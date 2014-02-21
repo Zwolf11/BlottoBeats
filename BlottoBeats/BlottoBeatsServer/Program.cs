@@ -19,20 +19,16 @@ namespace BlottoBeatsServer {
 
 			client.ConnectToServer();
 			client.SendMessageToServer("Multiple connections work");
-			client.SendMessageToServer(71);
-			int[] derpArray = { 4, 5, 2 };
-			client.SendMessageToServer(derpArray);
-			client.SendMessageToServer("Are you still there?");
+			client.SendMessageToServer(418);
+			Console.WriteLine("<client> Message from server: '" + client.ReceiveMessageFromServer() + "'");
 			client.DisconnectFromServer();
 		}
 	}
 
-	// ===================================================
-	//  Basic TCP Server
-	// ---------------------------------------------------
-	//  Spawns a new thread for each connection to a
-	//  client.
-	// ===================================================
+	/// <summary>
+	/// Basic TCP Server
+	///  Spawns a new thread for each connection to a client.
+	/// </summary>
 	class Server {
 		private TcpListener tcpListener;
 		private Thread listenThread;
@@ -44,8 +40,11 @@ namespace BlottoBeatsServer {
 			this.listenThread.Start();
 		}
 		
-		// Main server thread function.
-		// Accepts clients and spawns threads to handle connections with them.
+		
+		/// <summary>
+		/// Main server thread function.
+		/// Accepts clients over TCP and spawns threads to handle connections with them.
+		/// </summary>
 		private void ListenForClients() {
 			this.tcpListener.Start();
 
@@ -80,46 +79,49 @@ namespace BlottoBeatsServer {
 			}
 		}
 		
-		// Child thread function.
-		// Handles a connection with a single client.
+		/// <summary>
+		/// Child thread function.
+		/// Handles a connection with a single client.
+		/// </summary>
+		/// <param name="client">The TcpClient object</param>
 		private void HandleConnectionWithClient(object client) {
 			TcpClient tcpClient = (TcpClient)client;
 			NetworkStream clientStream = tcpClient.GetStream();
 
-			// TODO: tcpClient.Connected LIED to me!
-			while (tcpClient.Connected) {
-				object thingy = Message.Recieve(clientStream);
+			Console.WriteLine("<server> Received connection from client...");
 
+			object thingy = Message.Recieve(clientStream);
+			while (tcpClient.Connected && thingy != null) {
 				// TODO: Actually do something useful.
 				if (thingy is string) {
-					Console.WriteLine(thingy);
-				} else if (thingy == null) {
-					Console.WriteLine("Can't find the thingy!");
+					Console.WriteLine("<server> Message from client: '" + thingy + "'");
+				} else if (thingy is int && (int)thingy == 418) {
+					Console.WriteLine("<server> HTTP: 418 error");
+					Message.Send(clientStream, "I'm a teapot");
 				} else {
-					Console.WriteLine("What is this I don't even...");
-					Console.WriteLine("  " + thingy.ToString());
+					Console.WriteLine("<Server> What is this I don't even...");
+					Console.WriteLine("<Server>  " + thingy.ToString());
 				}
+
+				thingy = Message.Recieve(clientStream);
 			}
+
+			Console.WriteLine("<server> Client disconnected");
 
 			tcpClient.Close();
 		}
-
-		// Takes a single object and converts it into a message which is sent to the client
-		private void SendMessageToClient(NetworkStream clientStream, object obj) {
-			Message.Send(clientStream, obj);
-		}
-
-		// Receieves a single message from the client and converts it into an object
-		private object ReceieveMessageFromClient(NetworkStream clientStream) {
-			return Message.Recieve(clientStream);
-		}
 	}
 
-	// ===================================================
-	//  Message helper object for to clog the tubes with
-	// ===================================================
+	/// <summary>
+	/// Message helper object for to clog the tubes with.
+	/// Use Message.Send() to send a message and Message.Receive() to receive it.
+	/// </summary>
 	public class Message {
-		// Sends a single object over the specified stream
+		/// <summary>
+		/// Sends a single object over the specified stream 
+		/// </summary>
+		/// <param name="stream">Stream to send the message over</param>
+		/// <param name="obj">Object to send</param>
 		public static void Send(NetworkStream stream, object obj) {
 			byte[] data;
 			byte[] dataLength;
@@ -141,7 +143,11 @@ namespace BlottoBeatsServer {
 			stream.Flush();
 		}
 
-		// Receieves a single object over the specified stream
+		/// <summary>
+		/// Receieves a single object over the specified stream
+		/// </summary>
+		/// <param name="stream">Stream to receive the message from</param>
+		/// <returns>Object received</returns>
 		public static object Recieve(NetworkStream stream) {
 			int dataLength;
 			byte[] data = new byte[sizeof(Int32)];
@@ -157,7 +163,7 @@ namespace BlottoBeatsServer {
 				} while (totalBytesRead < sizeof(Int32) && bytesRead != 0);
 				
 				if (totalBytesRead < sizeof(Int32)) {
-					Console.Error.Write("Cannot receieve message: connection closed unexpectedly");
+					if (totalBytesRead != 0) Console.Error.WriteLine("Message Recieve Failed: connection closed unexpectedly");
 					return null;
 				}
 				
@@ -174,7 +180,7 @@ namespace BlottoBeatsServer {
 				} while (totalBytesRead < dataLength && bytesRead != 0);
 
 				if (totalBytesRead < dataLength) {
-					Console.Error.Write("Cannot receieve message: connection closed unexpectedly");
+					Console.Error.WriteLine("Message Receive Failed: connection closed unexpectedly");
 					return null;
 				}
 
@@ -184,15 +190,15 @@ namespace BlottoBeatsServer {
 					return (new BinaryFormatter()).Deserialize(memoryStream);
 				}
 			} catch (Exception e) {
-				Console.Error.Write("A socket error has occured: " + e.ToString());
+				Console.Error.WriteLine("A socket error has occured: " + e.ToString());
 				return null;
 			}
 		}
 	}
 
-	// ===================================================
-	//  A basic demo client to show how to send messages
-	// ===================================================
+	/// <summary>
+	/// A basic demo client to show how to send messages
+	/// </summary>
 	class ClientDemo {
 		private TcpClient client;
 		private IPEndPoint serverEndPoint;
@@ -205,44 +211,60 @@ namespace BlottoBeatsServer {
 			serverEndPoint = new IPEndPoint(IP, PORT);
 		}
 
-		// Initiates a connection to the server
+		/// <summary>
+		/// Initiates a connection to the server
+		/// </summary>
 		public void ConnectToServer() {
 			if (client != null && client.Connected) {
 				Console.Error.WriteLine("Can't connect to server as there is already an active connection!");
 				return;
 			}
 
+			Console.WriteLine("<client> Initilizing connection...");
+
 			client = new TcpClient();
 			client.Connect(serverEndPoint);
 			clientStream = client.GetStream();
 		}
 		
-		// Disconnects an active connection from the server
+		/// <summary>
+		/// Disconnects an active connection from the server
+		/// </summary>
 		public void DisconnectFromServer() {
 			if (client != null && !client.Connected) {
 				Console.Error.WriteLine("Can't disconnect from server as there is no active connection!");
 				return;
 			}
 
+			Console.WriteLine("<client> Disconnected from server");
+
 			client.Close();
 			clientStream = null;
 		}
 
-		// Takes a single object and converts it to a message which is sent to the server
+		/// <summary>
+		/// Takes a single object and converts it to a message which is sent to the server
+		/// </summary>
+		/// <param name="obj">The object to send</param>
 		public void SendMessageToServer(object obj) {
 			if (!client.Connected) {
 				Console.Error.WriteLine("Can't send a message with no connection to the server!");
 				return;
 			}
 
+			Console.WriteLine("<client> Sending message '" + obj.ToString() + "'");
+
 			Message.Send(clientStream, obj);
 		}
 
 
-		// Receieves a single message from the server and converts it to an object
+		/// <summary>
+		/// Receieves a single message from the server and converts it to an object
+		/// </summary>
+		/// <returns>The object received</returns>
 		public object ReceiveMessageFromServer() {
 			if (!client.Connected) {
-				Console.Error.Write("Can't receive a message with no connection to the server!");
+				Console.Error.WriteLine("Can't receive a message with no connection to the server!");
 				return null;
 			}
 
