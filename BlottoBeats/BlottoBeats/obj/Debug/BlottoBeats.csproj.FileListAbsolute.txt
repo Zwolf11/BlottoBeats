@@ -14,3 +14,6 @@ C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\
 C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.csproj.GenerateResource.Cache
 C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\BlottoBeats.exe
 C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\BlottoBeats.pdb
+C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\BlottoBeats.exe.config
+C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.exe
+C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.pdb
