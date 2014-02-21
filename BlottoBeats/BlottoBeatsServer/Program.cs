@@ -1,33 +1,71 @@
 ﻿using System;
 using System.IO;
-using System.Text;
-using System.Net.Sockets;
-using System.Threading;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
 
 namespace BlottoBeatsServer {
 	class Program {
 		static void Main(string[] args) {
 			Server server = new Server();
-			ClientDemo client = new ClientDemo();
-			
-			client.ConnectToServer();
-			client.SendMessageToServer("Hello, internet!");
-			client.SendMessageToServer("TCP Connection reuse is fun and lazy!");
-			client.DisconnectFromServer();
+			ClientDemo client1 = new ClientDemo();
+			ClientDemo client2 = new ClientDemo();
 
-			client.ConnectToServer();
-			client.SendMessageToServer("Multiple connections work");
-			client.SendMessageToServer(418);
-			Console.WriteLine("<client> Message from server: '" + client.ReceiveMessageFromServer() + "'");
-			client.DisconnectFromServer();
+			Console.WriteLine("TEST 1: MULTIPLE MESSAGES OVER ONE CONNECTION");
+			Console.WriteLine();
+
+			client1.ConnectToServer();
+			client1.SendMessageToServer("Hello, internet!");
+			client1.SendMessageToServer("TCP Connection reuse is fun and lazy!");
+			client1.DisconnectFromServer();
+
+			Thread.Sleep(1000);
+
+			Console.WriteLine();
+			Console.WriteLine("TEST 1 COMPLETE");
+			Console.WriteLine();
+			Console.WriteLine("TEST 2: SECOND CONNECTION FROM THE SAME CLIENT, MESSAGE FROM SERVER");
+			Console.WriteLine();
+
+			client1.ConnectToServer();
+			client1.SendMessageToServer("Repeated connections from the same client work");
+			client1.SendMessageToServer(418);
+			Console.WriteLine("<client> Message from server: '" + client1.ReceiveMessageFromServer() + "'");
+			client1.DisconnectFromServer();
+
+			Thread.Sleep(1000);
+
+			Console.WriteLine();
+			Console.WriteLine("TEST 2 COMPLETE");
+			Console.WriteLine();
+			Console.WriteLine("TEST 3: MULTIPLE CLIENTS CONNECTED SIMULTANEOUSLY");
+			Console.WriteLine();
+
+			client1.ConnectToServer();
+			client2.ConnectToServer();
+			client1.SendMessageToServer("HI! CLIENT 1 HERE");
+			client2.SendMessageToServer("HI! CLIENT 2 HERE");
+			client1.SendMessageToServer("HEY! I WAS HERE FIRST!");
+			client2.SendMessageToServer("NO, I WAS HERE FIRST!");
+			client1.SendMessageToServer("Angryface  >:(");
+			client2.SendMessageToServer("Backwards Angryface  ):<");
+			client1.SendMessageToServer("(Multiple clients at the same time works)");
+			client2.SendMessageToServer("(Multiple clients at the same time... HEY!");
+			client1.DisconnectFromServer();
+			client2.DisconnectFromServer();
+
+			Thread.Sleep(1000);
+
+			Console.WriteLine();
+			Console.WriteLine("TEST 3 COMPLETE");
+			Console.WriteLine();
 		}
 	}
 
 	/// <summary>
 	/// Basic TCP Server
-	///  Spawns a new thread for each connection to a client.
+	/// Uses ThreadPool to handle multiple connections at the same time.
 	/// </summary>
 	class Server {
 		private TcpListener tcpListener;
@@ -43,39 +81,14 @@ namespace BlottoBeatsServer {
 		
 		/// <summary>
 		/// Main server thread function.
-		/// Accepts clients over TCP and spawns threads to handle connections with them.
+		/// Accepts clients over TCP and uses ThreadPool to support multiple connections at the same time.
 		/// </summary>
 		private void ListenForClients() {
 			this.tcpListener.Start();
 
-			// TODO: Convert to using ThreadPool?
-			/*
-			public static void Main() {
-				// Queue the task.
-				ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadProc));
-        
-				Console.WriteLine("Main thread does some work, then sleeps.");
-				// If you comment out the Sleep, the main thread exits before
-				// the thread pool task runs.  The thread pool uses background
-				// threads, which do not keep the application running.  (This
-				// is a simple example of a race condition.)
-				Thread.Sleep(1000);
-
-				Console.WriteLine("Main thread exits.");
-			}
-
-			// This thread procedure performs the task.
-			static void ThreadProc(Object stateInfo) {
-				// No state object was passed to QueueUserWorkItem, so 
-				// stateInfo is null.
-				Console.WriteLine("Hello from the thread pool.");
-			}
-			*/
 			while (true) {
 				TcpClient client = this.tcpListener.AcceptTcpClient();
-
-				Thread clientThread = new Thread(new ParameterizedThreadStart(HandleConnectionWithClient));
-				clientThread.Start(client);
+				ThreadPool.QueueUserWorkItem(new WaitCallback(HandleConnectionWithClient), client);
 			}
 		}
 		
@@ -204,11 +217,21 @@ namespace BlottoBeatsServer {
 		private IPEndPoint serverEndPoint;
 		private NetworkStream clientStream;
 		
-		private static IPAddress IP = IPAddress.Parse("127.0.0.1"); // Defaults to localhost
-		private static int PORT = 3000;								// Defaults to 3000
-		
+		/// <summary>
+		/// Initializes a new ClientDemo with a default ip address of localhost
+		/// and a default port of 3000
+		/// </summary>
 		public ClientDemo() {
-			serverEndPoint = new IPEndPoint(IP, PORT);
+			serverEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 3000);
+		}
+
+		/// <summary>
+		/// Initializes a new ClientDemo with the given IP address and port
+		/// </summary>
+		/// <param name="ipAddress">IP address of the server</param>
+		/// <param name="port">Port to connect to the server with</param>
+		public ClientDemo(string ipAddress, int port) {
+			serverEndPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
 		}
 
 		/// <summary>
