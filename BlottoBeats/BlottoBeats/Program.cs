@@ -22,7 +22,7 @@ namespace BlottoBeats
 			if (server.Test()) {
 				Console.WriteLine("Connection is valid!");
 			} else {
-				Console.WriteLine("Connection is not valid!");
+				Console.Error.WriteLine("Connection is not valid!");
 			}
 			
 			// How to upload a song
@@ -35,7 +35,12 @@ namespace BlottoBeats
 			SongParameters parametersToMatch = new SongParameters();
 			int numberOfSongs = 5;
 			request = new BBRequest(parametersToMatch, numberOfSongs);
-			List<Song> songlist = (List<Song>)server.SendRequest(request);
+			object reply = server.SendRequest(request);
+			if (reply is BBRequest.ResponseSongs) {
+				List<Song> songlist = ((BBRequest.ResponseSongs)reply).songs;
+			} else {
+				Console.Error.WriteLine("Reply was of wrong type!");
+			}
 			*/
         }
     }
