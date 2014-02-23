@@ -27,15 +27,32 @@ namespace BlottoBeats
 			Song song = new Song();
 			bool upOrDownVote = true;
 			BBRequest request = new BBRequest(song, upOrDownVote);
-			server.SendRequest(request);
+			object reply = server.SendRequest(request);
+			if (reply is SongAndVoteData) {
+				SongAndVoteData songScore = (SongAndVoteData)reply;
+				Console.WriteLine("Vote Successful. Song score is {0}", songScore.score);
+			} else {
+				Console.Error.WriteLine("Reply was of wrong type!");
+			}
+
+			// How to check the score of a song
+			request = new BBRequest(song);
+			reply = server.SendRequest(request);
+			if (reply is SongAndVoteData) {
+				SongAndVoteData songScore = (SongAndVoteData)reply;
+				Console.WriteLine("Song score is {0}", songScore.score);
+			} else {
+				Console.Error.WriteLine("Reply was of wrong type!");
+			}
 
 			// How to request a list of songs
 			SongParameters parametersToMatch = new SongParameters();
 			int numberOfSongs = 5;
 			request = new BBRequest(parametersToMatch, numberOfSongs);
-			object reply = server.SendRequest(request);
-			if (reply is BBRequest.ResponseSongs) {
-				List<Song> songlist = ((BBRequest.ResponseSongs)reply).songs;
+			reply = server.SendRequest(request);
+			if (reply is List<SongAndVoteData>) {
+				List<SongAndVoteData> songList = (List<SongAndVoteData>)reply;
+				Console.WriteLine("Request Successful. Returned {0} songs.", songList.Count);
 			} else {
 				Console.Error.WriteLine("Reply was of wrong type!");
 			}

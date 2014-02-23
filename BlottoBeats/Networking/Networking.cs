@@ -35,28 +35,19 @@ namespace Networking {
 		/// </summary>
 		/// <param name="request">The BBRequest to send</param>
 		/// <returns>If the reqeuest expects a response, returns the response</returns>
-		public BBRequest.Request SendRequest(BBRequest request) {
-			BBRequest.Request response = null;
+		public object SendRequest(BBRequest request) {
+			object reply;
 			
 			using (TcpClient client = new TcpClient()) {
 				client.Connect(serverEndPoint);
 				NetworkStream networkStream = client.GetStream();
-				
-				Message.Send(networkStream, request);
-				if (request.ExpectsResponse()) {
-					object reply = Message.Recieve(networkStream);
 
-					if (reply == null) {
-						Console.Error.WriteLine("BBRequest Error: Expected reply but recieved none");
-					} else if (!(reply is BBRequest)) {
-						Console.Error.WriteLine("BBRequest Error: Reply is of unknown object type '{0}'", reply.GetType().ToString());
-					} else {
-						response = ((BBRequest)reply).GetRequest();
-					}
-				}
+				Message.Send(networkStream, request);				
+				reply = Message.Recieve(networkStream);
 			}
 
-			return response;
+			if (reply == null) Console.Error.WriteLine("BBRequest Error: Expected reply but recieved none");
+			return reply;
 		}
 
 		/// <summary>
@@ -82,56 +73,41 @@ namespace Networking {
 	/// </summary>
 	[SerializableAttribute]
 	public class BBRequest {
-		private Request request;
-		private bool expectsResponse;
+		public Request requestType { get; private set; }
 
 		/// <summary>
 		/// Sends an upload request with a single song and either an upvote or a downvote.
 		/// The server will check the database for that song.  If the song exists, it will
 		/// add the vote to it, otherwise it will add the song to the server and save it
 		/// with the vote.
+		/// 
+		/// The response will contain a single SongAndVoteData item with the song and it's score
 		/// </summary>
 		/// <param name="song">Song to upload</param>
 		/// <param name="upOrDownvote">Vote. True if an upvote, false otherwise.</param>
 		public BBRequest(Song song, bool upOrDownvote) {
-			request = new UpDownVote(song, upOrDownvote);
-			expectsResponse = false;
+			requestType = new UpDownVote(song, upOrDownvote);
 		}
 
 		/// <summary>
-		/// Requests a list of songs that match the given parameters.
+		/// Sends a request for the score of a single song.
+		/// 
+		/// The response will contain a single SongAndVoteData item with the song and it's score
+		/// </summary>
+		/// <param name="song">Song to check the score of</param>
+		public BBRequest(Song song) {
+			requestType = new RequestScore(song);
+		}
+
+		/// <summary>
+		/// Sends a request for a list of songs that match the given parameters.
+		/// 
+		/// The response will contain a list of songs that match the parameters.
 		/// </summary>
 		/// <param name="parameters">Parameters to match</param>
 		/// <param name="numberOfSongs">Number of songs to return</param>
 		public BBRequest(SongParameters parameters, int numberOfSongs) {
-			request = new RequestSongs(parameters, numberOfSongs);
-			expectsResponse = true;
-		}
-
-		/// <summary>
-		/// Sends a response to a REQUESTSONGS request containing the songs
-		/// that were requested.
-		/// </summary>
-		/// <param name="songs"></param>
-		public BBRequest(List<Song> songs) {
-			request = new ResponseSongs(songs);
-			expectsResponse = false;
-		}
-		
-		/// <summary>
-		/// Whether the request expects a response
-		/// </summary>
-		/// <returns></returns>
-		public bool ExpectsResponse() {
-			return expectsResponse;
-		}
-
-		/// <summary>
-		/// Get the request object
-		/// </summary>
-		/// <returns>The requested object</returns>
-		public Request GetRequest() {
-			return request;
+			requestType = new RequestSongs(parameters, numberOfSongs);
 		}
 
 		/// <summary>
@@ -141,12 +117,12 @@ namespace Networking {
 		public class Request { }
 
 		/// <summary>
-		/// Upload a song
+		/// Uploads a song with a vote
 		/// </summary>
 		[SerializableAttribute]
 		public class UpDownVote : Request {
-			public Song song;
-			public bool vote;
+			public Song song { get; private set; }
+			public bool vote { get; private set; }
 
 			public UpDownVote(Song song, bool vote) {
 				this.song = song;
@@ -155,12 +131,24 @@ namespace Networking {
 		}
 
 		/// <summary>
+		/// Requests the score of a song
+		/// </summary>
+		[SerializableAttribute]
+		public class RequestScore : Request {
+			public Song song { get; private set; }
+
+			public RequestScore(Song song) {
+				this.song = song;
+			}
+		}
+
+		/// <summary>
 		/// Request a list of songs
 		/// </summary>
 		[SerializableAttribute]
 		public class RequestSongs : Request {
-			public SongParameters parameters;
-			public int num;
+			public SongParameters parameters { get; private set; }
+			public int num { get; private set; }
 
 			public RequestSongs(SongParameters parameters, int num) {
 				this.parameters = parameters;
@@ -169,13 +157,25 @@ namespace Networking {
 		}
 
 		/// <summary>
+		/// Responds with a single song
+		/// </summary>
+		[SerializableAttribute]
+		public class ResponseSong : Request {
+			public SongAndVoteData song { get; private set; }
+
+			public ResponseSong(SongAndVoteData song) {
+				this.song = song;
+			}
+		}
+
+		/// <summary>
 		/// Responds with a list of songs
 		/// </summary>
 		[SerializableAttribute]
 		public class ResponseSongs : Request {
-			public List<Song> songs;
+			public List<SongAndVoteData> songs { get; private set; }
 
-			public ResponseSongs(List<Song> songs) {
+			public ResponseSongs(List<SongAndVoteData> songs) {
 				this.songs = songs;
 			}
 		}
@@ -281,7 +281,7 @@ namespace Networking {
 			Message.TestMsg(stream);
 			object response = Message.Recieve(stream);
 
-			return (response is string && response == "Test");
+			return (response is string && "Test" == (string)response);
 		}
 
 		/// <summary>

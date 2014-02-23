@@ -15,14 +15,3 @@ C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\
 C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\BlottoBeats.exe
 C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\BlottoBeats.pdb
 C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\BlottoBeats.exe.config
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\BlottoBeats.exe
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\BlottoBeats.pdb
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\Networking.dll
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\Song.dll
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\Networking.pdb
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\Song.pdb
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.csprojResolveAssemblyReference.cache
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.Properties.Resources.resources
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.csproj.GenerateResource.Cache
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.exe
-C:\Users\Ryan\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.pdb
