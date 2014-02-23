@@ -12,8 +12,6 @@ namespace Networking {
 	/// </summary>
 	public class BBServerConnection {
 		private IPEndPoint serverEndPoint;
-		private TcpClient client;
-		private NetworkStream networkStream;
 
 		/// <summary>
 		/// Initializes a new connection to a BlottoBeats Server with a default
@@ -49,7 +47,7 @@ namespace Networking {
 					object reply = Message.Recieve(networkStream);
 					
 					if (!(reply is BBRequest)) {
-						Console.Error.WriteLine("BBRequest Error: Reply is of unknown object type '" + reply.GetType().ToString() + "'");
+						Console.Error.WriteLine("BBRequest Error: Reply is of unknown object type '{0}'", reply.GetType().ToString());
 						return null;
 					}
 					
@@ -294,92 +292,4 @@ namespace Networking {
 			stream.Flush();
 		}
 	}
-
-	/*
-	/// <summary>
-	/// A basic demo client to show how to send messages to the server
-	/// </summary>
-	class ClientDemo {
-		private TcpClient client;
-		private IPEndPoint serverEndPoint;
-		private NetworkStream clientStream;
-
-		/// <summary>
-		/// Initializes a new ClientDemo with a default ip address of localhost
-		/// and a default port of 3000
-		/// </summary>
-		public ClientDemo() {
-			serverEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 3000);
-		}
-
-		/// <summary>
-		/// Initializes a new ClientDemo with the given IP address and port
-		/// </summary>
-		/// <param name="ipAddress">IP address of the server</param>
-		/// <param name="port">Port to connect to the server with</param>
-		public ClientDemo(string ipAddress, int port) {
-			serverEndPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
-		}
-
-		/// <summary>
-		/// Initiates a connection to the server
-		/// </summary>
-		public void ConnectToServer() {
-			if (client != null && client.Connected) {
-				Console.Error.WriteLine("Can't connect to server as there is already an active connection!");
-				return;
-			}
-
-			Console.WriteLine("<client> Initilizing connection...");
-
-			client = new TcpClient();
-			client.Connect(serverEndPoint);
-			clientStream = client.GetStream();
-		}
-
-		/// <summary>
-		/// Disconnects an active connection from the server
-		/// </summary>
-		public void DisconnectFromServer() {
-			if (client != null && !client.Connected) {
-				Console.Error.WriteLine("Can't disconnect from server as there is no active connection!");
-				return;
-			}
-
-			Console.WriteLine("<client> Disconnected from server");
-
-			client.Close();
-			clientStream = null;
-		}
-
-		/// <summary>
-		/// Takes a single object and converts it to a message which is sent to the server
-		/// </summary>
-		/// <param name="obj">The object to send</param>
-		public void SendMessageToServer(object obj) {
-			if (!client.Connected) {
-				Console.Error.WriteLine("Can't send a message with no connection to the server!");
-				return;
-			}
-
-			Console.WriteLine("<client> Sending message '" + obj.ToString() + "'");
-
-			Message.Send(clientStream, obj);
-		}
-
-
-		/// <summary>
-		/// Receieves a single message from the server and converts it to an object
-		/// </summary>
-		/// <returns>The object received</returns>
-		public object ReceiveMessageFromServer() {
-			if (!client.Connected) {
-				Console.Error.WriteLine("Can't receive a message with no connection to the server!");
-				return null;
-			}
-
-			return Message.Recieve(clientStream);
-		}
-	}
-	*/
 }

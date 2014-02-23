@@ -10,14 +10,14 @@ namespace BlottoBeatsServer {
 	/// Basic TCP Server
 	/// Uses ThreadPool to handle multiple connections at the same time.
 	/// </summary>
-	class Server {
+	public class Server {
 		private TcpListener tcpListener;
 		private Thread listenThread;
-		
+
 		/// <summary>
 		/// Starts up the server
 		/// </summary>
-		public static void main() {
+		public static void Main() {
 			// Create a new server that listens on port 3000;
 			Server server = new Server(3000);
 
@@ -38,13 +38,33 @@ namespace BlottoBeatsServer {
 			listenThread = new Thread(new ThreadStart(ListenForClients));
 			listenThread.Start();
 		}
-		
+
+		/// <summary>
+		/// Checks the health of the server
+		/// </summary>
+		/// <returns>Returns true if the server is alive, false otherwise</returns>
+		public bool IsAlive() {
+			return listenThread.IsAlive;
+		}
+
+		/// <summary>
+		/// Restarts the server thread
+		/// </summary>
+		public void Restart() {
+			Log("Restarting Server...");
+			
+			listenThread.Abort();
+			listenThread = new Thread(new ThreadStart(ListenForClients));
+			listenThread.Start();
+		}
+
 		/// <summary>
 		/// Main server thread function.
 		/// Accepts clients over TCP and uses ThreadPool to support multiple connections at the same time.
 		/// </summary>
 		private void ListenForClients() {
 			tcpListener.Start();
+			Log("Server started");
 
 			while (true) {
 				TcpClient client = tcpListener.AcceptTcpClient();
@@ -60,45 +80,59 @@ namespace BlottoBeatsServer {
 		private void HandleConnectionWithClient(object client) {
 			TcpClient tcpClient = (TcpClient)client;
 			NetworkStream networkStream = tcpClient.GetStream();
+			IPAddress address = ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address;
 
-			Console.WriteLine("<server> Received connection from client...");
-
+			Log("Remote client connected", address);
+			
 			object message = Message.Recieve(networkStream);
 			while (tcpClient.Connected && message != null) {
-				// TODO: Actually do something useful.
+				
 				if (message is string && (string)message == "Test") {
 					// A test message was recieved.  Send a response back.
+					Log("Recieved a connection test request", address);
 					Message.TestMsg(networkStream);
 				} else if (message is BBRequest) {
-					Console.WriteLine("<server> Received a " + BBRequest.getType() + " request");
+					// A BBRequest was recieved.  Process the request
+					BBRequest request = (BBRequest)message;
+					Log("Received a " + request.GetRequest() + " request", address);
+
+					// TODO: Process request
+
 				} else {
-					Console.WriteLine("<Server> What is this I don't even...");
-					Console.WriteLine("<Server>  " + message.ToString());
+					Log("ERROR: Unknown request type '" + message.GetType() + "'", address);
 				}
 
 				message = Message.Recieve(networkStream);
 			}
 
-			Console.WriteLine("<server> Client disconnected");
+			Log("Remote client disconnected", address);
 
 			tcpClient.Close();
 		}
 
 		/// <summary>
-		/// Checks the health of the server
+		/// Logs a message
 		/// </summary>
-		/// <returns>Returns true if the server is alive, false otherwise</returns>
-		public bool IsAlive() {
-			return listenThread.IsAlive;
+		/// <param name="message">Message to log</param>
+		private void Log(string message) { 
+			Console.WriteLine("<{0}> {1}", Timestamp(), message);
 		}
 
 		/// <summary>
-		/// Restarts the server thread
+		/// Logs a message and the IP of the connected client
 		/// </summary>
-		public void Restart() {
-			listenThread.Abort();
-			listenThread = new Thread(new ThreadStart(ListenForClients));
-			listenThread.Start();
+		/// <param name="message">Message to log</param>
+		/// <param name="address">IP address to log</param>
+		private void Log(string message, IPAddress address) {
+			Console.WriteLine("<{0}> {2} - {1}", Timestamp(), message, address);
+		}
+
+		/// <summary>
+		/// Gets the current time as a string
+		/// </summary>
+		/// <returns></returns>
+		private string Timestamp() {
+			return String.Format("{0:hh:mm:ss}", DateTime.Now);
 		}
 	}
 }
