@@ -1,16 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
+using SongData;
 
 namespace Networking {
 	/// <summary>
 	/// Server object used to store data about the server
 	/// </summary>
 	public class BBServerConnection {
-		private TcpClient client;
 		private IPEndPoint serverEndPoint;
+		private TcpClient client;
 		private NetworkStream networkStream;
 
 		/// <summary>
@@ -31,63 +33,159 @@ namespace Networking {
 		}
 
 		/// <summary>
-		/// Initiates a connection to the server
-		/// </summary>
-		private void Connect() {
-			client = new TcpClient();
-			client.Connect(serverEndPoint);
-			networkStream = client.GetStream();
-		}
-
-		/// <summary>
-		/// Disconnects an active connection from the server
-		/// </summary>
-		private void Disconnect() {
-			client.Close();
-			client = null;
-			networkStream = null;
-		}
-
-		/// <summary>
 		/// Sends a BBRequest to the server
 		/// </summary>
 		/// <param name="request">The BBRequest to send</param>
 		/// <returns>If the reqeuest expects a response, returns the response</returns>
-		public object SendRequest(BBRequest request) {
-			Connect();
-			Message.Send(networkStream, request);
-			if (request.ExpectsResponse())
-				return Message.Recieve(networkStream);
-			Disconnect();
-			return null;
+		public BBRequest.Request SendRequest(BBRequest request) {
+			BBRequest.Request response = null;
+			
+			using (TcpClient client = new TcpClient()) {
+				client.Connect(serverEndPoint);
+				NetworkStream networkStream = client.GetStream();
+				
+				Message.Send(networkStream, request);
+				if (request.ExpectsResponse()) {
+					object reply = Message.Recieve(networkStream);
+					
+					if (!(reply is BBRequest)) {
+						Console.Error.WriteLine("BBRequest Error: Reply is of unknown object type '" + reply.GetType().ToString() + "'");
+						return null;
+					}
+					
+					response = ((BBRequest)reply).GetRequest();
+				}
+			}
+
+			return response;
+		}
+
+		/// <summary>
+		/// Tests the server to see if the connection is valid
+		/// </summary>
+		/// <returns>True if the connection is valid, false otherwise</returns>
+		public bool Test() {
+			bool result = false;
+			
+			using (TcpClient client = new TcpClient()) {
+				client.Connect(serverEndPoint);
+				NetworkStream networkStream = client.GetStream();
+
+				result = Message.Test(networkStream);
+			}
+
+			return result;
 		}
 	}
 
 	/// <summary>
 	/// Request object for communication between the BlottoBeats server and client.
 	/// </summary>
+	[SerializableAttribute]
 	public class BBRequest {
-		private Type type;
-		private object thingy;
-		private bool[] expectsResponse;
+		private Request request;
+		private bool expectsResponse;
 
-		
-
-		public bool ExpectsResponse() {
-			return false;
+		/// <summary>
+		/// Sends an upload request with a single song and either an upvote or a downvote.
+		/// The server will check the database for that song.  If the song exists, it will
+		/// add the vote to it, otherwise it will add the song to the server and save it
+		/// with the vote.
+		/// </summary>
+		/// <param name="song">Song to upload</param>
+		/// <param name="upOrDownvote">Vote. True if an upvote, false otherwise.</param>
+		public BBRequest(Song song, bool upOrDownvote) {
+			request = new UpDownVote(song, upOrDownvote);
+			expectsResponse = false;
 		}
 
-		public enum Type {
-			UPDOWNVOTE,
-			REQUESTSONGS,
-			RESPONSESONGS
+		/// <summary>
+		/// Requests a list of songs that match the given parameters.
+		/// </summary>
+		/// <param name="parameters">Parameters to match</param>
+		/// <param name="numberOfSongs">Number of songs to return</param>
+		public BBRequest(SongParameters parameters, int numberOfSongs) {
+			request = new RequestSongs(parameters, numberOfSongs);
+			expectsResponse = true;
+		}
+
+		/// <summary>
+		/// Sends a response to a REQUESTSONGS request containing the songs
+		/// that were requested.
+		/// </summary>
+		/// <param name="songs"></param>
+		public BBRequest(List<Song> songs) {
+			request = new ResponseSongs(songs);
+			expectsResponse = false;
+		}
+		
+		/// <summary>
+		/// Whether the request expects a response
+		/// </summary>
+		/// <returns></returns>
+		public bool ExpectsResponse() {
+			return expectsResponse;
+		}
+
+		/// <summary>
+		/// Get the request object
+		/// </summary>
+		/// <returns>The requested object</returns>
+		public Request GetRequest() {
+			return request;
+		}
+
+		/// <summary>
+		/// Generic request object
+		/// </summary>
+		[SerializableAttribute]
+		public class Request { }
+
+		/// <summary>
+		/// Upload a song
+		/// </summary>
+		[SerializableAttribute]
+		public class UpDownVote : Request {
+			public Song song;
+			public bool vote;
+
+			public UpDownVote(Song song, bool vote) {
+				this.song = song;
+				this.vote = vote;
+			}
+		}
+
+		/// <summary>
+		/// Request a list of songs
+		/// </summary>
+		[SerializableAttribute]
+		public class RequestSongs : Request {
+			public SongParameters parameters;
+			public int num;
+
+			public RequestSongs(SongParameters parameters, int num) {
+				this.parameters = parameters;
+				this.num = num;
+			}
+		}
+
+		/// <summary>
+		/// Responds with a list of songs
+		/// </summary>
+		[SerializableAttribute]
+		public class ResponseSongs : Request {
+			public List<Song> songs;
+
+			public ResponseSongs(List<Song> songs) {
+				this.songs = songs;
+			}
 		}
 	}
 
 	/// <summary>
 	/// Message helper class for to clog the tubes with.
 	/// Use Message.Send() to send a message and Message.Receive() to receive it.
-	/// Used to send and receive objects directly
+	/// Used to send and receive objects directly.
 	/// </summary>
 	public class Message {
 		/// <summary>
@@ -143,29 +241,57 @@ namespace Networking {
 				if (BitConverter.IsLittleEndian) Array.Reverse(data);
 
 				dataLength = BitConverter.ToInt32(data, 0);
-				data = new byte[dataLength];
+				
 
-				// Read data until the client disconnects
-				totalBytesRead = 0;
-				do {
-					bytesRead = stream.Read(data, totalBytesRead, (dataLength - totalBytesRead));
-					totalBytesRead += bytesRead;
-				} while (totalBytesRead < dataLength && bytesRead != 0);
+				if (dataLength == 0) {
+					// A test message was sent.
+					return "Test";
+				} else {
+					data = new byte[dataLength];
 
-				if (totalBytesRead < dataLength) {
-					Console.Error.WriteLine("Message Receive Failed: connection closed unexpectedly");
-					return null;
-				}
+					// Read data until the client disconnects
+					totalBytesRead = 0;
+					do {
+						bytesRead = stream.Read(data, totalBytesRead, (dataLength - totalBytesRead));
+						totalBytesRead += bytesRead;
+					} while (totalBytesRead < dataLength && bytesRead != 0);
 
-				if (BitConverter.IsLittleEndian) Array.Reverse(data);
+					if (totalBytesRead < dataLength) {
+						Console.Error.WriteLine("Message Receive Failed: connection closed unexpectedly");
+						return null;
+					}
 
-				using (MemoryStream memoryStream = new MemoryStream(data)) {
-					return (new BinaryFormatter()).Deserialize(memoryStream);
+					if (BitConverter.IsLittleEndian) Array.Reverse(data);
+
+					using (MemoryStream memoryStream = new MemoryStream(data)) {
+						return (new BinaryFormatter()).Deserialize(memoryStream);
+					}
 				}
 			} catch (Exception e) {
 				Console.Error.WriteLine("A socket error has occured: " + e.ToString());
 				return null;
 			}
+		}
+
+		/// <summary>
+		/// Tests a connection to see if it is valid
+		/// </summary>
+		/// <param name="stream">Stream to test</param>
+		/// <returns>True if the connection is valid, false otherwise</returns>
+		public static bool Test(NetworkStream stream) {
+			Message.TestMsg(stream);
+			object response = Message.Recieve(stream);
+
+			return (response is string && response == "Test");
+		}
+
+		/// <summary>
+		/// Sends a blank message with length header of zero.
+		/// </summary>
+		public static void TestMsg(NetworkStream stream) {
+			byte[] zeros = BitConverter.GetBytes((Int32) 0);
+			stream.Write(zeros, 0, sizeof(Int32));
+			stream.Flush();
 		}
 	}
 

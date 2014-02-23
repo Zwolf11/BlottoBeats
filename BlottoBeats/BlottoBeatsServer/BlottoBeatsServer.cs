@@ -1,10 +1,9 @@
-﻿using System;
-using System.IO;
+﻿using Networking;
+using SongData;
+using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
-using Networking;
 
 namespace BlottoBeatsServer {
 	/// <summary>
@@ -60,24 +59,24 @@ namespace BlottoBeatsServer {
 		/// <param name="client">The TcpClient object</param>
 		private void HandleConnectionWithClient(object client) {
 			TcpClient tcpClient = (TcpClient)client;
-			NetworkStream clientStream = tcpClient.GetStream();
+			NetworkStream networkStream = tcpClient.GetStream();
 
 			Console.WriteLine("<server> Received connection from client...");
 
-			object thingy = Message.Recieve(clientStream);
-			while (tcpClient.Connected && thingy != null) {
+			object message = Message.Recieve(networkStream);
+			while (tcpClient.Connected && message != null) {
 				// TODO: Actually do something useful.
-				if (thingy is string) {
-					Console.WriteLine("<server> Message from client: '" + thingy + "'");
-				} else if (thingy is int && (int)thingy == 418) {
-					Console.WriteLine("<server> HTTP: 418 error");
-					Message.Send(clientStream, "I'm a teapot");
+				if (message is string && (string)message == "Test") {
+					// A test message was recieved.  Send a response back.
+					Message.TestMsg(networkStream);
+				} else if (message is BBRequest) {
+					Console.WriteLine("<server> Received a " + BBRequest.getType() + " request");
 				} else {
 					Console.WriteLine("<Server> What is this I don't even...");
-					Console.WriteLine("<Server>  " + thingy.ToString());
+					Console.WriteLine("<Server>  " + message.ToString());
 				}
 
-				thingy = Message.Recieve(clientStream);
+				message = Message.Recieve(networkStream);
 			}
 
 			Console.WriteLine("<server> Client disconnected");
