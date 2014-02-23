@@ -1,6 +1,7 @@
 ﻿using Networking;
 using SongData;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -98,6 +99,9 @@ namespace BlottoBeatsServer {
 
 					// TODO: Process request
 
+					// Sends an empty list of songs if the request expects a response
+					// What, you expected me to do actual work?
+					if (request.ExpectsResponse()) Message.Send(networkStream, new BBRequest(new List<Song>())); 
 				} else {
 					Log("ERROR: Unknown request type '" + message.GetType() + "'", address);
 				}

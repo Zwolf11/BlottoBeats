@@ -10,9 +10,7 @@ namespace BlottoBeats
     {
         public static void Main()
         {
-            Application.Run(new MainForm());
-
-			/* SERVER COMMUNICATION GUIDE
+            // SERVER COMMUNICATION GUIDE
 			// How to connect to the server
 			string ip = "127.0.0.1";	// Replace with the IP of the server
 			int port = 3000;			// Replace with the port of the server
@@ -41,7 +39,9 @@ namespace BlottoBeats
 			} else {
 				Console.Error.WriteLine("Reply was of wrong type!");
 			}
-			*/
+			// END OF SERVER COMMUNICATION GUIDE
+
+			Application.Run(new MainForm());
         }
     }
 }

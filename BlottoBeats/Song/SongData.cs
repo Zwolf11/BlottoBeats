@@ -8,6 +8,7 @@ namespace SongData {
 	/// <summary>
 	/// TODO: Documentation
 	/// </summary>
+	[SerializableAttribute]
     public class Song {
 		// TODO: ADD STUFF
     }
@@ -15,6 +16,7 @@ namespace SongData {
 	/// <summary>
 	/// TODO: Documentation
 	/// </summary>
+	[SerializableAttribute]
 	public class SongParameters {
 		// TODO: ADD STUFF
 	}

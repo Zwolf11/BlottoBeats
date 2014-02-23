@@ -45,13 +45,14 @@ namespace Networking {
 				Message.Send(networkStream, request);
 				if (request.ExpectsResponse()) {
 					object reply = Message.Recieve(networkStream);
-					
-					if (!(reply is BBRequest)) {
+
+					if (reply == null) {
+						Console.Error.WriteLine("BBRequest Error: Expected reply but recieved none");
+					} else if (!(reply is BBRequest)) {
 						Console.Error.WriteLine("BBRequest Error: Reply is of unknown object type '{0}'", reply.GetType().ToString());
-						return null;
+					} else {
+						response = ((BBRequest)reply).GetRequest();
 					}
-					
-					response = ((BBRequest)reply).GetRequest();
 				}
 			}
 
