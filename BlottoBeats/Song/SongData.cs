@@ -6,11 +6,60 @@ using System.Threading.Tasks;
 
 namespace SongData {
 	/// <summary>
-	/// TODO - MICHAEL/AUSTIN: Documentation
+	/// Song class definition; Each instance of Song will have a tempo/speed, key/mode, and song data consisting of the subclasses below.
 	/// </summary>
-	[SerializableAttribute]
-    public class Song {
-		// TODO - MICHAEL/AUSTIN: ADD STUFF
+    [SerializableAttribute]
+    public class Song
+    {
+        private int tempo;
+        private String key; //Sharped notation is always used over flatted
+        private List<SongSegment> songData;
+
+        class Chord
+        {
+            HashSet<Note> chordVoice;
+        }
+
+        class Note
+        {
+            String noteValue;
+            int length;
+        }
+
+        class Melody
+        {
+            List<Note> melodicLine;
+        }
+
+        class SongSegment
+        {
+            List<Melody> melodies;
+            List<Chord> chordPattern;
+        }
+
+        public int Tempo
+        {
+            get
+            {
+                return this.tempo;
+            }
+            set
+            {
+                this.tempo = value;
+            }
+        }
+
+        public List<SongSegment> SongData
+        {
+            get
+            {
+                return this.songData;
+            }
+            set
+            {
+                this.songData = value;
+            }
+        }
     }
 
 	/// <summary>
