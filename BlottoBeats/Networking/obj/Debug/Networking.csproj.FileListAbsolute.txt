@@ -5,3 +5,10 @@ C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\Networking\bin\Debug\S
 C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\Networking\obj\Debug\Networking.csprojResolveAssemblyReference.cache
 C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\Networking\obj\Debug\Networking.dll
 C:\Users\Zwolf11\Documents\GitHub\BlottoBeats\BlottoBeats\Networking\obj\Debug\Networking.pdb
+E:\My Documents\GitHub\BlottoBeats\BlottoBeats\Networking\bin\Debug\Networking.dll
+E:\My Documents\GitHub\BlottoBeats\BlottoBeats\Networking\bin\Debug\Networking.pdb
+E:\My Documents\GitHub\BlottoBeats\BlottoBeats\Networking\bin\Debug\Song.dll
+E:\My Documents\GitHub\BlottoBeats\BlottoBeats\Networking\bin\Debug\Song.pdb
+E:\My Documents\GitHub\BlottoBeats\BlottoBeats\Networking\obj\Debug\Networking.csprojResolveAssemblyReference.cache
+E:\My Documents\GitHub\BlottoBeats\BlottoBeats\Networking\obj\Debug\Networking.dll
+E:\My Documents\GitHub\BlottoBeats\BlottoBeats\Networking\obj\Debug\Networking.pdb
