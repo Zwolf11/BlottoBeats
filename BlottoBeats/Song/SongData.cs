@@ -15,22 +15,26 @@ namespace SongData {
         private String key; //Sharped notation is always used over flatted
         private List<SongSegment> songData;
 
+        [SerializableAttribute]
         class Chord
         {
             HashSet<Note> chordVoice;
         }
 
+        [SerializableAttribute]
         class Note
         {
             String noteValue;
             int length;
         }
 
+        [SerializableAttribute]
         class Melody
         {
             List<Note> melodicLine;
         }
 
+        [SerializableAttribute]
         class SongSegment
         {
             List<Melody> melodies;
@@ -46,18 +50,6 @@ namespace SongData {
             set
             {
                 this.tempo = value;
-            }
-        }
-
-        public List<SongSegment> SongData
-        {
-            get
-            {
-                return this.songData;
-            }
-            set
-            {
-                this.songData = value;
             }
         }
     }
