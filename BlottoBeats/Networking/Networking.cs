@@ -193,20 +193,17 @@ namespace Networking {
 		/// <param name="stream">Stream to send the message over</param>
 		/// <param name="obj">Object to send</param>
 		public static void Send(NetworkStream stream, object obj) {
-			byte[] data;
-			byte[] dataLength;
+			SendBytes(stream, Pack(obj));
+		}
 
-			using (MemoryStream memoryStream = new MemoryStream()) {
-				(new BinaryFormatter()).Serialize(memoryStream, obj);
-				data = memoryStream.ToArray();
-			}
-			dataLength = BitConverter.GetBytes((Int32)data.Length);
+		/// <summary>
+		/// Sends a prepackaged byte array over the specified stream
+		/// </summary>
+		/// <param name="stream"></param>
+		public static void SendBytes(NetworkStream stream, byte[] data) {
+			byte[] dataLength = BitConverter.GetBytes((Int32)data.Length);
 
-			if (BitConverter.IsLittleEndian) {
-				// Use Big-Endian transmission
-				Array.Reverse(data);
-				Array.Reverse(dataLength);
-			}
+			if (BitConverter.IsLittleEndian) Array.Reverse(dataLength);
 
 			stream.Write(dataLength, 0, sizeof(Int32));	//send length of message
 			stream.Write(data, 0, data.Length);			//send message itself
@@ -219,6 +216,15 @@ namespace Networking {
 		/// <param name="stream">Stream to receive the message from</param>
 		/// <returns>Object received</returns>
 		public static object Recieve(NetworkStream stream) {
+			return Unpack(RecieveBytes(stream));
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <returns></returns>
+		public static byte[] RecieveBytes(NetworkStream stream) {
 			int dataLength;
 			byte[] data = new byte[sizeof(Int32)];
 
@@ -238,13 +244,11 @@ namespace Networking {
 				}
 
 				if (BitConverter.IsLittleEndian) Array.Reverse(data);
-
 				dataLength = BitConverter.ToInt32(data, 0);
-				
 
 				if (dataLength == 0) {
 					// A test message was sent.
-					return "Test";
+					return Pack("Test"); // *shrug* eh, it works
 				} else {
 					data = new byte[dataLength];
 
@@ -260,11 +264,7 @@ namespace Networking {
 						return null;
 					}
 
-					if (BitConverter.IsLittleEndian) Array.Reverse(data);
-
-					using (MemoryStream memoryStream = new MemoryStream(data)) {
-						return (new BinaryFormatter()).Deserialize(memoryStream);
-					}
+					return data;
 				}
 			} catch (Exception e) {
 				Console.Error.WriteLine("A socket error has occured: " + e.ToString());
@@ -291,6 +291,39 @@ namespace Networking {
 			byte[] zeros = BitConverter.GetBytes((Int32) 0);
 			stream.Write(zeros, 0, sizeof(Int32));
 			stream.Flush();
+		}
+
+		/// <summary>
+		/// Packs an object into a big-endian byte array
+		/// </summary>
+		/// <param name="obj">Object to pack</param>
+		/// <returns>Big-endian byte representation of the object</returns>
+		private static byte[] Pack(object obj) {
+			byte[] data;
+
+			using (MemoryStream memoryStream = new MemoryStream()) {
+				(new BinaryFormatter()).Serialize(memoryStream, obj);
+				data = memoryStream.ToArray();
+			}
+
+			if (BitConverter.IsLittleEndian) Array.Reverse(data);
+			return data;
+		}
+
+		/// <summary>
+		/// Unpacks a big-endian byte array into an object
+		/// </summary>
+		/// <param name="arr">Byte array to unpack</param>
+		/// <returns>Object that was unpacked</returns>
+		private static object Unpack(byte[] data) {
+			object obj;
+
+			if (BitConverter.IsLittleEndian) Array.Reverse(data);
+			using (MemoryStream memoryStream = new MemoryStream(data)) {
+				obj = (new BinaryFormatter()).Deserialize(memoryStream);
+			}
+
+			return obj;
 		}
 	}
 }
