@@ -16,6 +16,7 @@ namespace BlottoBeats
         private Button playButton;
         private List<Point> playImg;
         private List<Point> pauseImg;
+        private Button playBarButton;
         private Point dragPos;
         private bool dragging;
         private bool playing;
@@ -85,11 +86,21 @@ namespace BlottoBeats
         private void initButtons()
         {
             buttons.Clear();
+            settingsButtons.Clear();
             if (menuDropped) this.Size = new Size(33 * size / 8, 23 * size / 8);
             else this.Size = new Size(33 * size / 8, size);
             font = new Font("Arial", 3 * size / 20);
             lightInline.Width = size / 40;
             lightOutline.Width = size / 40;
+
+            List<Point> playBar = new List<Point>();
+            playBar.Add(new Point(0, 0));
+            playBar.Add(new Point(13 * size / 4, 0));
+            playBar.Add(new Point(13 * size / 4, 3 * size / 8));
+            playBar.Add(new Point(0, 3 * size / 8));
+            playBarButton = new Button(playBar, new Point(3 * size / 4, size / 8), darkGrey, null, null);
+            playBarButton.Clicked += playBarClicked;
+            buttons.Add(playBarButton);
 
             List<Point> menuButton = new List<Point>();
             menuButton.Add(new Point(0, 3 * size / 8));
@@ -239,7 +250,7 @@ namespace BlottoBeats
             settingsButtons.Add(genreCheckbox);
         }
 
-        private void playClicked(object sender, EventArgs e)
+        private void playClicked(object sender, MouseEventArgs e)
         {
             if (playing)
             {
@@ -257,7 +268,17 @@ namespace BlottoBeats
             Invalidate();
         }
 
-        private void backClicked(object sender, EventArgs e)
+        private void playBarClicked(object sender, MouseEventArgs e)
+        {
+            if (e.X >= size)
+            {
+                sliderButton.loc.X = e.X;
+                progress = 1.0 * (sliderButton.loc.X - size) / (257 * size / 64 - size);
+                Invalidate();
+            }
+        }
+
+        private void backClicked(object sender, MouseEventArgs e)
         {
             progress = 0;
             sliderButton.loc.X = size;
@@ -266,7 +287,7 @@ namespace BlottoBeats
             if(!timer.Enabled) timer.Start();
         }
 
-        private void nextClicked(object sender, EventArgs e)
+        private void nextClicked(object sender, MouseEventArgs e)
         {
             progress = 0;
             sliderButton.loc.X = size;
@@ -275,24 +296,24 @@ namespace BlottoBeats
             if (!timer.Enabled) timer.Start();
         }
 
-        private void upvoteClicked(object sender, EventArgs e)
+        private void upvoteClicked(object sender, MouseEventArgs e)
         {
             score = score == 1 ? 0 : 1;
             Invalidate();
         }
 
-        private void downvoteClicked(object sender, EventArgs e)
+        private void downvoteClicked(object sender, MouseEventArgs e)
         {
             score = score == -1 ? 0 : -1;
             Invalidate();
         }
 
-        private void redditClicked(object sender, EventArgs e)
+        private void redditClicked(object sender, MouseEventArgs e)
         {
 
         }
 
-        private void settingsClicked(object sender, EventArgs e)
+        private void settingsClicked(object sender, MouseEventArgs e)
         {
             if (menuDropped) this.Size = new Size(33 * size / 8, size);
             else this.Size = new Size(33 * size / 8, 23 * size / 8);
@@ -301,27 +322,27 @@ namespace BlottoBeats
             Invalidate();
         }
 
-        private void minimizeClicked(object sender, EventArgs e)
+        private void minimizeClicked(object sender, MouseEventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
         }
 
-        private void exitClicked(object sender, EventArgs e)
+        private void exitClicked(object sender, MouseEventArgs e)
         {
             this.Close();
         }
 
-        private void sliderClicked(object sender, EventArgs e)
+        private void sliderClicked(object sender, MouseEventArgs e)
         {
             if (playing) timer.Stop();
             this.MouseMove += dragSlider;
             this.MouseUp += undragSlider;
             this.MouseMove -= this.mouseMove;
+            this.MouseUp -= this.mouseUp;
         }
 
         private void dragSlider(object sender, MouseEventArgs e)
         {
-            this.MouseUp -= this.mouseUp;
             sliderButton.loc.X = e.X;
 
             if (e.X < size)
@@ -384,12 +405,12 @@ namespace BlottoBeats
             Invalidate();
         }
 
-        private void genreClicked(object sender, EventArgs e)
+        private void genreClicked(object sender, MouseEventArgs e)
         {
             
         }
 
-        private void genreCheckboxClicked(object sender, EventArgs e)
+        private void genreCheckboxClicked(object sender, MouseEventArgs e)
         {
 
         }
@@ -454,14 +475,6 @@ namespace BlottoBeats
             Graphics g = e.Graphics;
 
             g.FillEllipse(darkGrey, 31 * size / 8, size / 8 - 1, size / 4, 3 * size / 8);
-            g.FillRectangle(darkGrey, 3 * size / 4, size / 8, 13 * size / 4, 3 * size / 8);
-
-            SolidBrush fillProgress = medGrey;
-            if (score < 0) fillProgress = paleRed;
-            else if (score > 0) fillProgress = paleGreen;
-
-            g.FillRectangle(fillProgress, 3 * size / 4, size / 8, sliderButton.loc.X - 3 * size / 4, 3 * size / 8);
-            g.DrawRectangle(lightInline, 3 * size / 4, size / 8, sliderButton.loc.X - 3 * size / 4, 3 * size / 8);
 
             if (menuDropped)
             {
@@ -471,9 +484,7 @@ namespace BlottoBeats
                 g.DrawString("Randomized?", font, lightGrey, 15 * size / 4 - g.MeasureString("Randomized?", font).Width, 15 * size / 16);
 
                 for(int i=0;i<settingsVars.Count;i++)
-                {
                     g.DrawString(settingsVars[i], font, white, 13 * size / 16, 15 * size / 16 + 2 * font.Size * (i + 1));
-                }
 
                 foreach(Button button in settingsButtons)
                 {
@@ -492,6 +503,16 @@ namespace BlottoBeats
                     g.DrawPolygon(button.stroke, button.ClickLocation);
                 if(button.ImgLocation != null)
                     g.FillPolygon(lightGrey, button.ImgLocation);
+
+                if(button == playBarButton)
+                {
+                    SolidBrush fillProgress = medGrey;
+                    if (score < 0) fillProgress = paleRed;
+                    else if (score > 0) fillProgress = paleGreen;
+
+                    g.FillRectangle(fillProgress, 3 * size / 4, size / 8, sliderButton.loc.X - 3 * size / 4, 3 * size / 8);
+                    g.DrawRectangle(lightInline, 3 * size / 4, size / 8, sliderButton.loc.X - 3 * size / 4, 3 * size / 8);
+                }
             }
         }
     }
