@@ -298,7 +298,7 @@ namespace Networking {
 		/// </summary>
 		/// <param name="obj">Object to pack</param>
 		/// <returns>Big-endian byte representation of the object</returns>
-		private static byte[] Pack(object obj) {
+		public static byte[] Pack(object obj) {
 			byte[] data;
 
 			using (MemoryStream memoryStream = new MemoryStream()) {
@@ -315,7 +315,7 @@ namespace Networking {
 		/// </summary>
 		/// <param name="arr">Byte array to unpack</param>
 		/// <returns>Object that was unpacked</returns>
-		private static object Unpack(byte[] data) {
+		public static object Unpack(byte[] data) {
 			object obj;
 
 			if (BitConverter.IsLittleEndian) Array.Reverse(data);

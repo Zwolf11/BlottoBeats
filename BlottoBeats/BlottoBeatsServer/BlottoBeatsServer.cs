@@ -115,6 +115,7 @@ namespace BlottoBeatsServer {
 						database.VoteOnSong(req.song, req.vote);
 						SongAndVoteData response = database.GetSongScore(req.song);
 						Message.Send(networkStream, response);
+						Log("  Song has ID of " + response.song.ID + " and score of " + response.score, address);
 
 					} else if (bbrequest.requestType is BBRequest.RequestScore) {
 
@@ -122,6 +123,7 @@ namespace BlottoBeatsServer {
 						BBRequest.RequestScore req = (BBRequest.RequestScore)bbrequest.requestType;
 						SongAndVoteData response = database.GetSongScore(req.song);
 						Message.Send(networkStream, response);
+						Log("  Song has ID of " + response.song.ID + " and score of " + response.score, address);
 
 					} else if (bbrequest.requestType is BBRequest.RequestSongs) {
 
@@ -129,6 +131,7 @@ namespace BlottoBeatsServer {
 						BBRequest.RequestSongs req = (BBRequest.RequestSongs)bbrequest.requestType;
 						List<SongAndVoteData> songList = database.GetSongList(req.parameters, req.num);
 						Message.Send(networkStream, songList);
+						Log("  Returned " + songList.Count + " songs", address);
 
 					} else {
 						Log("ERROR: Unknown BBRequest type '" + bbrequest.GetType() + "'", address);
@@ -136,6 +139,7 @@ namespace BlottoBeatsServer {
 
 				} else {
 					Log("ERROR: Unknown request type '" + message.GetType() + "'", address);
+					Log("  MORE INFO: " + message.ToString(), address);
 				}
 
 				message = Message.Recieve(networkStream);
@@ -184,12 +188,14 @@ namespace BlottoBeatsServer {
 	internal class Database {
 		// TODO - JOE: Add stuff
         string connString;
+		int nextID;
 
 		/// <summary>
 		/// Loads a database from the given path
 		/// </summary>
-		internal Database(string pathToDatabase) {
-            connString = pathToDatabase;
+		internal Database(string connString) {
+            this.connString = connString;
+			this.nextID = GetNextAvailableID();
 		}
 
 		/// <summary>
@@ -199,8 +205,16 @@ namespace BlottoBeatsServer {
 		/// <param name="song">The song object to vote on</param>
 		/// <param name="vote">The vote. True if upvote, false if downvote.</param>
 		internal SongAndVoteData VoteOnSong(Song song, bool vote) {
-			// TODO - JOE: Implement
-			return new SongAndVoteData(song, 0);
+			if (song.ID == -1) song.ID = GetID(song);	// Song has no ID.  Search the server
+			if (song.ID == -1) {
+				// Song still has no ID.  Insert it into the database
+				song.ID = GetNextAvailableID();
+				insertData(song.ID, song.genre, Message.Pack(song), (vote) ? 1 : -1);
+			} else {
+				updateScore(song.ID, vote);
+			}
+
+			return new SongAndVoteData(song, (int)returnItem(song.ID, "voteScore"));
 		}
 
 		/// <summary>
@@ -210,8 +224,10 @@ namespace BlottoBeatsServer {
 		/// <param name="song">Song to check the score of</param>
 		/// <returns>A SongAndVoteData item containing the song and it's score</returns>
 		internal SongAndVoteData GetSongScore(Song song) {
-			
-			return new SongAndVoteData(song, 0);
+			if (song.ID == -1)
+				return new SongAndVoteData(song, 0);
+			else
+				return new SongAndVoteData(song, (int)returnItem(song.ID, "voteScore"));
 		}
 
 		/// <summary>
@@ -221,8 +237,31 @@ namespace BlottoBeatsServer {
 		/// <param name="numSongs">The maximum number of songs to return</param>
 		/// <returns>The list of songs</returns>
 		internal List<SongAndVoteData> GetSongList(SongParameters songParameters, int numSongs) {
-			// TODO - JOE: Implement
-			return new List<SongAndVoteData>();
+			List<SongAndVoteData> list = new List<SongAndVoteData>();
+			
+			// TODO: Implement
+
+			return list;
+		}
+
+		/// <summary>
+		/// Searches the database for a song that matches the given song.
+		/// If there is a match, returns the ID.  If not, returns -1
+		/// </summary>
+		/// <param name="song">Song to search the database for</param>
+		/// <returns>ID of the song on the server</returns>
+		private int GetID(Song song) {
+			// TODO: Actually try searching the database for this song
+			return -1;
+		}
+
+		/// <summary>
+		/// Gets the next available ID for the server
+		/// </summary>
+		/// <returns>ID</returns>
+		private int GetNextAvailableID() {
+			// TODO: Do some dark wizardry here to get the next available ID
+			return 0;
 		}
 
         private void insertData(int id, string genre, byte[] songData, int score)
@@ -244,7 +283,7 @@ namespace BlottoBeatsServer {
             if (vote == true)
             {
                 scoreUpdate = (int)(returnItem(id, "voteScore"));
-                Console.WriteLine(scoreUpdate);
+                Console.WriteLine(scoreUpdate); // CHECK: Debug?
                 scoreUpdate += 1;
                 command.CommandText = "Update uploadedsongs SET voteScore='" + scoreUpdate + "' WHERE iduploadedsongs='" + id + "'";
                 conn.Open();
@@ -280,13 +319,11 @@ namespace BlottoBeatsServer {
             while (reader.Read())
             {
                 item = reader[col];
-               
             }
             
             conn.Close();
 
             return item;
-        }
         }
 	}
 }
