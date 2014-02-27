@@ -31,3 +31,6 @@ E:\My Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\Song.pdb
 E:\My Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.csprojResolveAssemblyReference.cache
 E:\My Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.Properties.Resources.resources
 E:\My Documents\GitHub\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.csproj.GenerateResource.Cache
+C:\Users\Joe\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\bin\Debug\BlottoBeats.exe.config
+C:\Users\Joe\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.exe
+C:\Users\Joe\Source\Repos\BlottoBeats\BlottoBeats\BlottoBeats\obj\Debug\BlottoBeats.pdb

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using MySql.Data.MySqlClient;
 
 namespace BlottoBeatsServer {
 	/// <summary>
@@ -23,7 +24,7 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		public static void Main() {
 			// Create a new server that listens on port 3000;
-			Server server = new Server(3000, new Database("IDontKnowWhereTheDatabasIs"), "server.log");
+            Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log");
 
 			// Checks the state of the server every 5 seconds
 			// If the server thread has died, restart it
@@ -182,12 +183,13 @@ namespace BlottoBeatsServer {
 	/// </summary>
 	internal class Database {
 		// TODO - JOE: Add stuff
+        string connString;
 
 		/// <summary>
 		/// Loads a database from the given path
 		/// </summary>
 		internal Database(string pathToDatabase) {
-			// TODO - JOE: Actually load the database
+            connString = pathToDatabase;
 		}
 
 		/// <summary>
@@ -208,7 +210,7 @@ namespace BlottoBeatsServer {
 		/// <param name="song">Song to check the score of</param>
 		/// <returns>A SongAndVoteData item containing the song and it's score</returns>
 		internal SongAndVoteData GetSongScore(Song song) {
-			// TODO - JOE: Implement
+			
 			return new SongAndVoteData(song, 0);
 		}
 
@@ -222,5 +224,69 @@ namespace BlottoBeatsServer {
 			// TODO - JOE: Implement
 			return new List<SongAndVoteData>();
 		}
+
+        private void insertData(int id, string genre, byte[] songData, int score)
+        {
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,voteScore) values('" + id + "','" + genre + "','" + songData + "','" + score + "')";
+            conn.Open();
+            command.ExecuteNonQuery();
+            conn.Close();
+        }
+
+        private void updateScore(int id, bool vote)
+        {
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            int scoreUpdate;
+
+            if (vote == true)
+            {
+                scoreUpdate = (int)(returnItem(id, "voteScore"));
+                Console.WriteLine(scoreUpdate);
+                scoreUpdate += 1;
+                command.CommandText = "Update uploadedsongs SET voteScore='" + scoreUpdate + "' WHERE iduploadedsongs='" + id + "'";
+                conn.Open();
+                command.ExecuteNonQuery();
+                conn.Close();
+            }
+            else
+            {
+                scoreUpdate = (int)(returnItem(id, "voteScore"));
+                scoreUpdate -= 1;
+                command.CommandText = "Update uploadedsongs SET voteScore='" + scoreUpdate + "' WHERE iduploadedsongs='" + id + "'";
+                conn.Open();
+                command.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
+
+        private object returnItem(int id, string col)
+        {
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            command.CommandText = "Select " + col + " from uploadedsongs where iduploadedsongs=" + id;
+            object item = null;
+            try
+            {
+                conn.Open();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            MySqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                item = reader[col];
+               
+            }
+            
+            conn.Close();
+
+            return item;
+        }
+        }
 	}
 }
