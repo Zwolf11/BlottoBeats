@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Collections;
+using System.Windows.Forms;
 
 namespace BlottoBeats
 {
-    public delegate void ClickedEventHandler(object sender, EventArgs e);
+    public delegate void ClickedEventHandler(object sender, MouseEventArgs e);
 
     public class Button
     {
@@ -49,6 +50,6 @@ namespace BlottoBeats
             this.img = img;
         }
 
-        public virtual void onClicked(EventArgs e) { if (Clicked != null) Clicked(this, e); }
+        public virtual void onClicked(MouseEventArgs e) { if (Clicked != null) Clicked(this, e); }
     }
 }
