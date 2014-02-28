@@ -151,11 +151,10 @@ namespace BlottoBeats
             upvoteImg.Add(new Point(11 * size / 32, 3 * size / 32));
             upvoteImg.Add(new Point(11 * size / 32, 2 * size / 32));
             upvoteImg.Add(new Point(12 * size / 32, 2 * size / 32));
-            upvoteImg.Add(new Point(12 * size / 32, 3 * size / 32));
-            upvoteImg.Add(new Point(12  * size / 32, 4 * size / 32));
             upvoteImg.Add(new Point(12 * size / 32, 5 * size / 32));
             upvoteImg.Add(new Point(15 * size / 32, 5 * size / 32));
-            upvoteImg.Add(new Point(15 * size / 32, 10 * size / 32));
+            upvoteImg.Add(new Point(15 * size / 32, 8 * size / 32));
+            upvoteImg.Add(new Point(13 * size / 32, 10 * size / 32));
             upvoteImg.Add(new Point(10 * size / 32, 10 * size / 32));
             upvoteImg.Add(new Point(9 * size / 32, 9 * size / 32));
             Button upvoteButton = new Button(menuButton, new Point(2 * size / 2 + 3 * size / 4, size / 2), paleGreen, lightOutline, upvoteImg);
@@ -163,6 +162,20 @@ namespace BlottoBeats
             buttons.Add(upvoteButton);
 
             List<Point> downvoteImg = new List<Point>();
+            downvoteImg.Add(new Point(15 * size / 32, 7 * size / 32));
+            downvoteImg.Add(new Point(15 * size / 32, 3 * size / 32));
+            downvoteImg.Add(new Point(17 * size / 32, 3 * size / 32));
+            downvoteImg.Add(new Point(17 * size / 32, 7 * size / 32));
+            downvoteImg.Add(new Point(14 * size / 32, 7 * size / 32));
+            downvoteImg.Add(new Point(13 * size / 32, 9 * size / 32));
+            downvoteImg.Add(new Point(13 * size / 32, 10 * size / 32));
+            downvoteImg.Add(new Point(12 * size / 32, 10 * size / 32));
+            downvoteImg.Add(new Point(12 * size / 32, 7 * size / 32));
+            downvoteImg.Add(new Point(9 * size / 32, 7 * size / 32));
+            downvoteImg.Add(new Point(9 * size / 32, 4 * size / 32));
+            downvoteImg.Add(new Point(11 * size / 32, 2 * size / 32));
+            downvoteImg.Add(new Point(14 * size / 32, 2 * size / 32));
+            downvoteImg.Add(new Point(15 * size / 32, 3 * size / 32));
             Button downvoteButton = new Button(menuButton, new Point(3 * size / 2 + 3 * size / 4, size / 2), paleRed, lightOutline, downvoteImg);
             downvoteButton.Clicked += downvoteClicked;
             buttons.Add(downvoteButton);
