@@ -62,7 +62,8 @@ namespace SongData {
 	/// </summary>
 	[SerializableAttribute]
 	public class SongParameters {
-		// TODO - MICHAEL/AUSTIN: ADD STUFF
+        public int tempo { get; set; }
+        public String genre { get; set; }
 	}
 
 	/// <summary>
