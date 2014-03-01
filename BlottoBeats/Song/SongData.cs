@@ -14,30 +14,64 @@ namespace SongData {
         private string key; //Sharped notation is always used over flatted
         private List<SongSegment> songData;
 
-        [SerializableAttribute]
-        class Chord
+        public Song(int temp, string ky)
         {
-            HashSet<Note> chordVoice;
+            tempo = temp;
+            key = ky;
+            songData = new List<SongSegment>();
+        }
+
+        public void addSegment(SongSegment x){
+            songData.Add(x);
         }
 
         [SerializableAttribute]
-        class Note
+        public class Chord
+        {
+            HashSet<Note> chordVoice;
+            public Chord(String[] notes, int rhythm)
+            {
+                chordVoice = new HashSet<Note>();
+                int len = notes.Length;
+                for (int i = 0; i < len; i++)
+                {
+                    chordVoice.Add(new Note(notes[i], rhythm));
+
+                }
+
+            }
+        }
+
+        [SerializableAttribute]
+        public class Note
         {
             String noteValue;
             int length;
+
+            public Note(String val, int len)
+            {
+                noteValue = val;
+                length = len;
+            }
         }
 
         [SerializableAttribute]
-        class Melody
+        public class Melody
         {
             List<Note> melodicLine;
         }
 
         [SerializableAttribute]
-        class SongSegment
+        public class SongSegment
         {
-            List<Melody> melodies;
-            List<Chord> chordPattern;
+            List<Melody> melodies { get; private set; }
+            public List<Chord> chordPattern { get; private set; }
+
+            public SongSegment()
+            {
+                chordPattern = new List<Chord>();
+                melodies = new List<Melody>();
+            }
         }
 
         public int Tempo

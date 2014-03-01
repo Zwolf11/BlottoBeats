@@ -26,13 +26,11 @@ namespace Generator
         public void generate(int seed, SongParameters paramets)
         {
             Random randomizer = new Random(seed);
-            int mode;
+            int mode; // 0 = Major 1 = Minor
             String key;
-            String timeSigPattern; //Simple or Compound Meter
-            int timeSigQuant; // 2 = Duple, 3 = Triple, etc
-            int numpatterns;
-            List<SongPattern> patterns;
-            Song output;
+            String timeSigPattern = ""; //Simple or Compound Meter
+            int timeSigQuant = 0; // 2 = Duple, 3 = Triple, etc
+            int numpatterns = 0;
 
             String[] notes = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" }; //array of all note values
    
@@ -42,6 +40,7 @@ namespace Generator
             //Select Key
             key = notes[randomizer.Next(12)];
 
+            Song output = new Song(paramets.tempo, key);
 
             int randOutput = randomizer.Next(2);
             switch (randOutput){
@@ -70,8 +69,7 @@ namespace Generator
                 for (int j = 0; j < inGeneration.repeatEvery / 4; j++)
                 {
                     int numChords = randomizer.Next(6) + 1;
-                    int sumRhythm = 0;
-                    String chord;
+                    String chord="";
                     if (numChords == 1)
                     {
                         chord = "1";
@@ -526,6 +524,55 @@ namespace Generator
                         }
 
                     }
+                    //TODO Add rules for numChords = 5 and 6
+
+                    int sumRhythm = 0;
+                    numChords = chord.Length;
+                    Song.SongSegment thisSection = new Song.SongSegment();
+                    int rhythm=0;
+
+                    //TODO Add rules for generating rhythm
+                    for (int count = 0; count < numChords; count++)
+                    {
+                       if (timeSigPattern.Equals("Simple")){
+                           if (timeSigQuant == 2)
+                           {
+
+
+                           }
+                           if (timeSigQuant == 3)
+                           {
+
+
+                           }
+                           if (timeSigQuant == 4)
+                           {
+
+
+                           }
+
+
+                       }
+                       else{
+                           if (timeSigQuant == 2)
+                           {
+
+
+                           }
+                           if (timeSigQuant == 3)
+                           {
+
+
+                           }
+                           if (timeSigQuant == 4)
+                           {
+
+
+                           }
+                       }
+
+                       thisSection.chordPattern.Add(generateChord(mode, key, chord[count], rhythm));
+                    }
 
                 }
 
@@ -535,6 +582,31 @@ namespace Generator
             /*outputToMidi(output);*/
             
 
+
+        }
+
+
+        //TODO define chord voicing given the mode, major/minor mode, chord number 1-7 (aka tonic-leadingtone), and length
+        private Song.Chord generateChord(int mode, String key, char chord, int length)
+        {
+            String[] notes = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+
+            //generate chord in major mode
+            if (mode == 0)
+            {
+
+
+
+            }
+
+
+            //generate chord in minor mode
+            if (mode == 1)
+            {
+
+
+
+            }
 
         }
 
