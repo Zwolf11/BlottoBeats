@@ -54,10 +54,12 @@ namespace Generator
 
             timeSigQuant = randomizer.Next(3) + 1;
 
+            //TODO Actually figure out the rules for song patterns. It's currently a mess.
             numpatterns = randomizer.Next(4);
 
             for (int i = 0; i <= numpatterns; i++)
             {
+                Song.SongSegment thisSection = new Song.SongSegment();
                 randOutput = randomizer.Next(8) + 1;
                 int measures = randOutput * 4;
                 int rep = 0;
@@ -346,28 +348,28 @@ namespace Generator
                             }
                             else
                             {
-                                 randOutput = randomizer.Next(6);
-                                 switch (randOutput)
-                                 {
-                                     case 0:
-                                         chord = "1641";
-                                         break;
-                                     case 1:
-                                         chord = "1341";
-                                         break;
-                                     case 2:
-                                         chord = "1271";
-                                         break;
-                                     case 3:
-                                         chord = "1471";
-                                         break;
-                                     case 4:
-                                         chord = "1251";
-                                         break;
-                                     case 5:
-                                         chord = "1451";
-                                         break;
-                                 }
+                                randOutput = randomizer.Next(6);
+                                switch (randOutput)
+                                {
+                                    case 0:
+                                        chord = "1641";
+                                        break;
+                                    case 1:
+                                        chord = "1341";
+                                        break;
+                                    case 2:
+                                        chord = "1271";
+                                        break;
+                                    case 3:
+                                        chord = "1471";
+                                        break;
+                                    case 4:
+                                        chord = "1251";
+                                        break;
+                                    case 5:
+                                        chord = "1451";
+                                        break;
+                                }
                             }
 
                         }
@@ -524,11 +526,451 @@ namespace Generator
                         }
 
                     }
-                    //TODO Add rules for numChords = 5 and 6
+                    if (numChords == 5)
+                    {
+                        if (j == 0 || prevWasHalf)
+                        {
+                            if (j != (inGeneration.repeatEvery / 4) - 1)
+                            {
+                                randOutput = randomizer.Next(17);
+                                switch (randOutput)
+                                {
+                                    case 0:
+                                        chord = "13625";
+                                        break;
+                                    case 1:
+                                        chord = "13645";
+                                        break;
+                                    case 2:
+                                        chord = "13425";
+                                        break;
+                                    case 3:
+                                        chord = "16425";
+                                        break;
+                                    case 4:
+                                        chord = "16256";
+                                        break;
+                                    case 5:
+                                        chord = "16456";
+                                        break;
+                                    case 6:
+                                        chord = "13456";
+                                        break;
+                                    case 7:
+                                        chord = "14256";
+                                        break;
+                                    case 8:
+                                        chord = "13641";
+                                        break;
+                                    case 9:
+                                        chord = "16271";
+                                        break;
+                                    case 10:
+                                        chord = "16471";
+                                        break;
+                                    case 11:
+                                        chord = "13471";
+                                        break;
+                                    case 12:
+                                        chord = "16251";
+                                        break;
+                                    case 13:
+                                        chord = "16451";
+                                        break;
+                                    case 14:
+                                        chord = "13451";
+                                        break;
+                                    case 15:
+                                        chord = "14521";
+                                        break;
+                                    case 16:
+                                        chord = "14271";
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                 randOutput = randomizer.Next(9);
+                                 switch (randOutput)
+                                 {
+                                     case 0:
+                                         chord = "13641";
+                                         break;
+                                     case 1:
+                                         chord = "16271";
+                                         break;
+                                     case 2:
+                                         chord = "16471";
+                                         break;
+                                     case 3:
+                                         chord = "13471";
+                                         break;
+                                     case 4:
+                                         chord = "16251";
+                                         break;
+                                     case 5:
+                                         chord = "16451";
+                                         break;
+                                     case 6:
+                                         chord = "13451";
+                                         break;
+                                     case 7:
+                                         chord = "14521";
+                                         break;
+                                     case 8:
+                                         chord = "14271";
+                                         break;
+                                 }
+                            }
+
+                        }
+                        else
+                        {
+                            if (j != (inGeneration.repeatEvery / 4) - 1)
+                            {
+                                randOutput = randomizer.Next(30);
+                                switch (randOutput)
+                                {
+                                    case 0:
+                                        chord = "13625";
+                                        break;
+                                    case 1:
+                                        chord = "13645";
+                                        break;
+                                    case 2:
+                                        chord = "13425";
+                                        break;
+                                    case 3:
+                                        chord = "16425";
+                                        break;
+                                    case 4:
+                                        chord = "36425";
+                                        break;
+                                    case 5:
+                                        chord = "16256";
+                                        break;
+                                    case 6:
+                                        chord = "36256";
+                                        break;
+                                    case 7:
+                                        chord = "16456";
+                                        break;
+                                    case 8:
+                                        chord = "36456";
+                                        break;
+                                    case 9:
+                                        chord = "13456";
+                                        break;
+                                    case 10:
+                                        chord = "14256";
+                                        break;
+                                    case 11:
+                                        chord = "64256";
+                                        break;
+                                    case 12:
+                                        chord = "34256";
+                                        break;
+                                    case 13:
+                                        chord = "13641";
+                                        break;
+                                    case 14:
+                                        chord = "16271";
+                                        break;
+                                    case 15:
+                                        chord = "36271";
+                                        break;
+                                    case 16:
+                                        chord = "16471";
+                                        break;
+                                    case 17:
+                                        chord = "36471";
+                                        break;
+                                    case 18:
+                                        chord = "13471";
+                                        break;
+                                    case 19:
+                                        chord = "16251";
+                                        break;
+                                    case 20:
+                                        chord = "36251";
+                                        break;
+                                    case 21:
+                                        chord = "16451";
+                                        break;
+                                    case 22:
+                                        chord = "36451";
+                                        break;
+                                    case 23:
+                                        chord = "13451";
+                                        break;
+                                    case 24:
+                                        chord = "14251";
+                                        break;
+                                    case 25:
+                                        chord = "34251";
+                                        break;
+                                    case 26:
+                                        chord = "64251";
+                                        break;
+                                    case 27:
+                                        chord = "14271";
+                                        break;
+                                    case 28:
+                                        chord = "34271";
+                                        break;
+                                    case 29:
+                                        chord = "64271";
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                randOutput = randomizer.Next(17);
+                                switch (randOutput)
+                                {
+                                    case 0:
+                                        chord = "13641";
+                                        break;
+                                    case 1:
+                                        chord = "16271";
+                                        break;
+                                    case 2:
+                                        chord = "36271";
+                                        break;
+                                    case 3:
+                                        chord = "16471";
+                                        break;
+                                    case 4:
+                                        chord = "36471";
+                                        break;
+                                    case 5:
+                                        chord = "13471";
+                                        break;
+                                    case 6:
+                                        chord = "16251";
+                                        break;
+                                    case 7:
+                                        chord = "36251";
+                                        break;
+                                    case 8:
+                                        chord = "16451";
+                                        break;
+                                    case 9:
+                                        chord = "36451";
+                                        break;
+                                    case 10:
+                                        chord = "13451";
+                                        break;
+                                    case 11:
+                                        chord = "14251";
+                                        break;
+                                    case 12:
+                                        chord = "34251";
+                                        break;
+                                    case 13:
+                                        chord = "64251";
+                                        break;
+                                    case 14:
+                                        chord = "14271";
+                                        break;
+                                    case 15:
+                                        chord = "34271";
+                                        break;
+                                    case 16:
+                                        chord = "64271";
+                                        break;
+                                }
+
+                            }
+
+                        }
+
+                    }
+                    if (numChords == 6)
+                    {
+                        if (j == 0 || prevWasHalf)
+                        {
+                            if (j != (inGeneration.repeatEvery / 4) - 1)
+                            {
+                                randOutput = randomizer.Next(13);
+                                switch (randOutput)
+                                {
+                                    case 0:
+                                        chord = "136425";
+                                        break;
+                                    case 1:
+                                        chord = "136256";
+                                        break;
+                                    case 2:
+                                        chord = "136456";
+                                        break;
+                                    case 3:
+                                        chord = "164256";
+                                        break;
+                                    case 4:
+                                        chord = "134256";
+                                        break;
+                                    case 5:
+                                        chord = "136271";
+                                        break;
+                                    case 6:
+                                        chord = "136471";
+                                        break;
+                                    case 7:
+                                        chord = "136251";
+                                        break;
+                                    case 8:
+                                        chord = "136451";
+                                        break;
+                                    case 9:
+                                        chord = "134251";
+                                        break;
+                                    case 10:
+                                        chord = "164251";
+                                        break;
+                                    case 11:
+                                        chord = "134271";
+                                        break;
+                                    case 12:
+                                        chord = "164271";
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                randOutput = randomizer.Next(8);
+                                switch (randOutput)
+                                {
+                                    case 0:
+                                        chord = "136271";
+                                        break;
+                                    case 1:
+                                        chord = "136471";
+                                        break;
+                                    case 2:
+                                        chord = "136251";
+                                        break;
+                                    case 3:
+                                        chord = "136451";
+                                        break;
+                                    case 4:
+                                        chord = "134251";
+                                        break;
+                                    case 5:
+                                        chord = "164251";
+                                        break;
+                                    case 6:
+                                        chord = "134271";
+                                        break;
+                                    case 7:
+                                        chord = "164271";
+                                        break;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            if (j != (inGeneration.repeatEvery / 4) - 1)
+                            {
+                                randOutput = randomizer.Next(16);
+                                switch (randOutput)
+                                {
+                                    case 0:
+                                        chord = "136425";
+                                        break;
+                                    case 1:
+                                        chord = "136256";
+                                        break;
+                                    case 2:
+                                        chord = "136456";
+                                        break;
+                                    case 3:
+                                        chord = "164256";
+                                        break;
+                                    case 4:
+                                        chord = "364256";
+                                        break;
+                                    case 5:
+                                        chord = "134256";
+                                        break;
+                                    case 6:
+                                        chord = "136271";
+                                        break;
+                                    case 7:
+                                        chord = "136471";
+                                        break;
+                                    case 8:
+                                        chord = "136251";
+                                        break;
+                                    case 9:
+                                        chord = "136451";
+                                        break;
+                                    case 10:
+                                        chord = "134251";
+                                        break;
+                                    case 11:
+                                        chord = "164251";
+                                        break;
+                                    case 12:
+                                        chord = "364251";
+                                        break;
+                                    case 13:
+                                        chord = "134271";
+                                        break;
+                                    case 14:
+                                        chord = "164271";
+                                        break;
+                                    case 15:
+                                        chord = "364271";
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                randOutput = randomizer.Next(10);
+                                switch (randOutput)
+                                {
+                                    case 0:
+                                        chord = "136271";
+                                        break;
+                                    case 1:
+                                        chord = "136471";
+                                        break;
+                                    case 2:
+                                        chord = "136251";
+                                        break;
+                                    case 3:
+                                        chord = "136451";
+                                        break;
+                                    case 4:
+                                        chord = "134251";
+                                        break;
+                                    case 5:
+                                        chord = "164251";
+                                        break;
+                                    case 6:
+                                        chord = "364251";
+                                        break;
+                                    case 7:
+                                        chord = "134271";
+                                        break;
+                                    case 8:
+                                        chord = "164271";
+                                        break;
+                                    case 9:
+                                        chord = "364271";
+                                        break;
+                                }
+
+                            }
+
+                        }
+
+                    }
 
                     int sumRhythm = 0;
                     numChords = chord.Length;
-                    Song.SongSegment thisSection = new Song.SongSegment();
                     int rhythm=0;
 
                     //TODO Add rules for generating rhythm
@@ -573,11 +1015,16 @@ namespace Generator
 
                        thisSection.chordPattern.Add(generateChord(mode, key, chord[count], rhythm));
                     }
-
+                    if (chord[chord.Length - 1] == '5')
+                    {
+                        prevWasHalf = true;
+                    }
                 }
 
 
             }
+
+
 
             /*outputToMidi(output);*/
             
@@ -586,27 +1033,47 @@ namespace Generator
         }
 
 
-        //TODO define chord voicing given the mode, major/minor mode, chord number 1-7 (aka tonic-leadingtone), and length
+        //TODO define chord voicing in minor mode
         private Song.Chord generateChord(int mode, String key, char chord, int length)
         {
             String[] notes = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
-
+            String[] keySig= new String[7];
+            String[] noteNames = new String[4];
+            int chordNumIndex = int.Parse(new String(chord, 1)) - 1;
+            int keynum = Array.IndexOf(notes, key);
             //generate chord in major mode
             if (mode == 0)
             {
+                keySig[0] = notes[keynum];
+                keySig[1] = notes[(keynum + 2)%12];
+                keySig[2] = notes[(keynum + 4) % 12];
+                keySig[3] = notes[(keynum + 5) % 12];
+                keySig[4] = notes[(keynum + 7) % 12];
+                keySig[5] = notes[(keynum + 9) % 12];
+                keySig[6] = notes[(keynum + 11) % 12];
 
-
-
+                noteNames[0] = keySig[chordNumIndex] + "1";
+                noteNames[1] = keySig[chordNumIndex] + "4";
+                noteNames[2] = keySig[(chordNumIndex + 2)%8] + "4";
+                noteNames[3] = keySig[(chordNumIndex + 4)%8] + "4";
+                return new Song.Chord(noteNames, length);
             }
 
 
             //generate chord in minor mode
             if (mode == 1)
             {
-
+                keySig[0] = notes[keynum];
+                keySig[1] = notes[(keynum + 2) % 12];
+                keySig[2] = notes[(keynum + 3) % 12];
+                keySig[3] = notes[(keynum + 5) % 12];
+                keySig[4] = notes[(keynum + 7) % 12];
+                keySig[5] = notes[(keynum + 8) % 12];
+                keySig[6] = notes[(keynum + 10) % 12];
 
 
             }
+            return null;
 
         }
 
