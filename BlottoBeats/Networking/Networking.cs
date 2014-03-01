@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SongData;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
-using SongData;
 
 namespace Networking {
 	/// <summary>
@@ -44,9 +44,9 @@ namespace Networking {
 
 				Message.Send(networkStream, request);				
 				reply = Message.Recieve(networkStream);
+				if (reply == null) Console.Error.WriteLine("BBRequest Error: Expected reply but recieved none");
 			}
 
-			if (reply == null) Console.Error.WriteLine("BBRequest Error: Expected reply but recieved none");
 			return reply;
 		}
 
@@ -85,8 +85,8 @@ namespace Networking {
 		/// </summary>
 		/// <param name="song">Song to upload</param>
 		/// <param name="upOrDownvote">Vote. True if an upvote, false otherwise.</param>
-		public BBRequest(Song song, bool upOrDownvote) {
-			requestType = new UpDownVote(song, upOrDownvote);
+		public BBRequest(int seed, SongParameters song, bool upOrDownvote) {
+			requestType = new UpDownVote(seed, song, upOrDownvote);
 		}
 
 		/// <summary>
@@ -95,8 +95,8 @@ namespace Networking {
 		/// The response will contain a single SongAndVoteData item with the song and it's score
 		/// </summary>
 		/// <param name="song">Song to check the score of</param>
-		public BBRequest(Song song) {
-			requestType = new RequestScore(song);
+		public BBRequest(int seed, SongParameters song) {
+			requestType = new RequestScore(seed, song);
 		}
 
 		/// <summary>
@@ -121,11 +121,13 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class UpDownVote : Request {
-			public Song song { get; private set; }
+			public SongParameters song { get; private set; }
+			public int seed { get; private set; }
 			public bool vote { get; private set; }
 
-			public UpDownVote(Song song, bool vote) {
+			public UpDownVote(int seed, SongParameters song, bool vote) {
 				this.song = song;
+				this.seed = seed;
 				this.vote = vote;
 			}
 		}
@@ -135,10 +137,12 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class RequestScore : Request {
-			public Song song { get; private set; }
+			public SongParameters song { get; private set; }
+			public int seed { get; private set; }
 
-			public RequestScore(Song song) {
+			public RequestScore(int seed, SongParameters song) {
 				this.song = song;
+				this.seed = seed;
 			}
 		}
 
@@ -193,14 +197,7 @@ namespace Networking {
 		/// <param name="stream">Stream to send the message over</param>
 		/// <param name="obj">Object to send</param>
 		public static void Send(NetworkStream stream, object obj) {
-			SendBytes(stream, Pack(obj));
-		}
-
-		/// <summary>
-		/// Sends a prepackaged byte array over the specified stream
-		/// </summary>
-		/// <param name="stream"></param>
-		public static void SendBytes(NetworkStream stream, byte[] data) {
+			byte[] data = Pack(obj);
 			byte[] dataLength = BitConverter.GetBytes((Int32)data.Length);
 
 			if (BitConverter.IsLittleEndian) Array.Reverse(dataLength);
@@ -216,15 +213,6 @@ namespace Networking {
 		/// <param name="stream">Stream to receive the message from</param>
 		/// <returns>Object received</returns>
 		public static object Recieve(NetworkStream stream) {
-			return Unpack(RecieveBytes(stream));
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="stream"></param>
-		/// <returns></returns>
-		public static byte[] RecieveBytes(NetworkStream stream) {
 			int dataLength;
 			byte[] data = new byte[sizeof(Int32)];
 
@@ -248,7 +236,7 @@ namespace Networking {
 
 				if (dataLength == 0) {
 					// A test message was sent.
-					return Pack("Test"); // *shrug* eh, it works
+					return "Test";
 				} else {
 					data = new byte[dataLength];
 
@@ -264,7 +252,7 @@ namespace Networking {
 						return null;
 					}
 
-					return data;
+					return Unpack(data);
 				}
 			} catch (Exception e) {
 				Console.Error.WriteLine("A socket error has occured: " + e.ToString());

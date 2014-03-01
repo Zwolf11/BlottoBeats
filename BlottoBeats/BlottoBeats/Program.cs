@@ -24,9 +24,11 @@ namespace BlottoBeats
 			}
 			
 			// How to upload a song
-			Song song = new Song();
+			int seed = 9001;
+			SongParameters song = new SongParameters();
 			bool upOrDownVote = true;
-			BBRequest request = new BBRequest(song, upOrDownVote);
+
+			BBRequest request = new BBRequest(seed, song, upOrDownVote);
 			object reply = server.SendRequest(request);
 			if (reply is SongAndVoteData) {
 				SongAndVoteData songScore = (SongAndVoteData)reply;
@@ -36,7 +38,7 @@ namespace BlottoBeats
 			}
 
 			// How to check the score of a song
-			request = new BBRequest(song);
+			request = new BBRequest(seed, song);
 			reply = server.SendRequest(request);
 			if (reply is SongAndVoteData) {
 				SongAndVoteData songScore = (SongAndVoteData)reply;

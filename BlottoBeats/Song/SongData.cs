@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SongData {
 	/// <summary>
@@ -12,10 +9,9 @@ namespace SongData {
     public class Song
     {
 		public int ID { get; set; }		// Used to index the songs on the server.  Newly generated songs should have an ID of -1.
-		public string genre { get; private set; }
 
         private int tempo;
-        private String key; //Sharped notation is always used over flatted
+        private string key; //Sharped notation is always used over flatted
         private List<SongSegment> songData;
 
         [SerializableAttribute]
@@ -62,19 +58,22 @@ namespace SongData {
 	/// </summary>
 	[SerializableAttribute]
 	public class SongParameters {
+		public int ID { get; set; }		// Used to index the songs on the server.  Newly generated songs should have an ID of -1.
         public int tempo { get; set; }
-        public String genre { get; set; }
+        public string genre { get; set; }
 	}
 
 	/// <summary>
-	/// Contains a single song and the vote data for that song
+	/// Contains a single set of song parameters and the vote data for that song
 	/// </summary>
 	[SerializableAttribute]
 	public class SongAndVoteData {
-		public Song song { get; private set; }
+		public int seed { get; private set; }
+		public SongParameters song { get; private set; }
 		public int score { get; private set; }
 
-		public SongAndVoteData(Song song, int score) {
+		public SongAndVoteData(int seed, SongParameters song, int score) {
+			this.seed = seed;
 			this.song = song;
 			this.score = score;
 		}

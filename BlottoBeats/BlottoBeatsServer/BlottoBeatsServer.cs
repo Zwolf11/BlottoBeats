@@ -1,11 +1,11 @@
-﻿using Networking;
+﻿using MySql.Data.MySqlClient;
+using Networking;
 using SongData;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using MySql.Data.MySqlClient;
 
 namespace BlottoBeatsServer {
 	/// <summary>
@@ -112,8 +112,8 @@ namespace BlottoBeatsServer {
 
 						// Upload and vote on a song
 						BBRequest.UpDownVote req = (BBRequest.UpDownVote)bbrequest.requestType;
-						database.VoteOnSong(req.song, req.vote);
-						SongAndVoteData response = database.GetSongScore(req.song);
+						database.VoteOnSong(req.seed, req.song, req.vote);
+						SongAndVoteData response = database.GetSongScore(req.seed, req.song);
 						Message.Send(networkStream, response);
 						Log("  Song has ID of " + response.song.ID + " and score of " + response.score, address);
 
@@ -121,7 +121,7 @@ namespace BlottoBeatsServer {
 
 						// Request the score of a song
 						BBRequest.RequestScore req = (BBRequest.RequestScore)bbrequest.requestType;
-						SongAndVoteData response = database.GetSongScore(req.song);
+						SongAndVoteData response = database.GetSongScore(req.seed, req.song);
 						Message.Send(networkStream, response);
 						Log("  Song has ID of " + response.song.ID + " and score of " + response.score, address);
 
@@ -204,7 +204,7 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		/// <param name="song">The song object to vote on</param>
 		/// <param name="vote">The vote. True if upvote, false if downvote.</param>
-		internal SongAndVoteData VoteOnSong(Song song, bool vote) {
+		internal SongAndVoteData VoteOnSong(int seed, SongParameters song, bool vote) {
 			if (song.ID == -1) song.ID = GetID(song);	// Song has no ID.  Search the server
 			if (song.ID == -1) {
 				// Song still has no ID.  Insert it into the database
@@ -214,7 +214,7 @@ namespace BlottoBeatsServer {
 				updateScore(song.ID, vote);
 			}
 
-			return new SongAndVoteData(song, (int)returnItem(song.ID, "voteScore"));
+			return new SongAndVoteData(seed, song, (int)returnItem(song.ID, "voteScore"));
 		}
 
 		/// <summary>
@@ -223,11 +223,11 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		/// <param name="song">Song to check the score of</param>
 		/// <returns>A SongAndVoteData item containing the song and it's score</returns>
-		internal SongAndVoteData GetSongScore(Song song) {
+		internal SongAndVoteData GetSongScore(int seed, SongParameters song) {
 			if (song.ID == -1)
-				return new SongAndVoteData(song, 0);
+				return new SongAndVoteData(seed, song, 0);
 			else
-				return new SongAndVoteData(song, (int)returnItem(song.ID, "voteScore"));
+				return new SongAndVoteData(seed, song, (int)returnItem(song.ID, "voteScore"));
 		}
 
 		/// <summary>
@@ -250,7 +250,7 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		/// <param name="song">Song to search the database for</param>
 		/// <returns>ID of the song on the server</returns>
-		private int GetID(Song song) {
+		private int GetID(SongParameters song) {
 			// TODO: Actually try searching the database for this song
 			return -1;
 		}
