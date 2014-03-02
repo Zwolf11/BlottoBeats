@@ -26,7 +26,7 @@ namespace Generator
 
         //NOTE: CURRENTLY ASSUMING VALID/NON-NULL INPUT!!!!! (will crash with invalid input) 
         //TODO (soon, but not priority) check for validity of input
-        public void generate(int seed, SongParameters paramets)
+        public static void generate(int seed, SongParameters paramets)
         {
             Random randomizer = new Random(seed);
             int mode; // 0 = Major 1 = Minor
@@ -44,7 +44,8 @@ namespace Generator
             key = notes[randomizer.Next(12)];
 
             Song output = new Song(paramets.tempo, key);
-
+            Console.Out.WriteLine(key);
+            
             int randOutput = randomizer.Next(2);
             switch (randOutput){
                 case 0:
@@ -56,6 +57,8 @@ namespace Generator
             }
 
             timeSigQuant = randomizer.Next(3) + 1;
+
+            Console.Out.WriteLine(timeSigPattern + " " + timeSigQuant);
             //numpatterns is a value between 2 and 6
             numpatterns = randomizer.Next(4)+2;
             List<Song.SongSegment> patterns = new List<Song.SongSegment>();
@@ -975,6 +978,7 @@ namespace Generator
                     int sumRhythm = 0;
                     numChords = chord.Length;
                     int rhythm=0;
+                    int measureLen = 0;
 
                     //TODO Add rules for generating rhythm
                     for (int count = 0; count < numChords; count++)
@@ -982,41 +986,213 @@ namespace Generator
                        if (timeSigPattern.Equals("Simple")){
                            if (timeSigQuant == 2)
                            {
-
-
+                               measureLen = 4;
                            }
                            if (timeSigQuant == 3)
                            {
-
+                               measureLen = 6;
 
                            }
                            if (timeSigQuant == 4)
                            {
-
+                               measureLen = 8;
 
                            }
+                               if (count == numChords - 6)
+                               {
+                                   rhythm = randomizer.Next(measureLen) + 1;
+                               }
+                               if (count == numChords - 5)
+                               {
+                                   if(sumRhythm%2!=0){
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(2*measureLen - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0) || (rhythm + sumRhythm <= measureLen && (rhythm + sumRhythm) % 2 != 0));
 
+                                   }
+                                   else
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(2*measureLen - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && rhythm + sumRhythm % measureLen != 0));
 
+                                   }
+                               }
+                               if (count == numChords - 4)
+                               {
+                                   if (sumRhythm % 2 != 0)
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(3*measureLen - 1 - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0) || (rhythm + sumRhythm <= (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % 2 != 0));
+
+                                   }
+                                   else
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(3 * measureLen - 1 - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0));
+
+                                   }
+
+                               }
+                               if (count == numChords - 3)
+                               {
+                                   if (sumRhythm % 2 != 0)
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(3 * measureLen - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0) || (rhythm + sumRhythm <= (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % 2 != 0));
+
+                                   }
+                                   else
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(3 * measureLen - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0));
+
+                                   }
+
+                               }
+                               if (count == numChords - 2)
+                               {
+                                   if (sumRhythm % 2 != 0)
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(4 * measureLen - 1 - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0) || (rhythm + sumRhythm <= (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % 2 != 0));
+
+                                   }
+                                   else
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(4 * measureLen - 1 - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0));
+
+                                   }
+
+                               }
+                               if (count == numChords - 1)
+                               {
+                                   rhythm = 4*measureLen - sumRhythm;
+
+                               }
                        }
                        else{
                            if (timeSigQuant == 2)
                            {
-
+                               measureLen = 6;
 
                            }
                            if (timeSigQuant == 3)
                            {
-
+                               measureLen = 9;
 
                            }
                            if (timeSigQuant == 4)
                            {
-
+                               measureLen = 12;
 
                            }
+                           if (count == numChords - 6)
+                               {
+                                   rhythm = randomizer.Next(measureLen) + 1;
+                               }
+                               if (count == numChords - 5)
+                               {
+                                   if(sumRhythm%3!=0){
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(2*measureLen - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0) || (rhythm + sumRhythm <= measureLen && (rhythm + sumRhythm) % 3 != 0));
+
+                                   }
+                                   else
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(2*measureLen - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && rhythm + sumRhythm % measureLen != 0));
+
+                                   }
+                               }
+                               if (count == numChords - 4)
+                               {
+                                   if (sumRhythm % 3 != 0)
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(3*measureLen - 1 - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0) || (rhythm + sumRhythm <= (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % 3 != 0));
+
+                                   }
+                                   else
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(3 * measureLen - 1 - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0));
+
+                                   }
+
+                               }
+                               if (count == numChords - 3)
+                               {
+                                   if (sumRhythm % 3 != 0)
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(3 * measureLen - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0) || (rhythm + sumRhythm <= (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % 3 != 0));
+
+                                   }
+                                   else
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(3 * measureLen - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0));
+
+                                   }
+
+                               }
+                               if (count == numChords - 2)
+                               {
+                                   if (sumRhythm % 3 != 0)
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(4 * measureLen - 1 - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0) || (rhythm + sumRhythm <= (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % 3 != 0));
+
+                                   }
+                                   else
+                                   {
+                                       do
+                                       {
+                                           rhythm = randomizer.Next(4 * measureLen - 1 - sumRhythm) + 1;
+                                       } while ((rhythm + sumRhythm > (sumRhythm + (measureLen - sumRhythm % measureLen)) && (rhythm + sumRhythm) % measureLen != 0));
+
+                                   }
+
+                               }
+                               if (count == numChords - 1)
+                               {
+                                   rhythm = 4*measureLen - sumRhythm;
+
+                               }
                        }
 
                        thisSection.chordPattern.Add(generateChord(mode, key, chord[count], rhythm));
+                       sumRhythm += rhythm;
                     }
                     if (chord[chord.Length - 1] == '5')
                     {
@@ -1117,7 +1293,7 @@ namespace Generator
         }
 
 
-        private Song.Chord generateChord(int mode, String key, char chord, int length)
+        private static Song.Chord generateChord(int mode, String key, char chord, int length)
         {
             String[] notes = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
             String[] keySig= new String[7];
@@ -1137,8 +1313,9 @@ namespace Generator
 
                 noteNames[0] = keySig[chordNumIndex] + "1";
                 noteNames[1] = keySig[chordNumIndex] + "4";
-                noteNames[2] = keySig[(chordNumIndex + 2)%8] + "4";
-                noteNames[3] = keySig[(chordNumIndex + 4)%8] + "4";
+                noteNames[2] = keySig[(chordNumIndex + 2)%7] + "4";
+                noteNames[3] = keySig[(chordNumIndex + 4)%7] + "4";
+                Console.Out.WriteLine(chordNumIndex+1 + " " + length);
                 return new Song.Chord(noteNames, length);
             }
 
@@ -1159,17 +1336,17 @@ namespace Generator
                 {
                     noteNames[0] = keySig[chordNumIndex] + "1";
                     noteNames[1] = keySig[chordNumIndex] + "4";
-                    noteNames[2] = keySig[(chordNumIndex + 2) % 8] + "4";
-                    noteNames[3] = keySig[(chordNumIndex + 4) % 8] + "4";
+                    noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
+                    noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
                 }
                 //if dominant
                 if (chordNumIndex == 4)
                 {
                     noteNames[0] = keySig[chordNumIndex] + "1";
                     noteNames[1] = keySig[chordNumIndex] + "4";
-                    noteNames[3] = keySig[(chordNumIndex + 4) % 8] + "4";
+                    noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
                     //2nd note of the triad is raised a half step
-                    noteNames[2] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex+2)%8])+1)%12] + "4";
+                    noteNames[2] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex+2)%7])+1)%12] + "4";
 
                 }
                 //if leading tone
@@ -1178,18 +1355,26 @@ namespace Generator
                     //root of the triad is raised a half step
                     noteNames[0] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "1";
                     noteNames[1] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "4";
-                    noteNames[2] = keySig[(chordNumIndex + 2) % 8] + "4";
-                    noteNames[3] = keySig[(chordNumIndex + 4) % 8] + "4";
+                    noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
+                    noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
 
                 }
+
+                Console.Out.WriteLine(chordNumIndex+1+" "+ length);
                 return new Song.Chord(noteNames, length);
             }
             return null;
 
         }
 
-        /*static void Main(string[] args)
+        static void Main(string[] args)
         {
-        }*/
+            SongParameters input = new SongParameters();
+            input.tempo = 100;
+            input.genre = "Nope";
+            input.ID = -1;
+            int seed = 3000;
+            generate(seed, input);
+        }
     }
 }

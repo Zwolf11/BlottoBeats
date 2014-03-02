@@ -10,6 +10,14 @@ namespace BlottoBeats
     {
         public static void Main()
         {
+            //Generator Debug Code
+            /*SongParameters input = new SongParameters();
+            input.tempo = 100;
+            input.genre = "Nope";
+            input.ID = -1;
+            int seed = 3000;
+            Generator.Generator.generate(seed, input);*/
+
             /*// SERVER COMMUNICATION GUIDE
 			// How to connect to the server
 			string ip = "127.0.0.1";	// Replace with the IP of the server
