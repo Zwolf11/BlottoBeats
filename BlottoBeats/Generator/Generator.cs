@@ -1191,7 +1191,7 @@ namespace Generator
                                }
                        }
 
-                       thisSection.chordPattern.Add(generateChord(mode, key, chord[count], rhythm));
+                       thisSection.chordPattern.Add(generateChord(mode, key, chord[count], 2*rhythm));
                        sumRhythm += rhythm;
                     }
                     if (chord[chord.Length - 1] == '5')

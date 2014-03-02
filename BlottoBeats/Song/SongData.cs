@@ -12,7 +12,7 @@ namespace SongData {
 
         private int tempo;
         private string key; //Sharped notation is always used over flatted
-        private List<SongSegment> songData;
+        public List<SongSegment> songData { get; private set; }
 
         public Song(int temp, string ky)
         {
@@ -28,7 +28,7 @@ namespace SongData {
         [SerializableAttribute]
         public class Chord
         {
-            HashSet<Note> chordVoice;
+            public HashSet<Note> chordVoice { get; private set; }
             public Chord(String[] notes, int rhythm)
             {
                 chordVoice = new HashSet<Note>();
@@ -45,8 +45,8 @@ namespace SongData {
         [SerializableAttribute]
         public class Note
         {
-            String noteValue;
-            int length;
+            public String noteValue { get; private set; }
+            public int length { get; private set; }
 
             public Note(String val, int len)
             {
