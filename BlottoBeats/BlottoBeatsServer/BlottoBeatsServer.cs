@@ -269,36 +269,49 @@ namespace BlottoBeatsServer {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,voteScore) values('" + id + "','" + genre + "','" + songData + "','" + score + "')";
-            conn.Open();
-            command.ExecuteNonQuery();
-            conn.Close();
+
+			try {
+				conn.Open();
+				command.ExecuteNonQuery();
+			}
+			catch (Exception ex)
+			{
+				Console.Error.WriteLine(ex.Message);
+			}
+			finally
+			{
+				conn.Close();
+			}
         }
 
         private void updateScore(int id, bool vote)
         {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            int scoreUpdate;
+			int scoreUpdate = (int)(returnItem(id, "voteScore"));
 
             if (vote == true)
             {
-                scoreUpdate = (int)(returnItem(id, "voteScore"));
-                Console.WriteLine(scoreUpdate); // CHECK: Debug?
                 scoreUpdate += 1;
-                command.CommandText = "Update uploadedsongs SET voteScore='" + scoreUpdate + "' WHERE iduploadedsongs='" + id + "'";
-                conn.Open();
-                command.ExecuteNonQuery();
-                conn.Close();
             }
             else
             {
-                scoreUpdate = (int)(returnItem(id, "voteScore"));
                 scoreUpdate -= 1;
-                command.CommandText = "Update uploadedsongs SET voteScore='" + scoreUpdate + "' WHERE iduploadedsongs='" + id + "'";
-                conn.Open();
-                command.ExecuteNonQuery();
-                conn.Close();
             }
+
+			command.CommandText = "Update uploadedsongs SET voteScore='" + scoreUpdate + "' WHERE iduploadedsongs='" + id + "'";
+			try {
+				conn.Open();
+				command.ExecuteNonQuery();
+			}
+			catch (Exception ex)
+			{
+				Console.Error.WriteLine(ex.Message);
+			}
+			finally
+			{
+				conn.Close();
+			}
         }
 
         private object returnItem(int id, string col)
@@ -307,23 +320,25 @@ namespace BlottoBeatsServer {
             MySqlCommand command = conn.CreateCommand();
             command.CommandText = "Select " + col + " from uploadedsongs where iduploadedsongs=" + id;
             object item = null;
+
             try
             {
                 conn.Open();
+				MySqlDataReader reader = command.ExecuteReader();
+				while (reader.Read()) {
+					item = reader[col];
+				}
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            MySqlDataReader reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                item = reader[col];
-            }
+			finally
+			{
+				conn.Close();
+			}
             
-            conn.Close();
-
-            return item;
+			return item;
         }
 	}
 }

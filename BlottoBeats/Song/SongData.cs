@@ -64,7 +64,7 @@ namespace SongData {
         [SerializableAttribute]
         public class SongSegment
         {
-            List<Melody> melodies { get; private set; }
+            public List<Melody> melodies { get; private set; }
             public List<Chord> chordPattern { get; private set; }
 
             public SongSegment()
