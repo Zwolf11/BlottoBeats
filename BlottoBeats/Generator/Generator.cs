@@ -23,6 +23,9 @@ namespace Generator
             }
 
         }
+
+        //NOTE: CURRENTLY ASSUMING VALID/NON-NULL INPUT!!!!! (will crash with invalid input) 
+        //TODO (soon, but not priority) check for validity of input
         public void generate(int seed, SongParameters paramets)
         {
             Random randomizer = new Random(seed);
@@ -53,11 +56,11 @@ namespace Generator
             }
 
             timeSigQuant = randomizer.Next(3) + 1;
+            //numpatterns is a value between 2 and 6
+            numpatterns = randomizer.Next(4)+2;
+            List<Song.SongSegment> patterns = new List<Song.SongSegment>();
 
-            //TODO Actually figure out the rules for song patterns. It's currently a mess.
-            numpatterns = randomizer.Next(4);
-
-            for (int i = 0; i <= numpatterns; i++)
+            for (int i = 0; i < numpatterns; i++)
             {
                 Song.SongSegment thisSection = new Song.SongSegment();
                 randOutput = randomizer.Next(8) + 1;
@@ -1021,6 +1024,87 @@ namespace Generator
                     }
                 }
 
+                patterns.Add(thisSection);
+            }
+
+            const int MAXNUMSECTIONS = 8;
+
+            //totalSections is a random number between 1 and 8
+            int totalSections = randomizer.Next(MAXNUMSECTIONS)+1;
+            //numReps denotes how many time any section can be repeated in a song denoted by (the total number of sections - the number of available patterns)
+            int numReps = totalSections - numpatterns;
+            //if the random value says to utilize fewer sections than have been generated, simply make the song the list of all generated sections
+            if (numReps < 1)
+            {
+                for (int i = 0; i < numpatterns; i++)
+                {
+                    output.addSegment(patterns[i]);
+                }
+            }
+
+            //otherwise make numReps number of repetitions in the production of the song
+            else
+            {
+                //denotes the number value of the furthest section placed into the song
+                int patNum=-1;
+                //denotes the number value of the preceding section placed into the song
+                int prevSec = -1;
+                for (int i = 0; i < totalSections; i++)
+                {
+                    //if you can't repeat anymore fill out the list
+                    if (numReps < 1)
+                    {
+                        patNum++;
+                        output.addSegment(patterns[patNum]);
+                        prevSec = patNum;
+                    }
+                    // if you can repeat
+                    else
+                    {
+                        //and you've already gone through the list, your only option is to repeat
+                        if (patNum == numpatterns)
+                        {
+
+                            do
+                            {
+                                randOutput = randomizer.Next(numpatterns);
+                            } while (randOutput == prevSec);
+
+                            numReps--;
+                            output.addSegment(patterns[randOutput]);
+                            prevSec = randOutput;
+                        }
+                        //if you haven't gotten all the way through the list, you can keep traversing or repeat
+                        else
+                        {
+                            randOutput = randomizer.Next(2);
+                            if (randOutput == 0)
+                            {
+                                patNum++;
+                                output.addSegment(patterns[patNum]);
+                                prevSec = patNum;
+
+                            }
+                            else
+                            {
+                                do
+                                {
+                                    randOutput = randomizer.Next(patNum+1);
+                                } while (randOutput == prevSec);
+
+                                numReps--;
+                                output.addSegment(patterns[randOutput]);
+                                prevSec = randOutput;
+
+                            }
+
+
+                        }
+                    }
+
+
+                }
+
 
             }
 
@@ -1033,7 +1117,6 @@ namespace Generator
         }
 
 
-        //TODO define chord voicing in minor mode
         private Song.Chord generateChord(int mode, String key, char chord, int length)
         {
             String[] notes = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
@@ -1071,7 +1154,35 @@ namespace Generator
                 keySig[5] = notes[(keynum + 8) % 12];
                 keySig[6] = notes[(keynum + 10) % 12];
 
+                //if not a dominant function
+                if (chordNumIndex != 4 && chordNumIndex != 6)
+                {
+                    noteNames[0] = keySig[chordNumIndex] + "1";
+                    noteNames[1] = keySig[chordNumIndex] + "4";
+                    noteNames[2] = keySig[(chordNumIndex + 2) % 8] + "4";
+                    noteNames[3] = keySig[(chordNumIndex + 4) % 8] + "4";
+                }
+                //if dominant
+                if (chordNumIndex == 4)
+                {
+                    noteNames[0] = keySig[chordNumIndex] + "1";
+                    noteNames[1] = keySig[chordNumIndex] + "4";
+                    noteNames[3] = keySig[(chordNumIndex + 4) % 8] + "4";
+                    //2nd note of the triad is raised a half step
+                    noteNames[2] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex+2)%8])+1)%12] + "4";
 
+                }
+                //if leading tone
+                if (chordNumIndex == 6)
+                {
+                    //root of the triad is raised a half step
+                    noteNames[0] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "1";
+                    noteNames[1] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "4";
+                    noteNames[2] = keySig[(chordNumIndex + 2) % 8] + "4";
+                    noteNames[3] = keySig[(chordNumIndex + 4) % 8] + "4";
+
+                }
+                return new Song.Chord(noteNames, length);
             }
             return null;
 
