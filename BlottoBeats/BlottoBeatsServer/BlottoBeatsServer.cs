@@ -270,7 +270,8 @@ namespace BlottoBeatsServer {
             MySqlCommand command = conn.CreateCommand();
             command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,voteScore) values('" + id + "','" + genre + "','" + songData + "','" + score + "')";
 
-			try {
+			try
+			{
 				conn.Open();
 				command.ExecuteNonQuery();
 			}
@@ -300,7 +301,8 @@ namespace BlottoBeatsServer {
             }
 
 			command.CommandText = "Update uploadedsongs SET voteScore='" + scoreUpdate + "' WHERE iduploadedsongs='" + id + "'";
-			try {
+			try
+			{
 				conn.Open();
 				command.ExecuteNonQuery();
 			}

@@ -1367,7 +1367,7 @@ namespace Generator
 
         }
 
-        static void Main(string[] args)
+        /*static void Main(string[] args)
         {
             SongParameters input = new SongParameters();
             input.tempo = 100;
@@ -1375,6 +1375,6 @@ namespace Generator
             input.ID = -1;
             int seed = 3000;
             generate(seed, input);
-        }
+        }*/
     }
 }
