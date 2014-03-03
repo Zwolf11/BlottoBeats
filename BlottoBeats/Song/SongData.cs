@@ -95,6 +95,12 @@ namespace SongData {
 		public int ID { get; set; }		// Used to index the songs on the server.  Newly generated songs should have an ID of -1.
         public int tempo { get; set; }
         public string genre { get; set; }
+
+		public SongParameters(int ID, int tempo, string genre) {
+			this.ID = ID;
+			this.tempo = tempo;
+			this.genre = genre;
+		}
 	}
 
 	/// <summary>
