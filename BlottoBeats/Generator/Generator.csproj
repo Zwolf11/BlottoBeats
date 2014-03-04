@@ -51,6 +51,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MidiOut\MidiOut.csproj">
+      <Project>{4d5528c3-3614-4a5d-a7fc-eb78229b2688}</Project>
+      <Name>MidiOut</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Song\SongData.csproj">
       <Project>{3f834156-7b00-4538-ac27-1fb8b615c591}</Project>
       <Name>SongData</Name>

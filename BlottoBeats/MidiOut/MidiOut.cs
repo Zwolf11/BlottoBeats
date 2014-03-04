@@ -29,7 +29,7 @@ namespace MidiOut
         public void outputToMidi(Song output)
         {
             //5 Tracks (Just in case; so far MIDIOut is currently utilizing 2: 1 for instrument and another for notes). Each track added to sequence right after
-            Track[] track = new Track[4];
+            Track[] track = new Track[5];
             for (int i = 0; i < 5; i++)
             {
                 track[i] = new Track();
@@ -56,6 +56,9 @@ namespace MidiOut
             {
                 for (int j=0; j<output.songData[i].chordPattern.Count; j++)
                 {
+                    //Reset channel values to stop outOfBoundsException : Austin
+                    c = 1;
+                    builder.MidiChannel = c;
                     foreach (var item in (output.songData[i].chordPattern[j].chordVoice))
                     {
                         String note = item.noteValue;
@@ -469,6 +472,9 @@ namespace MidiOut
             {
                 for (int j = 0; j < output.songData[i].chordPattern.Count; j++)
                 {
+                    //Reset channel values to stop outOfBoundsException : Austin
+                    c = 1;
+                    builder.MidiChannel = c;
                     foreach (var item in (output.songData[i].chordPattern[j].chordVoice))
                     {
                         String note = item.noteValue;
@@ -874,8 +880,10 @@ namespace MidiOut
                 }//endfor
             }//endfor
             //Judging from the documentation from the toolkit website, this should output the sequence..?
-            s.Sequence = sequence;
-            s.Start();
+            //Output to Austin's Desktop for debug purposes
+            //sequence.Save("C:\\Users\\Austin\\Desktop\\test.mid");
+            /*s.Sequence = sequence;
+            s.Start();*/
         }
     }
 

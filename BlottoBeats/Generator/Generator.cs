@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SongData;
-
+using MidiOut;
 namespace Generator
 {
     public class Generator
@@ -1286,7 +1286,8 @@ namespace Generator
 
 
 
-            /*outputToMidi(output);*/
+            MidiOut.MidiOut outgoing = new MidiOut.MidiOut();
+            outgoing.outputToMidi(output);
             
 
 

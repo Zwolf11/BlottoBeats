@@ -58,10 +58,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Generator\Generator.csproj">
-      <Project>{4721fa28-7b1c-4035-849a-c366a7a915c7}</Project>
-      <Name>Generator</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Song\SongData.csproj">
       <Project>{3f834156-7b00-4538-ac27-1fb8b615c591}</Project>
       <Name>SongData</Name>

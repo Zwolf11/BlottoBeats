@@ -11,10 +11,7 @@ namespace BlottoBeats
         public static void Main()
         {
             //Generator Debug Code
-            /*SongParameters input = new SongParameters();
-            input.tempo = 100;
-            input.genre = "Nope";
-            input.ID = -1;
+           /* SongParameters input = new SongParameters(-1, 100, "Nope");
             int seed = 3000;
             Generator.Generator.generate(seed, input);*/
 
