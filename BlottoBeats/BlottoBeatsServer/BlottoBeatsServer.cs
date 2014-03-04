@@ -251,17 +251,49 @@ namespace BlottoBeatsServer {
 		/// <param name="song">Song to search the database for</param>
 		/// <returns>ID of the song on the server</returns>
 		private int GetID(SongParameters song) {
-			// TODO: Actually try searching the database for this song
+			// its the function below
 			return -1;
 		}
+
+
+        //if song is not in table it will return 0
+        private int searchAndReturnId(string genre, int seed, int tempo)
+        {
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + genre + "%' and songseed like '%" + seed + "%' and tempo like '%" + tempo + "%'";
+            int returnId = 0;
+            try
+            {
+                conn.Open();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            MySqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                returnId = (int)reader["iduploadedsongs"];
+            }
+
+            return returnId;
+        }
+
 
 		/// <summary>
 		/// Gets the next available ID for the server
 		/// </summary>
 		/// <returns>ID</returns>
 		private int GetNextAvailableID() {
-			// TODO: Do some dark wizardry here to get the next available ID
-			return 0;
+            int testId = 1;
+
+            while (returnItem(testId, "iduploadedsongs") != null)
+            {
+                testId += 1;
+            }
+
+            return testId;
 		}
 
         private void insertData(int id, string genre, byte[] songData, int score)
