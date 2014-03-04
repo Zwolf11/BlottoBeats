@@ -47,6 +47,8 @@ namespace MidiOut
             track[1].Insert(0, builder.Result);
             //Tick position
             int pos = 0;
+            //Note length
+            int len = 0;
             //MidiChannel number
             int c = 1;
             //Set MidiChannel number to 1
@@ -61,8 +63,8 @@ namespace MidiOut
                     builder.MidiChannel = c;
                     foreach (var item in (output.songData[i].chordPattern[j].chordVoice))
                     {
-                        String note = item.noteValue;
-                        int len = item.length;
+                        String note = item.noteValue; //C, C#, D, D#, E, F, F#, G, G#, A, A#
+                        len = item.length; //in 16th notes
                         //Switch note on
                         builder.Command = ChannelCommand.NoteOn;
                         switch (note)
@@ -455,16 +457,17 @@ namespace MidiOut
                         builder.Data2 = 127; //Set volume to max
                         builder.Build(); //Build the message
                         track[1].Insert(pos, builder.Result); //Insert into Track 1 at tick position 'pos'
-                        //Formuls for ticks: PPQ (pulses per quarter) * 2 = Delta ticks.. assuming note length is in PPQ.
-                        pos += (len*2);
                         //Increment MIDI channel by 1
                         c += 1;
                         builder.MidiChannel = c;
                     }//endforeach
+                    /*Tick position increment; This will be based on the last note of the previous chord, but I think it's safe to assume that its length will be the same as the rest of the chord tones of that chord.
+                     PpqnClock.PpqnMinValue is the minimum PPQ value (24) set by the class library PpqnClock.*/
+                    pos += (PpqnClock.PpqnMinValue / 4 * len);
                 }//endfor
             }//endfor
             //Set builder command to note off. Reset tick position to 0 and MIDI channel to 1
-            pos = 0;
+            //pos = 0;
             c = 1;
             builder.MidiChannel = c;
             //Iterate through the chord voices again to turn the notes off
@@ -478,7 +481,7 @@ namespace MidiOut
                     foreach (var item in (output.songData[i].chordPattern[j].chordVoice))
                     {
                         String note = item.noteValue;
-                        int len = item.length;
+                        len = item.length;
                         //Set Note Off
                         builder.Command = ChannelCommand.NoteOff;
                         switch (note)
@@ -871,17 +874,17 @@ namespace MidiOut
                         builder.Data2 = 0; //Set volume to mute
                         builder.Build(); //Build the message
                         track[1].Insert(pos, builder.Result); //Insert into Track 1 at tick position 'pos'
-                        //Formuls for ticks: PPQ (pulses per quarter) * 2 = Delta ticks.. assuming note length is in PPQ
-                        pos += (len*2);
                         //Increment MIDI channel by 1
                         c += 1;
                         builder.MidiChannel = c;
                     }//endforeach
+                    /*Reason: Since pos will already be incremented to whatever delta ticks after the last chord was inserted, there's no need to increment prior to insertion for note off, unless I'm completely off*/
+                    pos += (PpqnClock.PpqnMinValue / 4 * len);
                 }//endfor
             }//endfor
             //Judging from the documentation from the toolkit website, this should output the sequence..?
             //Output to Austin's Desktop for debug purposes
-            //sequence.Save("C:\\Users\\Austin\\Desktop\\test.mid");
+            sequence.Save("C:\\Users\\lee1129\\Desktop\\test.mid");
             /*s.Sequence = sequence;
             s.Start();*/
         }
