@@ -1289,9 +1289,9 @@ namespace MidiOut
             }//endfor*/
             //Judging from the documentation from the toolkit website, this should output the sequence..?
             //Output to Austin's Desktop for debug purposes
-            //sequence.Save("C:\\Users\\Austin\\Desktop\\test2.mid");
-            /*s.Sequence = sequence;
-            s.Start();*/
+            //sequence.Save("C:\\Users\\Austin\\Desktop\\test6.mid");
+            //s.Sequence = sequence;
+           // s.Start();
         }
     }
 

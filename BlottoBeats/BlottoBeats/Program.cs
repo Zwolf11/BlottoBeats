@@ -12,7 +12,7 @@ namespace BlottoBeats
         {
             //Generator Debug Code
            /*SongParameters input = new SongParameters(-1, 100, "Nope");
-            int seed = 511145;
+            int seed = -100000;
             Generator.Generator.generate(seed, input);*/
 
             /*// SERVER COMMUNICATION GUIDE

@@ -1254,7 +1254,7 @@ namespace Generator
                         else
                         {
                             randOutput = randomizer.Next(2);
-                            if (randOutput == 0)
+                            if (prevSec == 0 || randOutput == 0)
                             {
                                 patNum++;
                                 output.addSegment(patterns[patNum]);
