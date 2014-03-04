@@ -10,8 +10,7 @@ namespace BlottoBeats
     {
         private int size;
         private List<Button> buttons;
-        private List<String> settingsVars;
-        private List<Button> settingsButtons;
+        private List<Setting> settings;
         private Button sliderButton;
         private Button playButton;
         private List<Point> playImg;
@@ -52,8 +51,7 @@ namespace BlottoBeats
 
             size = 80;
             buttons = new List<Button>();
-            settingsVars = new List<String>();
-            settingsButtons = new List<Button>();
+            settings = new List<Setting>();
             dragging = false;
             playing = false;
             progress = 0;
@@ -78,7 +76,11 @@ namespace BlottoBeats
             lightOutline = new Pen(Color.FromArgb(130, 130, 130));
             lightOutline.Alignment = System.Drawing.Drawing2D.PenAlignment.Outset;
 
-            settingsVars.Add("Genre");
+            settings.Add(new Setting(0, "Tempo", this, size));
+            settings.Add(new Setting(1, "Seed", this, size));
+
+            foreach (Setting setting in settings)
+                setting.setVisible(menuDropped);
 
             initButtons();
         }
@@ -86,7 +88,6 @@ namespace BlottoBeats
         private void initButtons()
         {
             buttons.Clear();
-            settingsButtons.Clear();
             if (menuDropped) this.Size = new Size(33 * size / 8, 23 * size / 8);
             else this.Size = new Size(33 * size / 8, size);
             font = new Font("Arial", 3 * size / 20);
@@ -113,10 +114,6 @@ namespace BlottoBeats
             backImg.Add(new Point(10 * size / 32 + size / 16, size / 16));
             backImg.Add(new Point(10 * size / 32 + size / 16, 3 * size / 16));
             backImg.Add(new Point(12 * size / 32 + size / 16, size / 16));
-            //backImg.Add(new Point(12 * size / 32, 3 * size / 16));
-            //backImg.Add(new Point(14 * size / 32, size / 16));
-            //backImg.Add(new Point(14 * size / 32, 5 * size / 16));
-            //backImg.Add(new Point(12 * size / 32, 3 * size / 16));
             backImg.Add(new Point(12 * size / 32 + size / 16, 5 * size / 16));
             backImg.Add(new Point(10 * size / 32 + size / 16, 3 * size / 16));
             backImg.Add(new Point(10 * size / 32 + size / 16, 5 * size / 16));
@@ -126,8 +123,6 @@ namespace BlottoBeats
             buttons.Add(backButton);
 
             List<Point> nextImg = new List<Point>();
-            //nextImg.Add(new Point(9 * size / 32, size / 16));
-            //nextImg.Add(new Point(11 * size / 32, 3 * size / 16));
             nextImg.Add(new Point(11 * size / 32, size / 16));
             nextImg.Add(new Point(13 * size / 32, 3 * size / 16));
             nextImg.Add(new Point(13 * size / 32, size / 16));
@@ -136,8 +131,6 @@ namespace BlottoBeats
             nextImg.Add(new Point(13 * size / 32, 5 * size / 16));
             nextImg.Add(new Point(13 * size / 32, 3 * size / 16));
             nextImg.Add(new Point(11 * size / 32, 5 * size / 16));
-            //nextImg.Add(new Point(11 * size / 32, 3 * size / 16));
-            //nextImg.Add(new Point(9 * size / 32, 5 * size / 16));
             Button nextButton = new Button(menuButton, new Point(size / 2 + 3 * size / 4, size / 2), darkGrey, lightOutline, nextImg);
             nextButton.Clicked += nextClicked;
             buttons.Add(nextButton);
@@ -244,23 +237,8 @@ namespace BlottoBeats
             exitButton.Clicked += exitClicked;
             buttons.Add(exitButton);
 
-            List<Point> checkbox = new List<Point>();
-            checkbox.Add(new Point(size / 16, size / 8));
-            checkbox.Add(new Point(3 * size / 16, size / 8));
-            checkbox.Add(new Point(3 * size / 16, size / 4));
-            checkbox.Add(new Point(size / 16, size / 4));
-
-            List<Point> genre = new List<Point>();
-            genre.Add(new Point(0, 0));
-            genre.Add(new Point(2 * size, 0));
-            genre.Add(new Point(2 * size, (int)(3 * font.Size / 2)));
-            genre.Add(new Point(0, (int)(3 * font.Size / 2)));
-            Button genreButton = new Button(genre, new Point((int)(13 * size / 16 + this.CreateGraphics().MeasureString(settingsVars[0], font).Width), (int)(15 * size / 16 + 2 * font.Size)), white, null, null);
-            genreButton.Clicked += genreClicked;
-            settingsButtons.Add(genreButton);
-            Button genreCheckbox = new Button(checkbox, new Point(111 * size / 32, (int)(15 * size / 16 + 3 * font.Size / 2)), white, Pens.Black, null);
-            genreCheckbox.Clicked += genreCheckboxClicked;
-            settingsButtons.Add(genreCheckbox);
+            foreach (Setting setting in settings)
+                setting.init(size);
         }
 
         private void playClicked(object sender, MouseEventArgs e)
@@ -295,6 +273,7 @@ namespace BlottoBeats
         {
             progress = 0;
             sliderButton.loc.X = size;
+            score = 0;
             playing = true;
             playButton.img = pauseImg;
             if(!timer.Enabled) timer.Start();
@@ -304,6 +283,7 @@ namespace BlottoBeats
         {
             progress = 0;
             sliderButton.loc.X = size;
+            score = 0;
             playing = true;
             playButton.img = pauseImg;
             if (!timer.Enabled) timer.Start();
@@ -330,7 +310,10 @@ namespace BlottoBeats
         {
             if (menuDropped) this.Size = new Size(33 * size / 8, size);
             else this.Size = new Size(33 * size / 8, 23 * size / 8);
+
             menuDropped = !menuDropped;
+            foreach (Setting setting in settings)
+                setting.setVisible(menuDropped);
 
             Invalidate();
         }
@@ -418,16 +401,6 @@ namespace BlottoBeats
             Invalidate();
         }
 
-        private void genreClicked(object sender, MouseEventArgs e)
-        {
-            
-        }
-
-        private void genreCheckboxClicked(object sender, MouseEventArgs e)
-        {
-
-        }
-
         private void tick(object sender, EventArgs e)
         {
             if (progress < 1)
@@ -439,6 +412,7 @@ namespace BlottoBeats
             {
                 progress = 0;
                 sliderButton.loc.X = size;
+                score = 0;
                 if (!autoPlay)
                 {
                     playing = false;
@@ -495,18 +469,6 @@ namespace BlottoBeats
                 g.DrawRectangle(lightInline, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
                 g.DrawString("Variable", font, lightGrey, 13 * size / 16, 15 * size / 16);
                 g.DrawString("Randomized?", font, lightGrey, 15 * size / 4 - g.MeasureString("Randomized?", font).Width, 15 * size / 16);
-
-                for(int i=0;i<settingsVars.Count;i++)
-                    g.DrawString(settingsVars[i], font, white, 13 * size / 16, 15 * size / 16 + 2 * font.Size * (i + 1));
-
-                foreach(Button button in settingsButtons)
-                {
-                    g.FillPolygon(button.inside, button.ClickLocation);
-                    if (button.stroke != null)
-                        g.DrawPolygon(button.stroke, button.ClickLocation);
-                    if (button.ImgLocation != null)
-                        g.FillPolygon(lightGrey, button.ImgLocation);
-                }
             }
 
             foreach(Button button in buttons)
