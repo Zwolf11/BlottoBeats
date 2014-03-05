@@ -96,6 +96,23 @@ namespace SongData {
         public int tempo { get; set; }
         public string genre { get; set; }
 
+		/// <summary>
+		/// Generates a SongParameters object with a default ID of -1
+		/// </summary>
+		/// <param name="tempo">Tempo of the song</param>
+		/// <param name="genre">Genre of the song</param>
+		public SongParameters(int tempo, string genre) {
+			this.ID = -1;
+			this.tempo = tempo;
+			this.genre = genre;
+		}
+
+		/// <summary>
+		/// Generates a SongParameters object with a given ID
+		/// </summary>
+		/// <param name="ID">ID of the song</param>
+		/// <param name="tempo">Tempo of the song</param>
+		/// <param name="genre">Genre of the song</param>
 		public SongParameters(int ID, int tempo, string genre) {
 			this.ID = ID;
 			this.tempo = tempo;
