@@ -12,7 +12,7 @@ namespace BlottoBeatsServer {
 	/// Basic TCP Server
 	/// Uses ThreadPool to handle multiple connections at the same time.
 	/// </summary>
-	private class Server {
+	internal class Server {
 		private TcpListener tcpListener;
 		private Thread listenThread;
 		

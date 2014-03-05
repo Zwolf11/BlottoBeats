@@ -8,8 +8,6 @@ namespace SongData {
     [SerializableAttribute]
     public class Song
     {
-		public int ID { get; set; }		// Used to index the songs on the server.  Newly generated songs should have an ID of -1.
-
         private int tempo;
         private string key; //Sharped notation is always used over flatted
         public List<SongSegment> songData { get; private set; }
