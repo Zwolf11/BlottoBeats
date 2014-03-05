@@ -10,6 +10,7 @@ using Sanford.Multimedia.Midi;
 using Sanford.Multimedia.Timers;
 using Sanford.Threading;
 using SongData;
+using System.Media;
 
 namespace MidiOut
 {
@@ -1289,9 +1290,9 @@ namespace MidiOut
             }//endfor*/
             //Judging from the documentation from the toolkit website, this should output the sequence..?
             //Output to Austin's Desktop for debug purposes
-            //sequence.Save("C:\\Users\\Austin\\Desktop\\test6.mid");
-            //s.Sequence = sequence;
-           // s.Start();
+            sequence.Save("C:\\Users\\Austin\\Desktop\\test6.mid");
+            //s.Sequence = sequence;  
+           //s.Start();
         }
     }
 

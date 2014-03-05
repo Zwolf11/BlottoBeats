@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using SongData;
 using MidiOut;
 
-namespace Generator
+namespace BlottoBeats
 {
     public class Generator
     {
+        private MainForm form;
+
         internal class SongPattern
         {
             public int totalNumMeasures { get; private set; }
@@ -25,9 +28,14 @@ namespace Generator
 
         }
 
+        public Generator(MainForm form)
+        {
+            this.form = form;
+        }
+
         //NOTE: CURRENTLY ASSUMING VALID/NON-NULL INPUT!!!!! (will crash with invalid input) 
         //TODO (soon, but not priority) check for validity of input
-        public static void generate(int seed, SongParameters paramets)
+        public void generate(int seed, SongParameters paramets)
         {
             Random randomizer = new Random(seed);
             int mode; // 0 = Major 1 = Minor
@@ -1289,9 +1297,8 @@ namespace Generator
 
             MidiOut.MidiOut outgoing = new MidiOut.MidiOut();
             outgoing.outputToMidi(output);
-            
 
-            //Call mainform's playSong() method here
+            form.playSong();
         }
 
 

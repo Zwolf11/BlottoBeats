@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Button.cs" />
+    <Compile Include="Generator.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,9 +78,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Generator\Generator.csproj">
-      <Project>{4721fa28-7b1c-4035-849a-c366a7a915c7}</Project>
-      <Name>Generator</Name>
+    <ProjectReference Include="..\MidiOut\MidiOut.csproj">
+      <Project>{4d5528c3-3614-4a5d-a7fc-eb78229b2688}</Project>
+      <Name>MidiOut</Name>
     </ProjectReference>
     <ProjectReference Include="..\Networking\Networking.csproj">
       <Project>{efd41bca-a637-4861-a0d7-7af1b9669627}</Project>

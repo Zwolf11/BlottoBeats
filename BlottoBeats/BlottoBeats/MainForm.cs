@@ -6,7 +6,6 @@ using System.IO;
 using System.Threading;
 using Networking;
 using SongData;
-using Generator;
 
 namespace BlottoBeats
 {
@@ -37,6 +36,7 @@ namespace BlottoBeats
         private Setting tempo;
         private Setting seed;
         private System.Windows.Forms.Timer timer;
+        private Generator generator;
         private BBServerConnection server;
 
         private Font font;
@@ -73,6 +73,7 @@ namespace BlottoBeats
             menuDropped = false;
             autoPlay = false;
             songLen = 60;
+            generator = new Generator(this);
             server = new BBServerConnection("127.0.0.1", 3000);
 
             timer = new System.Windows.Forms.Timer();
@@ -280,19 +281,20 @@ namespace BlottoBeats
                 {
                     playButton.img = loadImg;
                     playing = LOADING;
-                    new Thread(() => Generator.Generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"))).Start();
+                    generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"));
                 }
             }
 
             Invalidate();
         }
 
-        private void playSong()
+        public void playSong()
         {
             playButton.img = pauseImg;
             playing = PLAYING;
             songLoaded = true;
             timer.Start();
+            Invalidate();
         }
 
         private void playBarClicked(object sender, MouseEventArgs e)
@@ -323,20 +325,20 @@ namespace BlottoBeats
             playing = LOADING;
             playButton.img = loadImg;
             if (timer.Enabled) timer.Stop();
-            new Thread(() => Generator.Generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"))).Start();
+            generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"));
         }
 
         private void upvoteClicked(object sender, MouseEventArgs e)
         {
             score = score == 1 ? 0 : 1;
-            if (score > 1) new Thread(() => server.SendRequest(new BBRequest(seed.Value, new SongParameters(tempo.Value, "Unknown"), true))).Start();
+            if (score > 0) new Thread(() => server.SendRequest(new BBRequest(seed.Value, new SongParameters(tempo.Value, "Unknown"), true))).Start();
             Invalidate();
         }
 
         private void downvoteClicked(object sender, MouseEventArgs e)
         {
             score = score == -1 ? 0 : -1;
-            if (score < 1) new Thread(() => server.SendRequest(new BBRequest(seed.Value, new SongParameters(tempo.Value, "Unknown"), false))).Start();
+            if (score < 0) new Thread(() => server.SendRequest(new BBRequest(seed.Value, new SongParameters(tempo.Value, "Unknown"), false))).Start();
             Invalidate();
         }
 
@@ -461,7 +463,7 @@ namespace BlottoBeats
                 {
                     playing = LOADING;
                     playButton.img = loadImg;
-                    new Thread(() => Generator.Generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"))).Start();
+                    generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"));
                 }
                 timer.Stop();
             }
