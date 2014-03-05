@@ -1289,7 +1289,7 @@ namespace Generator
 
             MidiOut.MidiOut outgoing = new MidiOut.MidiOut();
             outgoing.outputToMidi(output);
-            
+
 
             //Call mainform's playSong() method here
         }
