@@ -329,12 +329,12 @@ namespace BlottoBeatsServer {
 
         private void insertData(int seed, SongParameters song, int score)
         {
-			// TODO: Update this function to work with the new database
+			//TODO: Update this function to work with the new database
 
-			/*
+			
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,voteScore) values('" + id + "','" + genre + "','" + songData + "','" + score + "')";
+            command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,voteScore) values('" + GetNextAvailableID(1) + "','" + song.genre + "','" + seed + "','" + score + "','" + song.tempo + "')";
 
 			try
 			{
@@ -349,7 +349,7 @@ namespace BlottoBeatsServer {
 			{
 				conn.Close();
 			}
-			*/
+			
         }
 
         private void updateScore(int id, bool vote)
