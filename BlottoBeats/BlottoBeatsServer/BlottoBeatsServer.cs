@@ -18,13 +18,14 @@ namespace BlottoBeatsServer {
 		
 		private Database database;
 		private string logFileLocation;
+		private int logLevel;	// How verbose the logs should be.  Higher is more verbose.
 
 		/// <summary>
 		/// Starts up the server
 		/// </summary>
 		public static void Main() {
 			// Create a new server that listens on port 3000;
-            Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log");
+            Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log", 3);
 
 			// Checks the state of the server every 5 seconds
 			// If the server thread has died, restart it
@@ -38,9 +39,13 @@ namespace BlottoBeatsServer {
 		/// Creates a new server object that listens on the specified port
 		/// </summary>
 		/// <param name="port">The port to listen on</param>
-		internal Server(int port, Database database, string logFileLocation) {
+		/// <param name="database">SQL Database string</param>
+		/// <param name="logFileLocation">Location to save the log</param>
+		/// <param name="logLevel">What level of logs to use</param>
+		internal Server(int port, Database database, string logFileLocation, int logLevel) {
 			this.database = database;
 			this.logFileLocation = logFileLocation;
+			this.logLevel = logLevel;
 
 			tcpListener = new TcpListener(IPAddress.Any, port);
 			listenThread = new Thread(new ThreadStart(ListenForClients));
@@ -59,7 +64,7 @@ namespace BlottoBeatsServer {
 		/// Restarts the server thread
 		/// </summary>
 		internal void Restart() {
-			Log("Restarting Server...");
+			Log("Restarting Server...", 0);
 			
 			listenThread.Abort();
 			listenThread = new Thread(new ThreadStart(ListenForClients));
@@ -72,7 +77,7 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		private void ListenForClients() {
 			tcpListener.Start();
-			Log("Server started");
+			Log("Server started", 0);
 
 			while (true) {
 				TcpClient client = tcpListener.AcceptTcpClient();
@@ -91,7 +96,7 @@ namespace BlottoBeatsServer {
 			IPAddress address = ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address;
 			
 
-			Log("Remote client connected", address);
+			Log("Remote client connected", address, 0);
 			
 			object message = Message.Recieve(networkStream);
 			while (tcpClient.Connected && message != null) {
@@ -99,31 +104,46 @@ namespace BlottoBeatsServer {
 				if (message is string && (string)message == "Test") {
 
 					// A test message was recieved.  Send a response back.
-					Log("Recieved a connection test request", address);
+					Log("Recieved a connection test request", address, 1);
 					Message.TestMsg(networkStream);
 
 				} else if (message is BBRequest) {
 
 					// A BBRequest was recieved.  Process the request
 					BBRequest bbrequest = (BBRequest)message;
-					Log("Received a " + bbrequest.requestType + " request", address);
+					Log("Received a " + bbrequest.requestType + " request", address, 1);
 
 					if (bbrequest.requestType is BBRequest.UpDownVote) {
 
 						// Upload and vote on a song
 						BBRequest.UpDownVote req = (BBRequest.UpDownVote)bbrequest.requestType;
+
+						Log("    " + (req.vote ? "Upvote" : "Downvote") + " Request", address, 2);
+						Log("        ID - " + req.song.ID , address, 3);
+						Log("     Genre - " + req.song.genre, address, 3);
+						Log("     Tempo - " + req.song.tempo, address, 3);
+						Log("      Seed - " + req.seed, address, 3);
+
 						database.VoteOnSong(req.seed, req.song, req.vote);
 						SongAndVoteData response = database.GetSongScore(req.seed, req.song);
 						Message.Send(networkStream, response);
-						Log("  Song has ID of " + response.song.ID + " and score of " + response.score, address);
+						
+						Log("    Response has ID of " + response.song.ID + " and score of " + response.score, address, 2);
 
 					} else if (bbrequest.requestType is BBRequest.RequestScore) {
 
 						// Request the score of a song
 						BBRequest.RequestScore req = (BBRequest.RequestScore)bbrequest.requestType;
+
+						Log("        ID - " + req.song.ID, address, 3);
+						Log("     Genre - " + req.song.genre, address, 3);
+						Log("     Tempo - " + req.song.tempo, address, 3);
+						Log("      Seed - " + req.seed, address, 3);
+
 						SongAndVoteData response = database.GetSongScore(req.seed, req.song);
 						Message.Send(networkStream, response);
-						Log("  Song has ID of " + response.song.ID + " and score of " + response.score, address);
+
+						Log("    Response has ID of " + response.song.ID + " and score of " + response.score, address, 2);
 
 					} else if (bbrequest.requestType is BBRequest.RequestSongs) {
 
@@ -131,21 +151,21 @@ namespace BlottoBeatsServer {
 						BBRequest.RequestSongs req = (BBRequest.RequestSongs)bbrequest.requestType;
 						List<SongAndVoteData> songList = database.GetSongList(req.parameters, req.num);
 						Message.Send(networkStream, songList);
-						Log("  Returned " + songList.Count + " songs", address);
+						Log("    Returned " + songList.Count + " songs", address, 2);
 
 					} else {
-						Log("ERROR: Unknown BBRequest type '" + bbrequest.GetType() + "'", address);
+						Log("ERROR: Unknown BBRequest type '" + bbrequest.GetType() + "'", address, 0);
 					}
 
 				} else {
-					Log("ERROR: Unknown request type '" + message.GetType() + "'", address);
-					Log("  MORE INFO: " + message.ToString(), address);
+					Log("ERROR: Unknown request type '" + message.GetType() + "'", address, 0);
+					Log("    MORE INFO: " + message.ToString(), address, 0);
 				}
 
 				message = Message.Recieve(networkStream);
 			}
 
-			Log("Remote client disconnected", address);
+			Log("Remote client disconnected", address, 0);
 
 			tcpClient.Close();
 		}
@@ -154,10 +174,12 @@ namespace BlottoBeatsServer {
 		/// Logs a message
 		/// </summary>
 		/// <param name="message">Message to log</param>
-		private void Log(string message) { 
-			Console.WriteLine("<{0}> {1}", Timestamp(), message);
-			using (System.IO.StreamWriter file = new System.IO.StreamWriter(logFileLocation, true)) {
-				file.WriteLine("<{0}> {1}", Timestamp(), message);
+		private void Log(string message, int level) {
+			if (logLevel >= level) {
+				Console.WriteLine("<{0}> {1}", Timestamp(), message);
+				using (System.IO.StreamWriter file = new System.IO.StreamWriter(logFileLocation, true)) {
+					file.WriteLine("<{0}> {1}", Timestamp(), message);
+				}
 			}
 		}
 
@@ -166,10 +188,12 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		/// <param name="message">Message to log</param>
 		/// <param name="address">IP address to log</param>
-		private void Log(string message, IPAddress address) {
-			Console.WriteLine("<{0}> {2} - {1}", Timestamp(), message, address);
-			using (System.IO.StreamWriter file = new System.IO.StreamWriter(logFileLocation, true)) {
-				file.WriteLine("<{0}> {2} - {1}", Timestamp(), message, address);
+		private void Log(string message, IPAddress address, int level) {
+			if (logLevel >= level) {	
+				Console.WriteLine("<{0}> {2} - {1}", Timestamp(), message, address);
+				using (System.IO.StreamWriter file = new System.IO.StreamWriter(logFileLocation, true)) {
+					file.WriteLine("<{0}> {2} - {1}", Timestamp(), message, address);
+				}
 			}
 		}
 
@@ -214,7 +238,11 @@ namespace BlottoBeatsServer {
 				updateScore(song.ID, vote);
 			}
 
-			return new SongAndVoteData(seed, song, (int)returnItem(song.ID, "voteScore"));
+			object score = returnItem(song.ID, "voteScore");
+			if (score != null && score is int)
+				return new SongAndVoteData(seed, song, (int)score);
+			else
+				return new SongAndVoteData(seed, song, 0);
 		}
 
 		/// <summary>
@@ -225,10 +253,17 @@ namespace BlottoBeatsServer {
 		/// <returns>A SongAndVoteData item containing the song and it's score</returns>
 		internal SongAndVoteData GetSongScore(int seed, SongParameters song) {
 			if (song.ID == -1) song.ID = GetID(seed, song);	// Song has no ID.  Search the server
-			if (song.ID == -1)
+			if (song.ID == -1) {
 				return new SongAndVoteData(seed, song, 0);	// Song still has no ID. Return score of 0.
-			else
-				return new SongAndVoteData(seed, song, (int)returnItem(song.ID, "voteScore"));
+			} else {
+				object score = returnItem(song.ID, "voteScore");
+				if (score != null && score is int)
+					return new SongAndVoteData(seed, song, (int)score);
+				else
+					return new SongAndVoteData(seed, song, 0);
+			}
+				
+				
 		}
 
 		/// <summary>
