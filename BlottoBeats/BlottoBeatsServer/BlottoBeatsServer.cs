@@ -209,7 +209,7 @@ namespace BlottoBeatsServer {
 				// Song still has no ID.  Insert it into the database
 				song.ID = nextID;
 				nextID = GetNextAvailableID(nextID);
-				insertData(song.ID, song.genre, Message.Pack(song), (vote) ? 1 : -1);
+				insertData(seed, song, (vote) ? 1 : -1);
 			} else {
 				updateScore(song.ID, vote);
 			}
@@ -292,8 +292,11 @@ namespace BlottoBeatsServer {
             return testId;
 		}
 
-        private void insertData(int id, string genre, byte[] songData, int score)
+        private void insertData(int seed, SongParameters song, int score)
         {
+			// TODO: Update this function to work with the new database
+
+			/*
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,voteScore) values('" + id + "','" + genre + "','" + songData + "','" + score + "')";
@@ -311,6 +314,7 @@ namespace BlottoBeatsServer {
 			{
 				conn.Close();
 			}
+			*/
         }
 
         private void updateScore(int id, bool vote)
