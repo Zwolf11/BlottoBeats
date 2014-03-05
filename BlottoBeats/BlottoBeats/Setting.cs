@@ -13,6 +13,8 @@ namespace BlottoBeats
         public TextBox text;
         public CheckBox checkbox;
 
+        public int Value { get { return int.Parse(text.Text); } }
+
         public Setting(int pos, String name, Form parent, int size)
         {
             this.pos = pos;
@@ -21,6 +23,7 @@ namespace BlottoBeats
             label.Text = name;
             label.BackColor = Color.Transparent;
             text = new TextBox();
+            text.Text = "1";
             checkbox = new CheckBox();
             checkbox.BackColor = Color.Transparent;
             checkbox.CheckedChanged += this.checkboxChanged;

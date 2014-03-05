@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SongData;
 using MidiOut;
+
 namespace Generator
 {
     public class Generator
@@ -1290,7 +1291,7 @@ namespace Generator
             outgoing.outputToMidi(output);
             
 
-
+            //Call mainform's playSong() method here
         }
 
 

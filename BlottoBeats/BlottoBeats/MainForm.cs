@@ -3,11 +3,19 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Threading;
+using Networking;
+using SongData;
+using Generator;
 
 namespace BlottoBeats
 {
     public class MainForm : Form
     {
+        public const int PLAYING = 1;
+        public const int LOADING = 0;
+        public const int PAUSED = -1;
+
         private int size;
         private List<Button> buttons;
         private List<Setting> settings;
@@ -15,16 +23,21 @@ namespace BlottoBeats
         private Button playButton;
         private List<Point> playImg;
         private List<Point> pauseImg;
+        private List<Point> loadImg;
         private Button playBarButton;
         private Point dragPos;
         private bool dragging;
-        private bool playing;
+        private int playing;
+        private bool songLoaded;
         private double progress;
         private int score;
         private bool menuDropped;
         private bool autoPlay;
         private int songLen;
-        private Timer timer;
+        private Setting tempo;
+        private Setting seed;
+        private System.Windows.Forms.Timer timer;
+        private BBServerConnection server;
 
         private Font font;
         private SolidBrush lightGrey;
@@ -53,14 +66,16 @@ namespace BlottoBeats
             buttons = new List<Button>();
             settings = new List<Setting>();
             dragging = false;
-            playing = false;
+            playing = PAUSED;
+            songLoaded = false;
             progress = 0;
             score = 0;
             menuDropped = false;
             autoPlay = false;
             songLen = 60;
+            server = new BBServerConnection("127.0.0.1", 3000);
 
-            timer = new Timer();
+            timer = new System.Windows.Forms.Timer();
             timer.Interval = 10;
             timer.Tick += this.tick;
 
@@ -76,8 +91,10 @@ namespace BlottoBeats
             lightOutline = new Pen(Color.FromArgb(130, 130, 130));
             lightOutline.Alignment = System.Drawing.Drawing2D.PenAlignment.Outset;
 
-            settings.Add(new Setting(0, "Tempo", this, size));
-            settings.Add(new Setting(1, "Seed", this, size));
+            tempo = new Setting(0, "Tempo", this, size);
+            seed = new Setting(1, "Seed", this, size);
+            settings.Add(tempo);
+            settings.Add(seed);
 
             foreach (Setting setting in settings)
                 setting.setVisible(menuDropped);
@@ -211,8 +228,10 @@ namespace BlottoBeats
             pauseImg.Add(new Point(9 * size / 16, 3 * size / 4));
             pauseImg.Add(new Point(9 * size / 16, size / 4));
             pauseImg.Add(new Point(3 * size / 4, size / 4));
+            loadImg = new List<Point>();
             List<Point> playButtonImg = playImg;
-            if (playing) playButtonImg = pauseImg;
+            if (playing == PLAYING) playButtonImg = pauseImg;
+            else if (playing == LOADING) playButtonImg = loadImg;
             playButton = new Button(play, new Point(0, 0), medGrey, lightInline, playButtonImg);
             playButton.Clicked += this.playClicked;
             buttons.Add(playButton);
@@ -243,20 +262,37 @@ namespace BlottoBeats
 
         private void playClicked(object sender, MouseEventArgs e)
         {
-            if (playing)
+            if (playing == PLAYING)
             {
                 playButton.img = playImg;
+                playing = PAUSED;
                 timer.Stop();
             }
-            else
+            else if(playing == PAUSED)
             {
-                playButton.img = pauseImg;
-                timer.Start();
+                if (songLoaded)
+                {
+                    playButton.img = pauseImg;
+                    playing = PLAYING;
+                    timer.Start();
+                }
+                else
+                {
+                    playButton.img = loadImg;
+                    playing = LOADING;
+                    new Thread(() => Generator.Generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"))).Start();
+                }
             }
 
-            playing = !playing;
-
             Invalidate();
+        }
+
+        private void playSong()
+        {
+            playButton.img = pauseImg;
+            playing = PLAYING;
+            songLoaded = true;
+            timer.Start();
         }
 
         private void playBarClicked(object sender, MouseEventArgs e)
@@ -274,7 +310,7 @@ namespace BlottoBeats
             progress = 0;
             sliderButton.loc.X = size;
             score = 0;
-            playing = true;
+            playing = PLAYING;
             playButton.img = pauseImg;
             if(!timer.Enabled) timer.Start();
         }
@@ -284,20 +320,23 @@ namespace BlottoBeats
             progress = 0;
             sliderButton.loc.X = size;
             score = 0;
-            playing = true;
-            playButton.img = pauseImg;
-            if (!timer.Enabled) timer.Start();
+            playing = LOADING;
+            playButton.img = loadImg;
+            if (timer.Enabled) timer.Stop();
+            new Thread(() => Generator.Generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"))).Start();
         }
 
         private void upvoteClicked(object sender, MouseEventArgs e)
         {
             score = score == 1 ? 0 : 1;
+            if (score > 1) new Thread(() => server.SendRequest(new BBRequest(seed.Value, new SongParameters(tempo.Value, "Unknown"), true))).Start();
             Invalidate();
         }
 
         private void downvoteClicked(object sender, MouseEventArgs e)
         {
             score = score == -1 ? 0 : -1;
+            if (score < 1) new Thread(() => server.SendRequest(new BBRequest(seed.Value, new SongParameters(tempo.Value, "Unknown"), false))).Start();
             Invalidate();
         }
 
@@ -330,7 +369,7 @@ namespace BlottoBeats
 
         private void sliderClicked(object sender, MouseEventArgs e)
         {
-            if (playing) timer.Stop();
+            if (playing == PLAYING) timer.Stop();
             this.MouseMove += dragSlider;
             this.MouseUp += undragSlider;
             this.MouseMove -= this.mouseMove;
@@ -355,7 +394,7 @@ namespace BlottoBeats
             this.MouseMove -= dragSlider;
             this.MouseUp -= undragSlider;
             this.MouseUp += this.mouseUp;
-            if (playing) timer.Start();
+            if (playing == PLAYING) timer.Start();
         }
 
         private void mouseUp(object sender, MouseEventArgs e)
@@ -415,10 +454,16 @@ namespace BlottoBeats
                 score = 0;
                 if (!autoPlay)
                 {
-                    playing = false;
+                    playing = PAUSED;
                     playButton.img = playImg;
-                    timer.Stop();
                 }
+                else
+                {
+                    playing = LOADING;
+                    playButton.img = loadImg;
+                    new Thread(() => Generator.Generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"))).Start();
+                }
+                timer.Stop();
             }
             Invalidate();
         }
