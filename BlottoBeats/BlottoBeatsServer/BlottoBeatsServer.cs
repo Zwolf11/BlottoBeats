@@ -12,7 +12,7 @@ namespace BlottoBeatsServer {
 	/// Basic TCP Server
 	/// Uses ThreadPool to handle multiple connections at the same time.
 	/// </summary>
-	internal class Server {
+	private class Server {
 		private TcpListener tcpListener;
 		private Thread listenThread;
 		
@@ -186,7 +186,6 @@ namespace BlottoBeatsServer {
 	/// Handles all communication with the MySQL database
 	/// </summary>
 	internal class Database {
-		// TODO - JOE: Add stuff
         string connString;
 		int nextID;
 
@@ -195,7 +194,7 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		internal Database(string connString) {
             this.connString = connString;
-			this.nextID = GetNextAvailableID();
+			this.nextID = GetNextAvailableID(1);
 		}
 
 		/// <summary>
@@ -205,10 +204,11 @@ namespace BlottoBeatsServer {
 		/// <param name="song">The song object to vote on</param>
 		/// <param name="vote">The vote. True if upvote, false if downvote.</param>
 		internal SongAndVoteData VoteOnSong(int seed, SongParameters song, bool vote) {
-			if (song.ID == -1) song.ID = GetID(song);	// Song has no ID.  Search the server
+			if (song.ID == -1) song.ID = GetID(seed, song);	// Song has no ID.  Search the server
 			if (song.ID == -1) {
 				// Song still has no ID.  Insert it into the database
-				song.ID = GetNextAvailableID();
+				song.ID = nextID;
+				nextID = GetNextAvailableID(nextID);
 				insertData(song.ID, song.genre, Message.Pack(song), (vote) ? 1 : -1);
 			} else {
 				updateScore(song.ID, vote);
@@ -219,13 +219,14 @@ namespace BlottoBeatsServer {
 
 		/// <summary>
 		/// Returns the score of the given song.  If the song isn't in the database,
-		/// returns zero.
+		/// returns zero.  Does not add the song to the database if it isn't already there.
 		/// </summary>
 		/// <param name="song">Song to check the score of</param>
 		/// <returns>A SongAndVoteData item containing the song and it's score</returns>
 		internal SongAndVoteData GetSongScore(int seed, SongParameters song) {
+			if (song.ID == -1) song.ID = GetID(seed, song);	// Song has no ID.  Search the server
 			if (song.ID == -1)
-				return new SongAndVoteData(seed, song, 0);
+				return new SongAndVoteData(seed, song, 0);	// Song still has no ID. Return score of 0.
 			else
 				return new SongAndVoteData(seed, song, (int)returnItem(song.ID, "voteScore"));
 		}
@@ -250,33 +251,28 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		/// <param name="song">Song to search the database for</param>
 		/// <returns>ID of the song on the server</returns>
-		private int GetID(SongParameters song) {
-			// its the function below
-			return -1;
-		}
-
-
-        //if song is not in table it will return 0
-        private int searchAndReturnId(string genre, int seed, int tempo)
-        {
+		private int GetID(int seed, SongParameters song) {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + genre + "%' and songseed like '%" + seed + "%' and tempo like '%" + tempo + "%'";
-            int returnId = 0;
+            command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + song.genre + "%' and songseed like '%" + seed + "%' and tempo like '%" + song.tempo + "%'";
+            int returnId = -1;
             try
             {
                 conn.Open();
+				MySqlDataReader reader = command.ExecuteReader();
+				while (reader.Read()) {
+					returnId = (int)reader["iduploadedsongs"];
+				}
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.Error.WriteLine(ex.Message);
             }
-            MySqlDataReader reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                returnId = (int)reader["iduploadedsongs"];
-            }
-
+			finally
+			{
+				conn.Close();
+			}
+            
             return returnId;
         }
 
@@ -285,8 +281,8 @@ namespace BlottoBeatsServer {
 		/// Gets the next available ID for the server
 		/// </summary>
 		/// <returns>ID</returns>
-		private int GetNextAvailableID() {
-            int testId = 1;
+		private int GetNextAvailableID(int currID) {
+            int testId = currID;
 
             while (returnItem(testId, "iduploadedsongs") != null)
             {
@@ -365,7 +361,7 @@ namespace BlottoBeatsServer {
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.Error.WriteLine(ex.Message);
             }
 			finally
 			{
