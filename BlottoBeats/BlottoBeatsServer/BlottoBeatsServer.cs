@@ -25,7 +25,8 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		public static void Main() {
 			// Create a new server that listens on port 3000;
-            Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log", 3);
+			Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log", 3);
+			//Server server = new Server(3000, new Database("Server=68.234.146.20;Port=3001;Database=songdatabase;Uid=BlottoServer;password=JJLrDtcrfvjym8gh1zUVklF19KDf1CTM;"), "server.log", 3);
 
 			// Checks the state of the server every 5 seconds
 			// If the server thread has died, restart it
@@ -124,8 +125,7 @@ namespace BlottoBeatsServer {
 						Log("     Tempo - " + req.song.tempo, address, 3);
 						Log("      Seed - " + req.seed, address, 3);
 
-						database.VoteOnSong(req.seed, req.song, req.vote);
-						SongAndVoteData response = database.GetSongScore(req.seed, req.song);
+						SongAndVoteData response = database.VoteOnSong(req.seed, req.song, req.vote);
 						Message.Send(networkStream, response);
 						
 						Log("    Response has ID of " + response.song.ID + " and score of " + response.score, address, 2);
@@ -230,19 +230,16 @@ namespace BlottoBeatsServer {
 		internal SongAndVoteData VoteOnSong(int seed, SongParameters song, bool vote) {
 			if (song.ID == -1) song.ID = GetID(seed, song);	// Song has no ID.  Search the server
 			if (song.ID == -1) {
-				// Song still has no ID.  Insert it into the database
+				// Song is not in the database.  Insert it into the database.
 				song.ID = nextID;
 				nextID = GetNextAvailableID(nextID);
 				insertData(seed, song, (vote) ? 1 : -1);
+				return new SongAndVoteData(seed, song, (vote) ? 1 : -1);
 			} else {
 				updateScore(song.ID, vote);
-			}
-
-			object score = returnItem(song.ID, "voteScore");
-			if (score != null && score is int)
-				return new SongAndVoteData(seed, song, (int)score);
-			else
+				int score = (int)returnItem(song.ID, "voteScore");
 				return new SongAndVoteData(seed, song, 0);
+			}
 		}
 
 		/// <summary>
@@ -254,7 +251,8 @@ namespace BlottoBeatsServer {
 		internal SongAndVoteData GetSongScore(int seed, SongParameters song) {
 			if (song.ID == -1) song.ID = GetID(seed, song);	// Song has no ID.  Search the server
 			if (song.ID == -1) {
-				return new SongAndVoteData(seed, song, 0);	// Song still has no ID. Return score of 0.
+				// Song is not in the database. Return score of 0.
+				return new SongAndVoteData(seed, song, 0);
 			} else {
 				object score = returnItem(song.ID, "voteScore");
 				if (score != null && score is int)
@@ -262,8 +260,6 @@ namespace BlottoBeatsServer {
 				else
 					return new SongAndVoteData(seed, song, 0);
 			}
-				
-				
 		}
 
 		/// <summary>
@@ -329,12 +325,9 @@ namespace BlottoBeatsServer {
 
         private void insertData(int seed, SongParameters song, int score)
         {
-			//TODO: Update this function to work with the new database
-
-			
-            MySqlConnection conn = new MySqlConnection(connString);
+			MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,voteScore) values('" + GetNextAvailableID(1) + "','" + song.genre + "','" + seed + "','" + score + "','" + song.tempo + "')";
+			command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,tempo,voteScore) values('" + song.ID + "','" + song.genre + "','" + seed + "','" + song.tempo + "','" + score + "')";
 
 			try
 			{
