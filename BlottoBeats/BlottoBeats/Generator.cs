@@ -65,7 +65,7 @@ namespace BlottoBeats
                     break;
             }
 
-            timeSigQuant = randomizer.Next(3) + 1;
+            timeSigQuant = randomizer.Next(3) + 2;
 
             Console.Out.WriteLine(timeSigPattern + " " + timeSigQuant);
             //numpatterns is a value between 2 and 6
