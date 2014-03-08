@@ -39,7 +39,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authentication.cs" />
+    <Compile Include="Message.cs" />
     <Compile Include="Networking.cs" />
+    <Compile Include="PasswordHash.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

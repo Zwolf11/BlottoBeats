@@ -119,20 +119,24 @@ namespace SongData {
 	}
 
 	/// <summary>
-	/// Contains a single set of song parameters and the vote data for that song
+	/// Contains a all the information required to construct a song.
 	/// </summary>
 	[SerializableAttribute]
-	public class SongAndVoteData {
+	public class CompleteSongData {
 		public int seed { get; private set; }
 		public SongParameters song { get; private set; }
 		public int score { get; private set; }
 
-		public SongAndVoteData(int seed, SongParameters song, int score) {
+		public CompleteSongData(int seed, SongParameters song) {
+			this.seed = seed;
+			this.song = song;
+			this.score = 0;
+		}
+
+		public CompleteSongData(int seed, SongParameters song, int score) {
 			this.seed = seed;
 			this.song = song;
 			this.score = score;
 		}
 	}
-
-	// TODO - MICHAEL/AUSTIN: Add any other song information necessary
 }

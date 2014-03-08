@@ -1,5 +1,4 @@
-﻿using MySql.Data.MySqlClient;
-using Networking;
+﻿using Networking;
 using SongData;
 using System;
 using System.Collections.Generic;
@@ -25,8 +24,8 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		public static void Main() {
 			// Create a new server that listens on port 3000;
-			//Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log", 3);
-			Server server = new Server(3000, new Database("Server=68.234.146.20;Port=3001;Database=songdatabase;Uid=BlottoServer;password=JJLrDtcrfvjym8gh1zUVklF19KDf1CTM;"), "server.log", 3);
+			Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log", 3);
+			//Server server = new Server(3000, new Database("Server=68.234.146.20;Port=3001;Database=songdatabase;Uid=BlottoServer;password=JJLrDtcrfvjym8gh1zUVklF19KDf1CTM;"), "server.log", 3);
 
 			// Checks the state of the server every 5 seconds
 			// If the server thread has died, restart it
@@ -108,16 +107,16 @@ namespace BlottoBeatsServer {
 					Log("Recieved a connection test request", address, 1);
 					Message.TestMsg(networkStream);
 
-				} else if (message is BBRequest) {
+				} else if (message is BBMessage) {
 
 					// A BBRequest was recieved.  Process the request
-					BBRequest bbrequest = (BBRequest)message;
-					Log("Received a " + bbrequest.requestType + " request", address, 1);
+					BBMessage bbmessage = message as BBMessage;
+					Log("Received a " + bbmessage.requestType + " request", address, 1);
 
-					if (bbrequest.requestType is BBRequest.UpDownVote) {
+					if (bbmessage.requestType is BBMessage.UpDownVote) {
 
 						// Upload and vote on a song
-						BBRequest.UpDownVote req = (BBRequest.UpDownVote)bbrequest.requestType;
+						BBMessage.UpDownVote req = bbmessage.requestType as BBMessage.UpDownVote;
 
 						Log("    " + (req.vote ? "Upvote" : "Downvote") + " Request", address, 2);
 						Log("        ID - " + req.song.ID , address, 3);
@@ -125,36 +124,36 @@ namespace BlottoBeatsServer {
 						Log("     Tempo - " + req.song.tempo, address, 3);
 						Log("      Seed - " + req.seed, address, 3);
 
-						SongAndVoteData response = database.VoteOnSong(req.seed, req.song, req.vote);
+						CompleteSongData response = database.VoteOnSong(req.seed, req.song, req.vote);
 						Message.Send(networkStream, response);
 						
 						Log("    Response has ID of " + response.song.ID + " and score of " + response.score, address, 2);
 
-					} else if (bbrequest.requestType is BBRequest.RequestScore) {
+					} else if (bbmessage.requestType is BBMessage.RequestScore) {
 
 						// Request the score of a song
-						BBRequest.RequestScore req = (BBRequest.RequestScore)bbrequest.requestType;
+						BBMessage.RequestScore req = bbmessage.requestType as BBMessage.RequestScore;
 
 						Log("        ID - " + req.song.ID, address, 3);
 						Log("     Genre - " + req.song.genre, address, 3);
 						Log("     Tempo - " + req.song.tempo, address, 3);
 						Log("      Seed - " + req.seed, address, 3);
 
-						SongAndVoteData response = database.GetSongScore(req.seed, req.song);
+						CompleteSongData response = database.GetSongScore(req.seed, req.song);
 						Message.Send(networkStream, response);
 
 						Log("    Response has ID of " + response.song.ID + " and score of " + response.score, address, 2);
 
-					} else if (bbrequest.requestType is BBRequest.RequestSongs) {
+					} else if (bbmessage.requestType is BBMessage.RequestSongs) {
 
 						// Request a list of songs
-						BBRequest.RequestSongs req = (BBRequest.RequestSongs)bbrequest.requestType;
-						List<SongAndVoteData> songList = database.GetSongList(req.parameters, req.num);
+						BBMessage.RequestSongs req = bbmessage.requestType as BBMessage.RequestSongs;
+						List<CompleteSongData> songList = database.GetSongList(req.parameters, req.num);
 						Message.Send(networkStream, songList);
 						Log("    Returned " + songList.Count + " songs", address, 2);
 
 					} else {
-						Log("ERROR: Unknown BBRequest type '" + bbrequest.GetType() + "'", address, 0);
+						Log("ERROR: Unknown BBRequest type '" + bbmessage.GetType() + "'", address, 0);
 					}
 
 				} else {
@@ -189,12 +188,7 @@ namespace BlottoBeatsServer {
 		/// <param name="message">Message to log</param>
 		/// <param name="address">IP address to log</param>
 		private void Log(string message, IPAddress address, int level) {
-			if (logLevel >= level) {	
-				Console.WriteLine("<{0}> {2} - {1}", Timestamp(), message, address);
-				using (System.IO.StreamWriter file = new System.IO.StreamWriter(logFileLocation, true)) {
-					file.WriteLine("<{0}> {2} - {1}", Timestamp(), message, address);
-				}
-			}
+			Log(String.Format("{0} - {1}", address, message), level);
 		}
 
 		/// <summary>
@@ -204,203 +198,5 @@ namespace BlottoBeatsServer {
 		private string Timestamp() {
 			return String.Format("{0:hh:mm:ss}", DateTime.Now);
 		}
-	}
-
-	/// <summary>
-	/// Handles all communication with the MySQL database
-	/// </summary>
-	internal class Database {
-        string connString;
-		int nextID;
-
-		/// <summary>
-		/// Loads a database from the given path
-		/// </summary>
-		internal Database(string connString) {
-            this.connString = connString;
-			this.nextID = GetNextAvailableID(1);
-		}
-
-		/// <summary>
-		/// Checks to see if a song is in the database already.  If it isn't, the song is
-		/// added to the database with a single vote.  If it is, add the vote to that song.
-		/// </summary>
-		/// <param name="song">The song object to vote on</param>
-		/// <param name="vote">The vote. True if upvote, false if downvote.</param>
-		internal SongAndVoteData VoteOnSong(int seed, SongParameters song, bool vote) {
-			if (song.ID == -1) song.ID = GetID(seed, song);	// Song has no ID.  Search the server
-			if (song.ID == -1) {
-				// Song is not in the database.  Insert it into the database.
-				song.ID = nextID;
-				nextID = GetNextAvailableID(nextID);
-				insertData(seed, song, (vote) ? 1 : -1);
-				return new SongAndVoteData(seed, song, (vote) ? 1 : -1);
-			} else {
-				updateScore(song.ID, vote);
-				int score = (int)returnItem(song.ID, "voteScore");
-				return new SongAndVoteData(seed, song, score);
-			}
-		}
-
-		/// <summary>
-		/// Returns the score of the given song.  If the song isn't in the database,
-		/// returns zero.  Does not add the song to the database if it isn't already there.
-		/// </summary>
-		/// <param name="song">Song to check the score of</param>
-		/// <returns>A SongAndVoteData item containing the song and it's score</returns>
-		internal SongAndVoteData GetSongScore(int seed, SongParameters song) {
-			if (song.ID == -1) song.ID = GetID(seed, song);	// Song has no ID.  Search the server
-			if (song.ID == -1) {
-				// Song is not in the database. Return score of 0.
-				return new SongAndVoteData(seed, song, 0);
-			} else {
-				object score = returnItem(song.ID, "voteScore");
-				if (score != null && score is int)
-					return new SongAndVoteData(seed, song, (int)score);
-				else
-					return new SongAndVoteData(seed, song, 0);
-			}
-		}
-
-		/// <summary>
-		/// Gets a list of songs that match the given SongParameters object
-		/// </summary>
-		/// <param name="songParameters">The parameters to match</param>
-		/// <param name="numSongs">The maximum number of songs to return</param>
-		/// <returns>The list of songs</returns>
-		internal List<SongAndVoteData> GetSongList(SongParameters songParameters, int numSongs) {
-			List<SongAndVoteData> list = new List<SongAndVoteData>();
-			
-			// TODO: Implement
-
-			return list;
-		}
-
-		/// <summary>
-		/// Searches the database for a song that matches the given song.
-		/// If there is a match, returns the ID.  If not, returns -1
-		/// </summary>
-		/// <param name="song">Song to search the database for</param>
-		/// <returns>ID of the song on the server</returns>
-		private int GetID(int seed, SongParameters song) {
-            MySqlConnection conn = new MySqlConnection(connString);
-            MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + song.genre + "%' and songseed like '%" + seed + "%' and tempo like '%" + song.tempo + "%'";
-            int returnId = -1;
-            try
-            {
-                conn.Open();
-				MySqlDataReader reader = command.ExecuteReader();
-				while (reader.Read()) {
-					returnId = (int)reader["iduploadedsongs"];
-				}
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine(ex.Message);
-            }
-			finally
-			{
-				conn.Close();
-			}
-            
-            return returnId;
-        }
-
-
-		/// <summary>
-		/// Gets the next available ID for the server
-		/// </summary>
-		/// <returns>ID</returns>
-		private int GetNextAvailableID(int currID) {
-            int testId = currID;
-
-            while (returnItem(testId, "iduploadedsongs") != null)
-            {
-                testId += 1;
-            }
-
-            return testId;
-		}
-
-        private void insertData(int seed, SongParameters song, int score)
-        {
-			MySqlConnection conn = new MySqlConnection(connString);
-            MySqlCommand command = conn.CreateCommand();
-			command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,tempo,voteScore) values('" + song.ID + "','" + song.genre + "','" + seed + "','" + song.tempo + "','" + score + "')";
-
-			try
-			{
-				conn.Open();
-				command.ExecuteNonQuery();
-			}
-			catch (Exception ex)
-			{
-				Console.Error.WriteLine(ex.Message);
-			}
-			finally
-			{
-				conn.Close();
-			}
-			
-        }
-
-        private void updateScore(int id, bool vote)
-        {
-            MySqlConnection conn = new MySqlConnection(connString);
-            MySqlCommand command = conn.CreateCommand();
-			int scoreUpdate = (int)(returnItem(id, "voteScore"));
-
-            if (vote == true)
-            {
-                scoreUpdate += 1;
-            }
-            else
-            {
-                scoreUpdate -= 1;
-            }
-
-			command.CommandText = "Update uploadedsongs SET voteScore='" + scoreUpdate + "' WHERE iduploadedsongs='" + id + "'";
-			try
-			{
-				conn.Open();
-				command.ExecuteNonQuery();
-			}
-			catch (Exception ex)
-			{
-				Console.Error.WriteLine(ex.Message);
-			}
-			finally
-			{
-				conn.Close();
-			}
-        }
-
-        private object returnItem(int id, string col)
-        {
-            MySqlConnection conn = new MySqlConnection(connString);
-            MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "Select " + col + " from uploadedsongs where iduploadedsongs=" + id;
-            object item = null;
-
-            try
-            {
-                conn.Open();
-				MySqlDataReader reader = command.ExecuteReader();
-				while (reader.Read()) {
-					item = reader[col];
-				}
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine(ex.Message);
-            }
-			finally
-			{
-				conn.Close();
-			}
-            
-			return item;
-        }
 	}
 }

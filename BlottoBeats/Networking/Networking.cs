@@ -1,10 +1,8 @@
 ﻿using SongData;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Networking {
 	/// <summary>
@@ -31,11 +29,26 @@ namespace Networking {
 		}
 
 		/// <summary>
+		/// Sends an authentication request to the server.  Returns a UserToken
+		/// object if successful, or null otherwise.
+		/// </summary>
+		/// <param name="username">Username to send</param>
+		/// <param name="password">Passoword to send</param>
+		/// <returns>UserToken if successful, null otherwise</returns>
+		public UserToken Authenticate(string username, string password) {
+
+			// TODO: Finish this
+			// currently returns a newly-generated and completely arbitrary user token
+
+			return new UserToken(username, UserToken.GetExpiration(), UserToken.GenerateToken());
+		}
+
+		/// <summary>
 		/// Sends a BBRequest to the server
 		/// </summary>
 		/// <param name="request">The BBRequest to send</param>
 		/// <returns>If the reqeuest expects a response, returns the response</returns>
-		public object SendRequest(BBRequest request) {
+		public BBMessage.Response SendRequest(BBMessage request) {
 			object reply;
 			
 			using (TcpClient client = new TcpClient()) {
@@ -44,10 +57,12 @@ namespace Networking {
 
 				Message.Send(networkStream, request);				
 				reply = Message.Recieve(networkStream);
-				if (reply == null) Console.Error.WriteLine("BBRequest Error: Expected reply but recieved none");
 			}
 
-			return reply;
+			if (reply == null)
+				throw new Exception("BBRequest Error: Expected reply but recieved none");//Console.Error.WriteLine("BBRequest Error: Expected reply but recieved none");
+			else
+				return reply as BBMessage.Response;
 		}
 
 		/// <summary>
@@ -69,11 +84,11 @@ namespace Networking {
 	}
 
 	/// <summary>
-	/// Request object for communication between the BlottoBeats server and client.
+	/// Request object for communication between the BlottoBeats client and server.
 	/// </summary>
 	[SerializableAttribute]
-	public class BBRequest {
-		public Request requestType { get; private set; }
+	public class BBMessage {
+		public BBMessageObject requestType { get; private set; }
 
 		/// <summary>
 		/// Sends an upload request with a single song and either an upvote or a downvote.
@@ -85,8 +100,8 @@ namespace Networking {
 		/// </summary>
 		/// <param name="song">Song to upload</param>
 		/// <param name="upOrDownvote">Vote. True if an upvote, false otherwise.</param>
-		public BBRequest(int seed, SongParameters song, bool upOrDownvote) {
-			requestType = new UpDownVote(seed, song, upOrDownvote);
+		public BBMessage(int seed, SongParameters song, bool upOrDownvote, UserToken userInfo) {
+			requestType = new UpDownVote(seed, song, upOrDownvote, userInfo);
 		}
 
 		/// <summary>
@@ -95,8 +110,8 @@ namespace Networking {
 		/// The response will contain a single SongAndVoteData item with the song and it's score
 		/// </summary>
 		/// <param name="song">Song to check the score of</param>
-		public BBRequest(int seed, SongParameters song) {
-			requestType = new RequestScore(seed, song);
+		public BBMessage(int seed, SongParameters song, UserToken userInfo) {
+			requestType = new RequestScore(seed, song, userInfo);
 		}
 
 		/// <summary>
@@ -106,15 +121,26 @@ namespace Networking {
 		/// </summary>
 		/// <param name="parameters">Parameters to match</param>
 		/// <param name="numberOfSongs">Number of songs to return</param>
-		public BBRequest(SongParameters parameters, int numberOfSongs) {
-			requestType = new RequestSongs(parameters, numberOfSongs);
+		public BBMessage(SongParameters parameters, int numberOfSongs, UserToken userInfo) {
+			requestType = new RequestSongs(parameters, numberOfSongs, userInfo);
 		}
+
+		/// <summary>
+		/// Base message class
+		/// </summary>
+		public class BBMessageObject { }
 
 		/// <summary>
 		/// Generic request object
 		/// </summary>
 		[SerializableAttribute]
-		public class Request { }
+		public class Request : BBMessageObject {
+			public UserToken userInfo { get; private set; }
+
+			protected Request(UserToken userInfo) {
+				this.userInfo = userInfo;
+			}
+		}
 
 		/// <summary>
 		/// Uploads a song with a vote
@@ -125,7 +151,7 @@ namespace Networking {
 			public int seed { get; private set; }
 			public bool vote { get; private set; }
 
-			public UpDownVote(int seed, SongParameters song, bool vote) {
+			public UpDownVote(int seed, SongParameters song, bool vote, UserToken userInfo) : base(userInfo) {
 				this.song = song;
 				this.seed = seed;
 				this.vote = vote;
@@ -140,7 +166,7 @@ namespace Networking {
 			public SongParameters song { get; private set; }
 			public int seed { get; private set; }
 
-			public RequestScore(int seed, SongParameters song) {
+			public RequestScore(int seed, SongParameters song, UserToken userInfo) : base(userInfo) {
 				this.song = song;
 				this.seed = seed;
 			}
@@ -154,20 +180,23 @@ namespace Networking {
 			public SongParameters parameters { get; private set; }
 			public int num { get; private set; }
 
-			public RequestSongs(SongParameters parameters, int num) {
+			public RequestSongs(SongParameters parameters, int num, UserToken userInfo) : base(userInfo) {
 				this.parameters = parameters;
 				this.num = num;
 			}
 		}
 
+		// Base Response class
+		public class Response : BBMessageObject { }
+
 		/// <summary>
 		/// Responds with a single song
 		/// </summary>
 		[SerializableAttribute]
-		public class ResponseSong : Request {
-			public SongAndVoteData song { get; private set; }
+		public class ResponseSong : Response {
+			public CompleteSongData song { get; private set; }
 
-			public ResponseSong(SongAndVoteData song) {
+			public ResponseSong(CompleteSongData song) {
 				this.song = song;
 			}
 		}
@@ -176,142 +205,12 @@ namespace Networking {
 		/// Responds with a list of songs
 		/// </summary>
 		[SerializableAttribute]
-		public class ResponseSongs : Request {
-			public List<SongAndVoteData> songs { get; private set; }
+		public class ResponseSongs : Response {
+			public List<CompleteSongData> songs { get; private set; }
 
-			public ResponseSongs(List<SongAndVoteData> songs) {
+			public ResponseSongs(List<CompleteSongData> songs) {
 				this.songs = songs;
 			}
-		}
-	}
-
-	/// <summary>
-	/// Message helper class for to clog the tubes with.
-	/// Use Message.Send() to send a message and Message.Receive() to receive it.
-	/// Used to send and receive objects directly.
-	/// </summary>
-	public class Message {
-		/// <summary>
-		/// Sends a single object over the specified stream 
-		/// </summary>
-		/// <param name="stream">Stream to send the message over</param>
-		/// <param name="obj">Object to send</param>
-		public static void Send(NetworkStream stream, object obj) {
-			byte[] data = Pack(obj);
-			byte[] dataLength = BitConverter.GetBytes((Int32)data.Length);
-
-			if (BitConverter.IsLittleEndian) Array.Reverse(dataLength);
-
-			stream.Write(dataLength, 0, sizeof(Int32));	//send length of message
-			stream.Write(data, 0, data.Length);			//send message itself
-			stream.Flush();
-		}
-
-		/// <summary>
-		/// Receieves a single object over the specified stream
-		/// </summary>
-		/// <param name="stream">Stream to receive the message from</param>
-		/// <returns>Object received</returns>
-		public static object Recieve(NetworkStream stream) {
-			int dataLength;
-			byte[] data = new byte[sizeof(Int32)];
-
-			int bytesRead = 0;
-			int totalBytesRead = 0;
-
-			try {
-				// Read the length integer
-				do {
-					bytesRead = stream.Read(data, totalBytesRead, (data.Length - totalBytesRead));
-					totalBytesRead += bytesRead;
-				} while (totalBytesRead < sizeof(Int32) && bytesRead != 0);
-
-				if (totalBytesRead < sizeof(Int32)) {
-					if (totalBytesRead != 0) Console.Error.WriteLine("Message Recieve Failed: connection closed unexpectedly");
-					return null;
-				}
-
-				if (BitConverter.IsLittleEndian) Array.Reverse(data);
-				dataLength = BitConverter.ToInt32(data, 0);
-
-				if (dataLength == 0) {
-					// A test message was sent.
-					return "Test";
-				} else {
-					data = new byte[dataLength];
-
-					// Read data until the client disconnects
-					totalBytesRead = 0;
-					do {
-						bytesRead = stream.Read(data, totalBytesRead, (dataLength - totalBytesRead));
-						totalBytesRead += bytesRead;
-					} while (totalBytesRead < dataLength && bytesRead != 0);
-
-					if (totalBytesRead < dataLength) {
-						Console.Error.WriteLine("Message Receive Failed: connection closed unexpectedly");
-						return null;
-					}
-
-					return Unpack(data);
-				}
-			} catch (Exception e) {
-				Console.Error.WriteLine("A socket error has occured: " + e.ToString());
-				return null;
-			}
-		}
-
-		/// <summary>
-		/// Tests a connection to see if it is valid
-		/// </summary>
-		/// <param name="stream">Stream to test</param>
-		/// <returns>True if the connection is valid, false otherwise</returns>
-		public static bool Test(NetworkStream stream) {
-			Message.TestMsg(stream);
-			object response = Message.Recieve(stream);
-
-			return (response is string && "Test" == (string)response);
-		}
-
-		/// <summary>
-		/// Sends a blank message with length header of zero.
-		/// </summary>
-		public static void TestMsg(NetworkStream stream) {
-			byte[] zeros = BitConverter.GetBytes((Int32) 0);
-			stream.Write(zeros, 0, sizeof(Int32));
-			stream.Flush();
-		}
-
-		/// <summary>
-		/// Packs an object into a big-endian byte array
-		/// </summary>
-		/// <param name="obj">Object to pack</param>
-		/// <returns>Big-endian byte representation of the object</returns>
-		public static byte[] Pack(object obj) {
-			byte[] data;
-
-			using (MemoryStream memoryStream = new MemoryStream()) {
-				(new BinaryFormatter()).Serialize(memoryStream, obj);
-				data = memoryStream.ToArray();
-			}
-
-			if (BitConverter.IsLittleEndian) Array.Reverse(data);
-			return data;
-		}
-
-		/// <summary>
-		/// Unpacks a big-endian byte array into an object
-		/// </summary>
-		/// <param name="arr">Byte array to unpack</param>
-		/// <returns>Object that was unpacked</returns>
-		public static object Unpack(byte[] data) {
-			object obj;
-
-			if (BitConverter.IsLittleEndian) Array.Reverse(data);
-			using (MemoryStream memoryStream = new MemoryStream(data)) {
-				obj = (new BinaryFormatter()).Deserialize(memoryStream);
-			}
-
-			return obj;
 		}
 	}
 }
