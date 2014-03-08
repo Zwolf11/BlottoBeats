@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using Networking;
 using SongData;
 using System;
 using System.Collections.Generic;
@@ -72,6 +73,29 @@ namespace BlottoBeatsServer {
 			// TODO: Implement
 
 			return list;
+		}
+
+		/// <summary>
+		/// Attemts to authenticate a user with the given credentials
+		/// </summary>
+		/// <param name="credentials">User credentials to authenticate</param>
+		/// <returns>UserToken if successful, null otherwise</returns>
+		internal UserToken Authenticate(Credentials credentials) {
+			string hash = getUserHash(credentials.username);
+
+			if (hash != null && credentials.Verify(hash)) {
+				// Credentials were valid.  Generate a new authentication token.
+				DateTime expiry = UserToken.GetExpiration();
+				string token = UserToken.GenerateToken();
+
+				if (storeUserToken(credentials.username, expiry, token))
+					return new UserToken(credentials.username, expiry, token);
+				else
+					return null;
+			} else {
+				// Credentials were invalid.  Return null.
+				return null;
+			}
 		}
 
 		/// <summary>
@@ -172,6 +196,18 @@ namespace BlottoBeatsServer {
 			}
 
 			return item;
+		}
+
+		private string getUserHash(string username) {
+			// TODO: Joe, write this method
+
+			return null;
+		}
+
+		private bool storeUserToken(string username, DateTime expires, string token) {
+			// TODO: Joe, write this method
+
+			return false;
 		}
 	}
 }

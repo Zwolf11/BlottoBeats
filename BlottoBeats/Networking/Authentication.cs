@@ -2,6 +2,9 @@
 using System.Security.Cryptography;
 
 namespace Networking {
+	/// <summary>
+	/// Authorization token for a user
+	/// </summary>
 	public class UserToken {
 		public string username { get; private set; }
 		public DateTime expires { get; private set; }
@@ -48,6 +51,37 @@ namespace Networking {
 		/// <returns>DateTime object</returns>
 		public static DateTime GetExpiration() {
 			return DateTime.Now.Add(offset);
+		}
+	}
+
+	/// <summary>
+	/// Login Credentials for a user
+	/// </summary>
+	public class Credentials {
+		public string username { get; private set; }
+		private string password { get; set; }
+
+		public Credentials(string username, string password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		/// <summary>
+		/// Verifies that the specified password matches the given hash
+		/// </summary>
+		/// <param name="hash">Hash to check</param>
+		/// <returns>True if they match, false otherwise</returns>
+		public bool Verify(string hash) {
+			return PasswordHash.PasswordHash.ValidatePassword(this.password, hash);
+		}
+
+		/// <summary>
+		/// Generates a new hash for the password
+		/// </summary>
+		/// <returns>A new hash for the password</returns>
+		public string GenerateHash() {
+			return PasswordHash.PasswordHash.CreateHash(this.password);
+
 		}
 	}
 }

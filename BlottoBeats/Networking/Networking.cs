@@ -35,12 +35,24 @@ namespace Networking {
 		/// <param name="username">Username to send</param>
 		/// <param name="password">Passoword to send</param>
 		/// <returns>UserToken if successful, null otherwise</returns>
-		public UserToken Authenticate(string username, string password) {
+		public UserToken Authenticate(Credentials credentials) {
+			AuthRequest request = new AuthRequest(credentials);
+			object reply;
 
-			// TODO: Finish this
-			// currently returns a newly-generated and completely arbitrary user token
+			using (TcpClient client = new TcpClient()) {
+				client.Connect(serverEndPoint);
+				NetworkStream networkStream = client.GetStream();
 
-			return new UserToken(username, UserToken.GetExpiration(), UserToken.GenerateToken());
+				Message.Send(networkStream, request);
+				reply = Message.Recieve(networkStream);
+			}
+
+			if (reply == null)
+				throw new Exception("BBRequest Error: Expected reply but recieved none");//Console.Error.WriteLine("BBRequest Error: Expected reply but recieved none");
+			else if (!(reply is AuthResponse))
+				throw new Exception("BBRequest Error: Expected AuthResponse but recieved unknown response type");
+			else
+				return (reply as AuthResponse).token;
 		}
 
 		/// <summary>
@@ -181,6 +193,9 @@ namespace Networking {
 		}
 	}
 
+	/// <summary>
+	/// Response object for communication between the BlottoBeats server and client.
+	/// </summary>
 	[SerializableAttribute]
 	public class BBResponse {
 		public Response responseType { get; private set; }
@@ -218,6 +233,28 @@ namespace Networking {
 			public ResponseSongs(List<CompleteSongData> songs) {
 				this.songs = songs;
 			}
+		}
+	}
+
+	/// <summary>
+	/// Request from the client to the server for an authentication token
+	/// </summary>
+	public class AuthRequest {
+		public Credentials credentials { get; private set; }
+
+		public AuthRequest(Credentials credentials) {
+			this.credentials = credentials;
+		}
+	}
+
+	/// <summary>
+	/// Response from the server with an authentication token, or null if unsuccessful
+	/// </summary>
+	public class AuthResponse {
+		public UserToken token { get; private set; }
+
+		public AuthResponse(UserToken token) {
+			this.token = token;
 		}
 	}
 }
