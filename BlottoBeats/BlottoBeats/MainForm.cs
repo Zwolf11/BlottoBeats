@@ -331,14 +331,22 @@ namespace BlottoBeats
         private void upvoteClicked(object sender, MouseEventArgs e)
         {
             score = score == 1 ? 0 : 1;
-            if (score > 0) new Thread(() => server.SendRequest(new BBMessage(seed.Value, new SongParameters(tempo.Value, "Unknown"), true))).Start();
+
+			// Songs are now encapsulated in CompleteSongData objects
+			CompleteSongData song = new CompleteSongData(seed.Value, new SongParameters(tempo.Value, "Unknown"));
+
+            if (score > 0) new Thread(() => server.SendRequest(new BBRequest(song, true, null))).Start();
             Invalidate();
         }
 
         private void downvoteClicked(object sender, MouseEventArgs e)
         {
             score = score == -1 ? 0 : -1;
-			if (score < 0) new Thread(() => server.SendRequest(new BBMessage(seed.Value, new SongParameters(tempo.Value, "Unknown"), false))).Start();
+			
+			// Songs are now encapsulated in CompleteSongData objects
+			CompleteSongData song = new CompleteSongData(seed.Value, new SongParameters(tempo.Value, "Unknown"));
+
+			if (score > 0) new Thread(() => server.SendRequest(new BBRequest(song, true, null))).Start();
             Invalidate();
         }
 

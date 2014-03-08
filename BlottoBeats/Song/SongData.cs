@@ -124,18 +124,18 @@ namespace SongData {
 	[SerializableAttribute]
 	public class CompleteSongData {
 		public int seed { get; private set; }
-		public SongParameters song { get; private set; }
+		public SongParameters param { get; private set; }
 		public int score { get; private set; }
 
 		public CompleteSongData(int seed, SongParameters song) {
 			this.seed = seed;
-			this.song = song;
+			this.param = song;
 			this.score = 0;
 		}
 
 		public CompleteSongData(int seed, SongParameters song, int score) {
 			this.seed = seed;
-			this.song = song;
+			this.param = song;
 			this.score = score;
 		}
 	}

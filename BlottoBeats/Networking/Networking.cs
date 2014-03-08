@@ -48,7 +48,7 @@ namespace Networking {
 		/// </summary>
 		/// <param name="request">The BBRequest to send</param>
 		/// <returns>If the reqeuest expects a response, returns the response</returns>
-		public BBMessage.Response SendRequest(BBMessage request) {
+		public BBResponse SendRequest(BBRequest request) {
 			object reply;
 			
 			using (TcpClient client = new TcpClient()) {
@@ -62,7 +62,7 @@ namespace Networking {
 			if (reply == null)
 				throw new Exception("BBRequest Error: Expected reply but recieved none");//Console.Error.WriteLine("BBRequest Error: Expected reply but recieved none");
 			else
-				return reply as BBMessage.Response;
+				return reply as BBResponse;
 		}
 
 		/// <summary>
@@ -87,8 +87,8 @@ namespace Networking {
 	/// Request object for communication between the BlottoBeats client and server.
 	/// </summary>
 	[SerializableAttribute]
-	public class BBMessage {
-		public BBMessageObject requestType { get; private set; }
+	public class BBRequest {
+		public Request requestType { get; private set; }
 
 		/// <summary>
 		/// Sends an upload request with a single song and either an upvote or a downvote.
@@ -100,8 +100,9 @@ namespace Networking {
 		/// </summary>
 		/// <param name="song">Song to upload</param>
 		/// <param name="upOrDownvote">Vote. True if an upvote, false otherwise.</param>
-		public BBMessage(int seed, SongParameters song, bool upOrDownvote, UserToken userInfo) {
-			requestType = new UpDownVote(seed, song, upOrDownvote, userInfo);
+		/// /// <param name="userInfo">The user authentication token</param>
+		public BBRequest(CompleteSongData song, bool upOrDownvote, UserToken userInfo) {
+			requestType = new UpDownVote(song, upOrDownvote, userInfo);
 		}
 
 		/// <summary>
@@ -110,8 +111,9 @@ namespace Networking {
 		/// The response will contain a single SongAndVoteData item with the song and it's score
 		/// </summary>
 		/// <param name="song">Song to check the score of</param>
-		public BBMessage(int seed, SongParameters song, UserToken userInfo) {
-			requestType = new RequestScore(seed, song, userInfo);
+		/// <param name="userInfo">The user authentication token</param>
+		public BBRequest(CompleteSongData song, UserToken userInfo) {
+			requestType = new RequestScore(song, userInfo);
 		}
 
 		/// <summary>
@@ -121,20 +123,16 @@ namespace Networking {
 		/// </summary>
 		/// <param name="parameters">Parameters to match</param>
 		/// <param name="numberOfSongs">Number of songs to return</param>
-		public BBMessage(SongParameters parameters, int numberOfSongs, UserToken userInfo) {
+		/// <param name="userInfo">The user authentication token</param>
+		public BBRequest(SongParameters parameters, int numberOfSongs, UserToken userInfo) {
 			requestType = new RequestSongs(parameters, numberOfSongs, userInfo);
 		}
-
-		/// <summary>
-		/// Base message class
-		/// </summary>
-		public class BBMessageObject { }
 
 		/// <summary>
 		/// Generic request object
 		/// </summary>
 		[SerializableAttribute]
-		public class Request : BBMessageObject {
+		public class Request {
 			public UserToken userInfo { get; private set; }
 
 			protected Request(UserToken userInfo) {
@@ -147,13 +145,11 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class UpDownVote : Request {
-			public SongParameters song { get; private set; }
-			public int seed { get; private set; }
+			public CompleteSongData song { get; private set; }
 			public bool vote { get; private set; }
 
-			public UpDownVote(int seed, SongParameters song, bool vote, UserToken userInfo) : base(userInfo) {
+			public UpDownVote(CompleteSongData song, bool vote, UserToken userInfo) : base(userInfo) {
 				this.song = song;
-				this.seed = seed;
 				this.vote = vote;
 			}
 		}
@@ -163,12 +159,10 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class RequestScore : Request {
-			public SongParameters song { get; private set; }
-			public int seed { get; private set; }
+			public CompleteSongData song { get; private set; }
 
-			public RequestScore(int seed, SongParameters song, UserToken userInfo) : base(userInfo) {
+			public RequestScore(CompleteSongData song, UserToken userInfo) : base(userInfo) {
 				this.song = song;
-				this.seed = seed;
 			}
 		}
 
@@ -185,9 +179,22 @@ namespace Networking {
 				this.num = num;
 			}
 		}
+	}
+
+	[SerializableAttribute]
+	public class BBResponse {
+		public Response responseType { get; private set; }
+
+		public BBResponse(CompleteSongData song) {
+			responseType = new ResponseSong(song);
+		}
+
+		public BBResponse(List<CompleteSongData> songs) {
+			responseType = new ResponseSongs(songs);
+		}
 
 		// Base Response class
-		public class Response : BBMessageObject { }
+		public class Response{ }
 
 		/// <summary>
 		/// Responds with a single song
