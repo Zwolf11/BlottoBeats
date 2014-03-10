@@ -12,13 +12,17 @@ namespace BlottoBeats
         public Label label;
         public TextBox text;
         public CheckBox checkbox;
+        private int minRand;
+        private int maxRand;
 
         public int Value { get { return int.Parse(text.Text); } }
 
-        public Setting(int pos, String name, Form parent, int size)
+        public Setting(int pos, String name, Form parent, int minRand, int maxRand, int size)
         {
             this.pos = pos;
             this.parent = parent;
+            this.minRand = minRand;
+            this.maxRand = maxRand;
             label = new Label();
             label.Text = name;
             label.BackColor = Color.Transparent;
@@ -27,6 +31,7 @@ namespace BlottoBeats
             checkbox = new CheckBox();
             checkbox.BackColor = Color.Transparent;
             checkbox.CheckedChanged += this.checkboxChanged;
+            checkbox.Checked = true;
             parent.Controls.Add(label);
             parent.Controls.Add(text);
             parent.Controls.Add(checkbox);
@@ -58,6 +63,12 @@ namespace BlottoBeats
         {
             CheckBox box = (CheckBox)sender;
             text.Enabled = !box.Checked;
+        }
+
+        public void randomize()
+        {
+            Random rand = new Random(DateTime.Now.Millisecond);
+            text.Text = "" + rand.Next(minRand, maxRand);
         }
     }
 }

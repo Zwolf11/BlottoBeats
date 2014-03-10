@@ -36,6 +36,7 @@ namespace BlottoBeats
         private Setting tempo;
         private Setting seed;
         private System.Windows.Forms.Timer timer;
+        private CompleteSongData curSong;
         private Generator generator;
         private BBServerConnection server;
 
@@ -92,8 +93,8 @@ namespace BlottoBeats
             lightOutline = new Pen(Color.FromArgb(130, 130, 130));
             lightOutline.Alignment = System.Drawing.Drawing2D.PenAlignment.Outset;
 
-            tempo = new Setting(0, "Tempo", this, size);
-            seed = new Setting(1, "Seed", this, size);
+            tempo = new Setting(0, "Tempo", this, 60, 200, size);
+            seed = new Setting(1, "Seed", this, int.MinValue, int.MaxValue, size);
             settings.Add(tempo);
             settings.Add(seed);
 
@@ -209,7 +210,7 @@ namespace BlottoBeats
             slider.Add(new Point(size / 8, 3 * size / 16));
             slider.Add(new Point(0, 3 * size / 8));
             slider.Add(new Point(-size / 8, 3 * size / 16));
-            sliderButton = new Button(slider, new Point((int)(progress * (257 * size / 64 - size) + size), size / 8), paleBlue, lightInline, null);
+            sliderButton = new Button(slider, new Point((int)(progress * (193 * size / 64) + size), size / 8), paleBlue, lightInline, null);
             sliderButton.Clicked += sliderClicked;
             buttons.Add(sliderButton);
 
@@ -261,39 +262,55 @@ namespace BlottoBeats
                 setting.init(size);
         }
 
-        private void playClicked(object sender, MouseEventArgs e)
-        {
-            if (playing == PLAYING)
-            {
-                playButton.img = playImg;
-                playing = PAUSED;
-                timer.Stop();
-            }
-            else if(playing == PAUSED)
-            {
-                if (songLoaded)
-                {
-                    playButton.img = pauseImg;
-                    playing = PLAYING;
-                    timer.Start();
-                }
-                else
-                {
-                    playButton.img = loadImg;
-                    playing = LOADING;
-                    generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"));
-                }
-            }
-
-            Invalidate();
-        }
-
         public void playSong()
         {
             playButton.img = pauseImg;
             playing = PLAYING;
             songLoaded = true;
+            curSong = new CompleteSongData(seed.Value, new SongParameters(tempo.Value, "Unknown"));
             timer.Start();
+        }
+
+        private void loadSong()
+        {
+            playButton.img = loadImg;
+            playing = LOADING;
+            foreach (Setting setting in settings)
+                if (setting.checkbox.Checked)
+                    setting.randomize();
+            generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"));
+        }
+
+        private void stopSong()
+        {
+            playButton.img = playImg;
+            playing = PAUSED;
+            timer.Stop();
+        }
+
+        private void resetPlayBar()
+        {
+            progress = 0;
+            sliderButton.loc.X = size;
+            score = 0;
+            songLoaded = false;
+        }
+
+        private void sendScore()
+        {
+            if (score > 0) new Thread(() => server.SendRequest(new BBRequest(curSong, true, null))).Start();
+            else if (score < 0) new Thread(() => server.SendRequest(new BBRequest(curSong, false, null))).Start();
+        }
+
+        private void playClicked(object sender, MouseEventArgs e)
+        {
+            if (playing == PLAYING)
+                stopSong();
+            else if (playing == PAUSED)
+            {
+                if (songLoaded) playSong();
+                else loadSong();
+            }
             Invalidate();
         }
 
@@ -302,51 +319,34 @@ namespace BlottoBeats
             if (e.X >= size)
             {
                 sliderButton.loc.X = e.X;
-                progress = 1.0 * (sliderButton.loc.X - size) / (257 * size / 64 - size);
+                progress = 1.0 * (sliderButton.loc.X - size) / (193 * size / 64);
                 Invalidate();
             }
         }
 
         private void backClicked(object sender, MouseEventArgs e)
         {
-            progress = 0;
-            sliderButton.loc.X = size;
-            score = 0;
-            playing = PLAYING;
-            playButton.img = pauseImg;
-            if(!timer.Enabled) timer.Start();
+            sendScore();
+            resetPlayBar();
+            loadSong();
         }
 
         private void nextClicked(object sender, MouseEventArgs e)
         {
-            progress = 0;
-            sliderButton.loc.X = size;
-            score = 0;
-            playing = LOADING;
-            playButton.img = loadImg;
-            if (timer.Enabled) timer.Stop();
-            generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"));
+            sendScore();
+            resetPlayBar();
+            loadSong();
         }
 
         private void upvoteClicked(object sender, MouseEventArgs e)
         {
             score = score == 1 ? 0 : 1;
-
-			// Songs are now encapsulated in CompleteSongData objects
-			CompleteSongData song = new CompleteSongData(seed.Value, new SongParameters(tempo.Value, "Unknown"));
-
-            if (score > 0) new Thread(() => server.SendRequest(new BBRequest(song, true, null))).Start();
             Invalidate();
         }
 
         private void downvoteClicked(object sender, MouseEventArgs e)
         {
             score = score == -1 ? 0 : -1;
-			
-			// Songs are now encapsulated in CompleteSongData objects
-			CompleteSongData song = new CompleteSongData(seed.Value, new SongParameters(tempo.Value, "Unknown"));
-
-			if (score > 0) new Thread(() => server.SendRequest(new BBRequest(song, true, null))).Start();
             Invalidate();
         }
 
@@ -374,6 +374,7 @@ namespace BlottoBeats
 
         private void exitClicked(object sender, MouseEventArgs e)
         {
+            sendScore();
             this.Close();
         }
 
@@ -400,7 +401,7 @@ namespace BlottoBeats
 
         private void undragSlider(object sender, MouseEventArgs e)
         {
-            progress = 1.0 * (sliderButton.loc.X - size) / (257 * size / 64 - size);
+            progress = 1.0 * (sliderButton.loc.X - size) / (193 * size / 64);
             this.MouseMove -= dragSlider;
             this.MouseUp -= undragSlider;
             this.MouseUp += this.mouseUp;
@@ -411,11 +412,11 @@ namespace BlottoBeats
         {
             this.MouseMove -= this.mouseMove;
 
-            if(!dragging)
-                foreach (Button button in buttons)
-                    if (pointInPolygon(e.Location, button.ClickLocation))
+            if (!dragging)
+                for (int i = buttons.Count - 1; i >= 0; i--)
+                    if (pointInPolygon(e.Location, buttons[i].ClickLocation))
                     {
-                        button.onClicked(e);
+                        buttons[i].onClicked(e);
                         break;
                     }
 
@@ -455,25 +456,14 @@ namespace BlottoBeats
             if (progress < 1)
             {
                 progress += 0.01 / songLen;
-                sliderButton.loc.X = (int)(progress * (257 * size / 64 - size) + size);
+                sliderButton.loc.X = (int)(progress * (193 * size / 64) + size);
             }
             else
             {
-                progress = 0;
-                sliderButton.loc.X = size;
-                score = 0;
-                if (!autoPlay)
-                {
-                    playing = PAUSED;
-                    playButton.img = playImg;
-                }
-                else
-                {
-                    playing = LOADING;
-                    playButton.img = loadImg;
-                    generator.generate(seed.Value, new SongParameters(tempo.Value, "Unknown"));
-                }
-                timer.Stop();
+                sendScore();
+                resetPlayBar();
+                if (autoPlay) loadSong();
+                else stopSong();
             }
             Invalidate();
         }
