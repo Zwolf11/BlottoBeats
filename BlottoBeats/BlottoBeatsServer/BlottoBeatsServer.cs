@@ -113,16 +113,25 @@ namespace BlottoBeatsServer {
 					AuthRequest req = message as AuthRequest;
 					Log("Recieved an authentication request", address, 1);
 
-					Log("    Username: " + req.credentials.username, address, 3);
+					UserToken token;
+					if (req.register) {
+						Log("    Registering New User: " + req.credentials.username, address, 2);
+						
+						token = database.Authenticate(req.credentials, true);
+						if (token != null)
+							Log("    Registration Successful", address, 2);
+						else
+							Log("    Registration Failed", address, 2);
+					} else {
+						Log("    Authenticating User: " + req.credentials.username, address, 2);
 					
-					// TODO: Finish this
-					// currently returns a newly-generated and completely arbitrary user token
-					UserToken token = database.Authenticate(req.credentials);
+						token = database.Authenticate(req.credentials, false);
+						if (token != null)
+							Log("    Authentication Successful", address, 2);
+						else
+							Log("    Authentication Failed", address, 2);
+					}
 
-					if (token != null)
-						Log("Authentication Successful", address, 1);
-					else
-						Log("Authentication Failed", address, 1);
 					Message.Send(networkStream, new AuthResponse(token));
 					
 				} else if (message is BBRequest) {
@@ -131,54 +140,70 @@ namespace BlottoBeatsServer {
 					BBRequest bbmessage = message as BBRequest;
 					Log("Received a " + bbmessage.requestType + " request", address, 1);
 
-					if (bbmessage.requestType is BBRequest.UpDownVote) {
-
-						// Upload and vote on a song
-						BBRequest.UpDownVote req = bbmessage.requestType as BBRequest.UpDownVote;
-
-						Log("    " + (req.vote ? "Upvote" : "Downvote") + " Request", address, 2);
-						Log("        ID: " + req.song.param.ID, address, 3);
-						Log("     Genre: " + req.song.param.genre, address, 3);
-						Log("     Tempo: " + req.song.param.tempo, address, 3);
-						Log("      Seed: " + req.song.seed, address, 3);
-
-						CompleteSongData song = database.VoteOnSong(req.song.seed, req.song.param, req.vote);
-						Message.Send(networkStream, new BBResponse(song));
-						
-						Log("    Response has ID of " + song.param.ID + " and score of " + song.score, address, 2);
-
-					} else if (bbmessage.requestType is BBRequest.RequestScore) {
-
-						// Request the score of a song
-						BBRequest.RequestScore req = bbmessage.requestType as BBRequest.RequestScore;
-
-						Log("        ID: " + req.song.param.ID, address, 3);
-						Log("     Genre: " + req.song.param.genre, address, 3);
-						Log("     Tempo: " + req.song.param.tempo, address, 3);
-						Log("      Seed: " + req.song.seed, address, 3);
-
-						CompleteSongData song = database.GetSongScore(req.song.seed, req.song.param);
-						Message.Send(networkStream, new BBResponse(song));
-
-						Log("    Response has ID of " + song.param.ID + " and score of " + song.score, address, 2);
-
-					} else if (bbmessage.requestType is BBRequest.RequestSongs) {
-
-						// Request a list of songs
-						BBRequest.RequestSongs req = bbmessage.requestType as BBRequest.RequestSongs;
-
-						List<CompleteSongData> songList = database.GetSongList(req.parameters, req.num);
-						Message.Send(networkStream, new BBResponse(songList));
-
-						Log("    Returned " + songList.Count + " songs", address, 2);
-
+					// Authenticate the user
+					int userID;
+					if (bbmessage.requestType.userToken == null) {
+						Log("    No user supplied.  Processing as anonymous.", address, 2);
+						userID = -1;
 					} else {
-						Log("ERROR: Unknown BBRequest type '" + bbmessage.GetType() + "'", address, 0);
+						Log("    Username: " + bbmessage.requestType.userToken.username, address, 2);
+						userID = database.VerifyToken(bbmessage.requestType.userToken);
 					}
+					
+					if (userID == 0) {
+						Log("    User Authentication failed", address, 1);
+						Message.Send(networkStream, new BBResponse());
+					} else {
+						if (bbmessage.requestType is BBRequest.UpDownVote) {
 
+							// Upload and vote on a song
+							BBRequest.UpDownVote req = bbmessage.requestType as BBRequest.UpDownVote;
+
+							Log("    " + (req.vote ? "Upvote" : "Downvote") + " Request", address, 2);
+							Log("        ID: " + req.song.param.ID, address, 3);
+							Log("     Genre: " + req.song.param.genre, address, 3);
+							Log("     Tempo: " + req.song.param.tempo, address, 3);
+							Log("      Seed: " + req.song.seed, address, 3);
+
+							CompleteSongData song = database.VoteOnSong(req.song.seed, req.song.param, req.vote);
+							Message.Send(networkStream, new BBResponse(song));
+
+							Log("    Response has ID of " + song.param.ID + " and score of " + song.score, address, 2);
+
+						} else if (bbmessage.requestType is BBRequest.RequestScore) {
+
+							// Request the score of a song
+							BBRequest.RequestScore req = bbmessage.requestType as BBRequest.RequestScore;
+
+							Log("        ID: " + req.song.param.ID, address, 3);
+							Log("     Genre: " + req.song.param.genre, address, 3);
+							Log("     Tempo: " + req.song.param.tempo, address, 3);
+							Log("      Seed: " + req.song.seed, address, 3);
+
+							CompleteSongData song = database.GetSongScore(req.song.seed, req.song.param);
+							Message.Send(networkStream, new BBResponse(song));
+
+							Log("    Response has ID of " + song.param.ID + " and score of " + song.score, address, 2);
+
+						} else if (bbmessage.requestType is BBRequest.RequestSongs) {
+
+							// Request a list of songs
+							BBRequest.RequestSongs req = bbmessage.requestType as BBRequest.RequestSongs;
+
+							List<CompleteSongData> songList = database.GetSongList(req.parameters, req.num);
+							Message.Send(networkStream, new BBResponse(songList));
+
+							Log("    Returned " + songList.Count + " songs", address, 2);
+
+						} else {
+							Log("ERROR: Unknown BBRequest type '" + bbmessage.GetType() + "'", address, 0);
+						}
+					}
 				} else {
+
 					Log("ERROR: Unknown request type '" + message.GetType() + "'", address, 0);
 					Log("    MORE INFO: " + message.ToString(), address, 0);
+
 				}
 
 				message = Message.Recieve(networkStream);

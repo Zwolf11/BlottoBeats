@@ -75,27 +75,50 @@ namespace BlottoBeatsServer {
 			return list;
 		}
 
+
 		/// <summary>
-		/// Attemts to authenticate a user with the given credentials
+		/// Attemts to register a new user or authenticate an existing user with the given credentials
 		/// </summary>
 		/// <param name="credentials">User credentials to authenticate</param>
+		/// <param name="register">True if registering a new user, false otherwise</param>
 		/// <returns>UserToken if successful, null otherwise</returns>
-		internal UserToken Authenticate(Credentials credentials) {
-			string hash = getUserHash(credentials.username);
-
-			if (hash != null && credentials.Verify(hash)) {
-				// Credentials were valid.  Generate a new authentication token.
-				DateTime expiry = UserToken.GetExpiration();
-				string token = UserToken.GenerateToken();
-
-				if (storeUserToken(credentials.username, expiry, token))
-					return new UserToken(credentials.username, expiry, token);
+		internal UserToken Authenticate(Credentials credentials, bool register) {
+			int userID;
+			if (register) {
+				// Register a new user
+				if (createUser(credentials.username, credentials.GenerateHash()))
+					userID = getUserID(credentials.username); // User was created
 				else
-					return null;
+					return null; // User was not created
 			} else {
-				// Credentials were invalid.  Return null.
-				return null;
+				userID = getUserID(credentials.username);
+				string hash = getUserHash(userID);
+
+				if (hash != null && !credentials.Verify(hash))
+					return null; // Credentials were invalid
 			}
+
+			// Generate a new authentication token.
+			DateTime expiry = UserToken.GetExpiration();
+			string token = UserToken.GenerateToken();
+
+			storeUserToken(userID, expiry, token);
+			return new UserToken(credentials.username, expiry, token);
+		}
+
+		/// <summary>
+		/// Verifies a user token
+		/// </summary>
+		/// <param name="tokenToVerify">The token to verify</param>
+		/// <returns>The ID of the user if authentication was successful, 0 otherwise</returns>
+		internal int VerifyToken(UserToken tokenToVerify) {
+			int userID = getUserID(tokenToVerify.username);
+			UserToken userToken = getUserToken(userID);
+
+			if (userToken.Verify(tokenToVerify))
+				return userID;
+			else
+				return 0;
 		}
 
 		/// <summary>
@@ -198,16 +221,49 @@ namespace BlottoBeatsServer {
 			return item;
 		}
 
-		private string getUserHash(string username) {
+		private bool createUser(string username, string hash) {
 			// TODO: Joe, write this method
+			// The user needs these fields:
+			//   User ID (int)
+			//   Username (string)
+			//   Password Hash (string)
+			//   Token Expiry Date (DateTime object - can be converted to a string or whatever, as long as it's recoverable)
+			//   Token String (string)
+			// The token expiry date and string should both start null
+
+			// This function should check to see if the username is already in use.
+			// If so, it should not create a new entry in the table, and the function should return false.
+			// If the username is not already in use, it should create a new entry in the user table and return true.
+			return false;
+		}
+
+		private int getUserID(string username) {
+			// TODO: Joe, write this method
+			// This function should return the ID of a user based on the username if they exist in the table, and 0 otherwise.
+
+			return 0;
+		}
+
+		private string getUserHash(int userID) {
+			// TODO: Joe, write this method
+			// This function should get the password hash of the specified user.
 
 			return null;
 		}
 
-		private bool storeUserToken(string username, DateTime expires, string token) {
+		private void storeUserToken(int userID, DateTime expires, string token) {
 			// TODO: Joe, write this method
+			// This function should store both the expires date and the token string in the specified user's entry
+		}
 
-			return false;
+		private UserToken getUserToken(int userID) {
+			// TODO: Joe, write this method
+			// This function should return a UserToken object with the username, expiry date, and token string initialized with the values in the user's entry
+
+			string username = null;
+			DateTime expires = new DateTime();
+			string token = null;
+			return new UserToken(username, expires, token);
 		}
 	}
 }

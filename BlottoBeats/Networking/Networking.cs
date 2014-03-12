@@ -32,11 +32,11 @@ namespace Networking {
 		/// Sends an authentication request to the server.  Returns a UserToken
 		/// object if successful, or null otherwise.
 		/// </summary>
-		/// <param name="username">Username to send</param>
-		/// <param name="password">Passoword to send</param>
+		/// <param name="credentials">Credentials object that contains the username and password of the user.</param>
+		/// <param name="register">True if registering a new user, false if verifying a current one.</param>
 		/// <returns>UserToken if successful, null otherwise</returns>
-		public UserToken Authenticate(Credentials credentials) {
-			AuthRequest request = new AuthRequest(credentials);
+		public UserToken Authenticate(Credentials credentials, bool register) {
+			AuthRequest request = new AuthRequest(credentials, register);
 			object reply;
 
 			using (TcpClient client = new TcpClient()) {
@@ -112,7 +112,7 @@ namespace Networking {
 		/// </summary>
 		/// <param name="song">Song to upload</param>
 		/// <param name="upOrDownvote">Vote. True if an upvote, false otherwise.</param>
-		/// /// <param name="userInfo">The user authentication token</param>
+		/// <param name="userInfo">The user authentication token</param>
 		public BBRequest(CompleteSongData song, bool upOrDownvote, UserToken userInfo) {
 			requestType = new UpDownVote(song, upOrDownvote, userInfo);
 		}
@@ -145,10 +145,10 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class Request {
-			public UserToken userInfo { get; private set; }
+			public UserToken userToken { get; private set; }
 
 			protected Request(UserToken userInfo) {
-				this.userInfo = userInfo;
+				this.userToken = userInfo;
 			}
 		}
 
@@ -200,25 +200,39 @@ namespace Networking {
 	public class BBResponse {
 		public Response responseType { get; private set; }
 
+		public BBResponse() {
+			responseType = new AuthFailed();
+		}
+
 		public BBResponse(CompleteSongData song) {
-			responseType = new ResponseSong(song);
+			responseType = new SingleSong(song);
 		}
 
 		public BBResponse(List<CompleteSongData> songs) {
-			responseType = new ResponseSongs(songs);
+			responseType = new SongList(songs);
 		}
 
-		// Base Response class
-		public class Response{ }
+		
+		/// <summary>
+		/// Base Response class
+		/// </summary>
+		[SerializableAttribute]
+		public class Response { }
+
+		/// <summary>
+		/// Response for a failed authentication
+		/// </summary>
+		[SerializableAttribute]
+		public class AuthFailed : Response { }
 
 		/// <summary>
 		/// Responds with a single song
 		/// </summary>
 		[SerializableAttribute]
-		public class ResponseSong : Response {
+		public class SingleSong : Response {
 			public CompleteSongData song { get; private set; }
 
-			public ResponseSong(CompleteSongData song) {
+			public SingleSong(CompleteSongData song) {
 				this.song = song;
 			}
 		}
@@ -227,23 +241,30 @@ namespace Networking {
 		/// Responds with a list of songs
 		/// </summary>
 		[SerializableAttribute]
-		public class ResponseSongs : Response {
+		public class SongList : Response {
 			public List<CompleteSongData> songs { get; private set; }
 
-			public ResponseSongs(List<CompleteSongData> songs) {
+			public SongList(List<CompleteSongData> songs) {
 				this.songs = songs;
 			}
 		}
 	}
 
 	/// <summary>
-	/// Request from the client to the server for an authentication token
+	/// Request from the client to the server to register a new user, or authenticate an existing one.
 	/// </summary>
 	public class AuthRequest {
 		public Credentials credentials { get; private set; }
+		public bool register;
 
-		public AuthRequest(Credentials credentials) {
+		/// <summary>
+		/// Sends an authentication request to the server.
+		/// </summary>
+		/// <param name="credentials">The credentials to use</param>
+		/// <param name="register">True if registering a new user</param>
+		public AuthRequest(Credentials credentials, bool register) {
 			this.credentials = credentials;
+			this.register = register;
 		}
 	}
 
