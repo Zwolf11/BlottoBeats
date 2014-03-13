@@ -1296,9 +1296,9 @@ namespace BlottoBeats
 
 
             MidiOut.MidiOut outgoing = new MidiOut.MidiOut();
-            outgoing.outputToMidi(output);
+            double songLen = outgoing.outputToMidi(output);
 
-            form.playSong();
+            form.songDoneLoading(songLen);
         }
 
 
