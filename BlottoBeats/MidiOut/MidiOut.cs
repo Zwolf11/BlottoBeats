@@ -463,10 +463,11 @@ namespace MidiOut
                         //Increment MIDI channel by 1
                         c += 1;
                         builder.MidiChannel = c;
-                        songLen += item.length / 16;
+                        
                     }//endforeach
                     /*Tick position increment; This will be based on the last note of the previous chord, but I think it's safe to assume that its length will be the same as the rest of the chord tones of that chord.
                      PpqnClock.PpqnMinValue is the minimum PPQ value (24) set by the class library PpqnClock.*/
+                    songLen += len / 4;
                     pos += (PpqnClock.PpqnMinValue / 4 * len);
                     c = 1;
                     builder.MidiChannel = c;
@@ -870,7 +871,7 @@ namespace MidiOut
                         //Increment MIDI channel by 1
                         c += 1;
                         builder.MidiChannel = c;
-                        songLen += item.length / 16;
+                        //songLen += item.length / 16;
                     }//endforeach
                     
                 }//endfor
@@ -887,7 +888,7 @@ namespace MidiOut
             }
 
             sequence.Save(@"C:\BlottoBeats\temp.mid");
-            return songLen / output.Tempo * 60;
+            return ((double) pos)/(PpqnClock.PpqnMinValue / 4)/4 / output.Tempo * 60;
 
             //Code to play sequence in client. Currently not functioning
             //s.Sequence = sequence;  
