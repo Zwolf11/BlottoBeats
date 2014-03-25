@@ -105,21 +105,6 @@ namespace BlottoBeats
                 setting.setVisible(menuDropped);
 
             initButtons();
-            initAdvMenuButton();
-        }
-
-        private void initAdvMenuButton()
-        {
-            List<Point> buttonShape = new List<Point>();
-            buttonShape.Add(new Point(0, 0));
-            buttonShape.Add(new Point(3 * size / 4, 0));
-            buttonShape.Add(new Point(3 * size / 4, size / 4));
-            buttonShape.Add(new Point(0, size / 4));
-
-            List<Point> advSetImg = new List<Point>();
-            advSettingButton = new Button(buttonShape, new Point(22 * size / 8, 20 * size / 8), darkGrey, lightOutline, advSetImg);
-            advSettingButton.Clicked += advSettingClicked;
-            buttons.Add(advSettingButton);
         }
 
         private void initButtons()
@@ -222,6 +207,17 @@ namespace BlottoBeats
             Button settingsButton = new Button(menuButton, new Point(5 * size / 2 + 3 * size / 4, size / 2), darkGrey, lightOutline, settingsImg);
             settingsButton.Clicked += settingsClicked;
             buttons.Add(settingsButton);
+
+            List<Point> buttonShape = new List<Point>();
+            buttonShape.Add(new Point(0, 0));
+            buttonShape.Add(new Point(3 * size / 4, 0));
+            buttonShape.Add(new Point(3 * size / 4, size / 4));
+            buttonShape.Add(new Point(0, size / 4));
+
+            List<Point> advSetImg = new List<Point>();
+            advSettingButton = new Button(buttonShape, new Point(22 * size / 8, 20 * size / 8), darkGrey, lightOutline, advSetImg);
+            advSettingButton.Clicked += advSettingClicked;
+            buttons.Add(advSettingButton);
 
             List<Point> slider = new List<Point>();
             slider.Add(new Point(0, 0));
