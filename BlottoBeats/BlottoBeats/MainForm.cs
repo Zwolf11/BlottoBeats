@@ -489,6 +489,7 @@ namespace BlottoBeats
                 size--;
 
             initButtons();
+            initAdvMenuButton();
             Invalidate();
         }
 
