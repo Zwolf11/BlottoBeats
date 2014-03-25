@@ -26,19 +26,24 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		/// <param name="song">The song object to vote on</param>
 		/// <param name="vote">The vote. True if upvote, false if downvote.</param>
-		internal CompleteSongData VoteOnSong(int seed, SongParameters song, bool vote) {
-			if (song.ID == -1) song.ID = GetID(seed, song);	// Song has no ID.  Search the server
+		internal SongParameters VoteOnSong(SongParameters song, bool vote) {
+			if (song.ID == -1) song.ID = GetID(song);	// Song has no ID.  Search the server
 			if (song.ID == -1) {
 				// Song is not in the database.  Insert it into the database.
 				song.ID = nextID;
+				song.score = (vote) ? 1 : -1;
+				insertData(song);
 				nextID = GetNextAvailableID(nextID);
-				insertData(seed, song, (vote) ? 1 : -1);
-				return new CompleteSongData(seed, song, (vote) ? 1 : -1);
 			} else {
 				updateScore(song.ID, vote);
-				int score = (int)returnItem(song.ID, "voteScore");
-				return new CompleteSongData(seed, song, score);
+				object score = returnItem(song.ID, "voteScore");
+				if (score != null && score is int)
+					song.score = (int)score;
+				else
+					throw new Exception("Database Error: Invalid data type returned");
 			}
+
+			return song;
 		}
 
 		/// <summary>
@@ -47,18 +52,20 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		/// <param name="song">Song to check the score of</param>
 		/// <returns>A SongAndVoteData item containing the song and it's score</returns>
-		internal CompleteSongData GetSongScore(int seed, SongParameters song) {
-			if (song.ID == -1) song.ID = GetID(seed, song);	// Song has no ID.  Search the server
+		internal SongParameters GetSongScore(SongParameters song) {
+			if (song.ID == -1) song.ID = GetID(song);	// Song has no ID.  Search the server
 			if (song.ID == -1) {
 				// Song is not in the database. Return score of 0.
-				return new CompleteSongData(seed, song, 0);
+				song.score = 0;
 			} else {
 				object score = returnItem(song.ID, "voteScore");
 				if (score != null && score is int)
-					return new CompleteSongData(seed, song, (int)score);
+					song.score = (int)score;
 				else
-					return new CompleteSongData(seed, song, 0);
+					throw new Exception("Database Error: Invalid data type returned");
 			}
+
+			return song;
 		}
 
 		/// <summary>
@@ -67,8 +74,8 @@ namespace BlottoBeatsServer {
 		/// <param name="songParameters">The parameters to match</param>
 		/// <param name="numSongs">The maximum number of songs to return</param>
 		/// <returns>The list of songs</returns>
-		internal List<CompleteSongData> GetSongList(SongParameters songParameters, int numSongs) {
-			List<CompleteSongData> list = new List<CompleteSongData>();
+		internal List<SongParameters> GetSongList(SongParameters songParameters, int numSongs) {
+			List<SongParameters> list = new List<SongParameters>();
 
 			// TODO: Implement
 
@@ -127,10 +134,10 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		/// <param name="song">Song to search the database for</param>
 		/// <returns>ID of the song on the server</returns>
-		private int GetID(int seed, SongParameters song) {
+		private int GetID(SongParameters song) {
 			MySqlConnection conn = new MySqlConnection(connString);
 			MySqlCommand command = conn.CreateCommand();
-			command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + song.genre + "%' and songseed like '%" + seed + "%' and tempo like '%" + song.tempo + "%'";
+			command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + song.genre + "%' and songseed like '%" + song.seed + "%' and tempo like '%" + song.tempo + "%'";
 			int returnId = -1;
 			try {
 				conn.Open();
@@ -162,10 +169,10 @@ namespace BlottoBeatsServer {
 			return testId;
 		}
 
-		private void insertData(int seed, SongParameters song, int score) {
+		private void insertData(SongParameters song) {
 			MySqlConnection conn = new MySqlConnection(connString);
 			MySqlCommand command = conn.CreateCommand();
-			command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,tempo,voteScore) values('" + song.ID + "','" + song.genre + "','" + seed + "','" + song.tempo + "','" + score + "')";
+			command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,tempo,voteScore) values('" + song.ID + "','" + song.genre + "','" + song.seed + "','" + song.tempo + "','" + song.score + "')";
 
 			try {
 				conn.Open();

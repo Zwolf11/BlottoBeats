@@ -108,23 +108,23 @@ namespace Networking {
 		/// add the vote to it, otherwise it will add the song to the server and save it
 		/// with the vote.
 		/// 
-		/// The response will contain a single SongAndVoteData item with the song and it's score
+		/// The response will contain a single SongParameters item with the song and it's score
 		/// </summary>
 		/// <param name="song">Song to upload</param>
 		/// <param name="upOrDownvote">Vote. True if an upvote, false otherwise.</param>
 		/// <param name="userInfo">The user authentication token</param>
-		public BBRequest(CompleteSongData song, bool upOrDownvote, UserToken userInfo) {
+		public BBRequest(SongParameters song, bool upOrDownvote, UserToken userInfo) {
 			requestType = new UpDownVote(song, upOrDownvote, userInfo);
 		}
 
 		/// <summary>
 		/// Sends a request for the score of a single song.
 		/// 
-		/// The response will contain a single SongAndVoteData item with the song and it's score
+		/// The response will contain a single SongParameters item with the song and it's score
 		/// </summary>
 		/// <param name="song">Song to check the score of</param>
 		/// <param name="userInfo">The user authentication token</param>
-		public BBRequest(CompleteSongData song, UserToken userInfo) {
+		public BBRequest(SongParameters song, UserToken userInfo) {
 			requestType = new RequestScore(song, userInfo);
 		}
 
@@ -157,10 +157,10 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class UpDownVote : Request {
-			public CompleteSongData song { get; private set; }
+			public SongParameters song { get; private set; }
 			public bool vote { get; private set; }
 
-			public UpDownVote(CompleteSongData song, bool vote, UserToken userInfo) : base(userInfo) {
+			public UpDownVote(SongParameters song, bool vote, UserToken userInfo) : base(userInfo) {
 				this.song = song;
 				this.vote = vote;
 			}
@@ -171,9 +171,9 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class RequestScore : Request {
-			public CompleteSongData song { get; private set; }
+			public SongParameters song { get; private set; }
 
-			public RequestScore(CompleteSongData song, UserToken userInfo) : base(userInfo) {
+			public RequestScore(SongParameters song, UserToken userInfo) : base(userInfo) {
 				this.song = song;
 			}
 		}
@@ -204,11 +204,11 @@ namespace Networking {
 			responseType = new AuthFailed();
 		}
 
-		public BBResponse(CompleteSongData song) {
+		public BBResponse(SongParameters song) {
 			responseType = new SingleSong(song);
 		}
 
-		public BBResponse(List<CompleteSongData> songs) {
+		public BBResponse(List<SongParameters> songs) {
 			responseType = new SongList(songs);
 		}
 
@@ -230,9 +230,9 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class SingleSong : Response {
-			public CompleteSongData song { get; private set; }
+			public SongParameters song { get; private set; }
 
-			public SingleSong(CompleteSongData song) {
+			public SingleSong(SongParameters song) {
 				this.song = song;
 			}
 		}
@@ -242,9 +242,9 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class SongList : Response {
-			public List<CompleteSongData> songs { get; private set; }
+			public List<SongParameters> songs { get; private set; }
 
-			public SongList(List<CompleteSongData> songs) {
+			public SongList(List<SongParameters> songs) {
 				this.songs = songs;
 			}
 		}

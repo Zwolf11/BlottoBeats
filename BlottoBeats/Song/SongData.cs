@@ -86,57 +86,44 @@ namespace SongData {
     }
 
 	/// <summary>
-	/// TODO - MICHAEL/AUSTIN: Documentation
+	/// Contains a all the information required to construct a song.
 	/// </summary>
 	[SerializableAttribute]
 	public class SongParameters {
 		public int ID { get; set; }		// Used to index the songs on the server.  Newly generated songs should have an ID of -1.
-        public int tempo { get; set; }
+		public int seed { get; set; }
+		public int tempo { get; set; }
         public string genre { get; set; }
+		public int score { get; set; }
 
 		/// <summary>
-		/// Generates a SongParameters object with a default ID of -1
+		/// Creates a new SongParameters object with a default ID of -1 and a score of 0
 		/// </summary>
+		/// <param name="seed">Seed of the song</param>
 		/// <param name="tempo">Tempo of the song</param>
 		/// <param name="genre">Genre of the song</param>
-		public SongParameters(int tempo, string genre) {
+		public SongParameters(int seed, int tempo, string genre) {
 			this.ID = -1;
+			this.score = 0; 
+			this.seed = seed;
 			this.tempo = tempo;
 			this.genre = genre;
 		}
 
 		/// <summary>
-		/// Generates a SongParameters object with a given ID
+		/// Constructs a SongParameters object with the given data
 		/// </summary>
 		/// <param name="ID">ID of the song</param>
+		/// <param name="score">Score of the song</param>
+		/// <param name="seed">Seed of the song</param>
 		/// <param name="tempo">Tempo of the song</param>
 		/// <param name="genre">Genre of the song</param>
-		public SongParameters(int ID, int tempo, string genre) {
+		public SongParameters(int ID, int score, int seed, int tempo, string genre) {
 			this.ID = ID;
+			this.score = score; 
+			this.seed = seed;
 			this.tempo = tempo;
 			this.genre = genre;
-		}
-	}
-
-	/// <summary>
-	/// Contains a all the information required to construct a song.
-	/// </summary>
-	[SerializableAttribute]
-	public class CompleteSongData {
-		public int seed { get; private set; }
-		public SongParameters param { get; private set; }
-		public int score { get; private set; }
-
-		public CompleteSongData(int seed, SongParameters song) {
-			this.seed = seed;
-			this.param = song;
-			this.score = 0;
-		}
-
-		public CompleteSongData(int seed, SongParameters song, int score) {
-			this.seed = seed;
-			this.param = song;
-			this.score = score;
 		}
 	}
 }

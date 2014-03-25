@@ -37,7 +37,7 @@ namespace BlottoBeats
         private Setting tempo;
         private Setting seed;
         private System.Windows.Forms.Timer timer;
-        private CompleteSongData curSong;
+        private SongParameters curSong;
         private Generator generator;
         private BBServerConnection server;
         private MediaPlayer.MediaPlayer player;
@@ -307,8 +307,8 @@ namespace BlottoBeats
             foreach (Setting setting in settings)
                 if (setting.checkbox.Checked)
                     setting.randomize();
-            curSong = new CompleteSongData(seed.Value, new SongParameters(tempo.Value, "Unknown"));
-            generator.generate(curSong.seed, curSong.param);
+            curSong = new SongParameters(seed.Value, tempo.Value, "Unknown");
+            generator.generate(curSong);
         }
 
         private void stopSong()

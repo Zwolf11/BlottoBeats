@@ -35,9 +35,9 @@ namespace BlottoBeats
 
         //NOTE: CURRENTLY ASSUMING VALID/NON-NULL INPUT!!!!! (will crash with invalid input) 
         //TODO (soon, but not priority) check for validity of input
-        public void generate(int seed, SongParameters paramets)
+        public void generate(SongParameters paramets)
         {
-            Random randomizer = new Random(seed);
+            Random randomizer = new Random(paramets.seed);
             int mode; // 0 = Major 1 = Minor
             String key;
             String timeSigPattern = ""; //Simple or Compound Meter

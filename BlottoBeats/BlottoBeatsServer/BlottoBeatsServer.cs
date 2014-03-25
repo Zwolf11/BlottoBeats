@@ -24,8 +24,8 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		public static void Main() {
 			// Create a new server that listens on port 3000;
-			Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log", 3);
-			//Server server = new Server(3000, new Database("Server=68.234.146.20;Port=3001;Database=songdatabase;Uid=BlottoServer;password=JJLrDtcrfvjym8gh1zUVklF19KDf1CTM;"), "server.log", 3);
+			//Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log", 3);
+			Server server = new Server(3000, new Database("Server=68.234.183.70;Port=3001;Database=songdatabase;Uid=BlottoServer;password=JJLrDtcrfvjym8gh1zUVklF19KDf1CTM;"), "server.log", 3);
 
 			// Checks the state of the server every 5 seconds
 			// If the server thread has died, restart it
@@ -160,37 +160,37 @@ namespace BlottoBeatsServer {
 							BBRequest.UpDownVote req = bbmessage.requestType as BBRequest.UpDownVote;
 
 							Log("    " + (req.vote ? "Upvote" : "Downvote") + " Request", address, 2);
-							Log("        ID: " + req.song.param.ID, address, 3);
-							Log("     Genre: " + req.song.param.genre, address, 3);
-							Log("     Tempo: " + req.song.param.tempo, address, 3);
+							Log("        ID: " + req.song.ID, address, 3);
+							Log("     Genre: " + req.song.genre, address, 3);
+							Log("     Tempo: " + req.song.tempo, address, 3);
 							Log("      Seed: " + req.song.seed, address, 3);
 
-							CompleteSongData song = database.VoteOnSong(req.song.seed, req.song.param, req.vote);
+							SongParameters song = database.VoteOnSong(req.song, req.vote);
 							Message.Send(networkStream, new BBResponse(song));
 
-							Log("    Response has ID of " + song.param.ID + " and score of " + song.score, address, 2);
+							Log("    Response has ID of " + song.ID + " and score of " + song.score, address, 2);
 
 						} else if (bbmessage.requestType is BBRequest.RequestScore) {
 
 							// Request the score of a song
 							BBRequest.RequestScore req = bbmessage.requestType as BBRequest.RequestScore;
 
-							Log("        ID: " + req.song.param.ID, address, 3);
-							Log("     Genre: " + req.song.param.genre, address, 3);
-							Log("     Tempo: " + req.song.param.tempo, address, 3);
+							Log("        ID: " + req.song.ID, address, 3);
+							Log("     Genre: " + req.song.genre, address, 3);
+							Log("     Tempo: " + req.song.tempo, address, 3);
 							Log("      Seed: " + req.song.seed, address, 3);
 
-							CompleteSongData song = database.GetSongScore(req.song.seed, req.song.param);
+							SongParameters song = database.GetSongScore(req.song);
 							Message.Send(networkStream, new BBResponse(song));
 
-							Log("    Response has ID of " + song.param.ID + " and score of " + song.score, address, 2);
+							Log("    Response has ID of " + song.ID + " and score of " + song.score, address, 2);
 
 						} else if (bbmessage.requestType is BBRequest.RequestSongs) {
 
 							// Request a list of songs
 							BBRequest.RequestSongs req = bbmessage.requestType as BBRequest.RequestSongs;
 
-							List<CompleteSongData> songList = database.GetSongList(req.parameters, req.num);
+							List<SongParameters> songList = database.GetSongList(req.parameters, req.num);
 							Message.Send(networkStream, new BBResponse(songList));
 
 							Log("    Returned " + songList.Count + " songs", address, 2);
