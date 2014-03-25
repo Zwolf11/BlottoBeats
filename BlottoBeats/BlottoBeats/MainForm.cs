@@ -24,6 +24,7 @@ namespace BlottoBeats
         private List<Point> pauseImg;
         private List<Point> loadImg;
         private Button playBarButton;
+        private Button advSettingButton;
         private Point dragPos;
         private bool dragging;
         private int playing;
@@ -104,6 +105,21 @@ namespace BlottoBeats
                 setting.setVisible(menuDropped);
 
             initButtons();
+            initAdvMenuButton();
+        }
+
+        private void initAdvMenuButton()
+        {
+            List<Point> buttonShape = new List<Point>();
+            buttonShape.Add(new Point(0, 0));
+            buttonShape.Add(new Point(3 * size / 4, 0));
+            buttonShape.Add(new Point(3 * size / 4, size / 4));
+            buttonShape.Add(new Point(0, size / 4));
+
+            List<Point> advSetImg = new List<Point>();
+            advSettingButton = new Button(buttonShape, new Point(22 * size / 8, 20 * size / 8), darkGrey, lightOutline, advSetImg);
+            advSettingButton.Clicked += advSettingClicked;
+            buttons.Add(advSettingButton);
         }
 
         private void initButtons()
@@ -383,6 +399,11 @@ namespace BlottoBeats
             Invalidate();
         }
 
+        private void advSettingClicked(object sender, MouseEventArgs e)
+        {
+
+        }
+
         private void minimizeClicked(object sender, MouseEventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
@@ -534,6 +555,12 @@ namespace BlottoBeats
                 g.DrawRectangle(lightInline, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
                 g.DrawString("Variable", font, lightGrey, 13 * size / 16, 15 * size / 16);
                 g.DrawString("Randomized?", font, lightGrey, 15 * size / 4 - g.MeasureString("Randomized?", font).Width, 15 * size / 16);
+                g.DrawString("Advanced Settings", font, lightGrey, 13 * size / 16, 40 * size / 16);
+                g.FillPolygon(advSettingButton.inside, advSettingButton.ClickLocation);
+                if (advSettingButton.stroke != null)
+                    g.DrawPolygon(advSettingButton.stroke, advSettingButton.ClickLocation);
+                if (advSettingButton.ImgLocation != null)
+                    g.FillPolygon(lightGrey, advSettingButton.ImgLocation);
             }
 
             foreach(Button button in buttons)
