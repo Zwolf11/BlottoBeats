@@ -44,7 +44,11 @@ namespace MidiOut
             track[0].Insert(0, tempoBuilder.Result);
             //Set instrument
             builder.Command = ChannelCommand.ProgramChange;
-            builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
+            if (output.Genre == null)
+            {
+                builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
+            }
+            //builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
             builder.Data2 = 0;
             builder.Build();
             track[1].Insert(0, builder.Result);

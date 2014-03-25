@@ -10,12 +10,14 @@ namespace SongData {
     {
         private int tempo;
         private string key; //Sharped notation is always used over flatted
+        private string genre;
         public List<SongSegment> songData { get; private set; }
 
-        public Song(int temp, string ky)
+        public Song(int temp, string ky, string gen)
         {
             tempo = temp;
             key = ky;
+            gen = genre;
             songData = new List<SongSegment>();
         }
 
@@ -83,6 +85,8 @@ namespace SongData {
                 this.tempo = value;
             }
         }
+        
+        public string Genre { get; set; }
     }
 
 	/// <summary>

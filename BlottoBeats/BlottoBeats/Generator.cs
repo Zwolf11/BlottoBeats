@@ -52,8 +52,10 @@ namespace BlottoBeats
             //Select Key
             key = notes[randomizer.Next(12)];
 
-            Song output = new Song(paramets.tempo, key);
+            //Now also sets the genre
+            Song output = new Song(paramets.tempo, key, paramets.genre);
             Console.Out.WriteLine(key);
+            Console.Out.WriteLine(paramets.genre);
             
             int randOutput = randomizer.Next(2);
             switch (randOutput){
