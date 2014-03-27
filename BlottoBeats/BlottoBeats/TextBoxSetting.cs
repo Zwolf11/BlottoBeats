@@ -18,6 +18,7 @@ namespace BlottoBeats
         public int getIntValue() { return int.Parse(text.Text); }
         public string getStringValue() { return text.Text; }
         public bool isChecked() { return checkbox.Checked; }
+        public void setValue(String value) { text.Text = value; }
 
         public TextBoxSetting(int pos, String name, Form parent, int minRand, int maxRand, int size)
         {

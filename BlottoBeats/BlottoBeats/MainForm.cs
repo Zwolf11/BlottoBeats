@@ -32,7 +32,6 @@ namespace BlottoBeats
         private double progress;
         private int score;
         private bool menuDropped;
-        private bool autoPlay;
         private double songLen;
         private Setting genre;
         private Setting tempo;
@@ -76,7 +75,6 @@ namespace BlottoBeats
             progress = 0;
             score = 0;
             menuDropped = false;
-            autoPlay = false;
             songLen = 0;
             songPos = -1;
             backlog = new List<SongParameters>();
@@ -313,8 +311,15 @@ namespace BlottoBeats
                 if (setting.isChecked())
                     setting.randomize();
 
+            player.Open("");
             if(songPos >= backlog.Count)
                 backlog.Add(new SongParameters(seed.getIntValue(), tempo.getIntValue(), genre.getStringValue()));
+            else
+            {
+                genre.setValue(backlog[songPos].genre);
+                tempo.setValue(backlog[songPos].tempo + "");
+                seed.setValue(backlog[songPos].seed + "");
+            }
             generator.generate(backlog[songPos]);
         }
 
@@ -510,8 +515,7 @@ namespace BlottoBeats
             {
                 sendScore();
                 resetPlayBar();
-                if (autoPlay) loadSong(true);
-                else stopSong();
+                loadSong(true);
             }
             Invalidate();
         }

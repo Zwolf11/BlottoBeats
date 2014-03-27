@@ -16,6 +16,7 @@ namespace BlottoBeats
         public int getIntValue() { return int.Parse(text.Text); }
         public string getStringValue() { return text.Text; }
         public bool isChecked() { return checkbox.Checked; }
+        public void setValue(String value) { text.Text = value; }
 
         public DropDownSetting(int pos, String name, Form parent, string[] items, int size)
         {
@@ -68,7 +69,7 @@ namespace BlottoBeats
         public void randomize()
         {
             Random rand = new Random(DateTime.Now.Millisecond);
-            text.SelectedIndex = rand.Next(0, text.Items.Count - 1);
+            text.SelectedIndex = rand.Next(0, text.Items.Count);
         }
     }
 }
