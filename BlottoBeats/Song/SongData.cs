@@ -17,7 +17,7 @@ namespace SongData {
         {
             tempo = temp;
             key = ky;
-            gen = genre;
+            genre = gen;
             songData = new List<SongSegment>();
         }
 
