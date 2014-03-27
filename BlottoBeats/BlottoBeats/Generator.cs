@@ -1210,7 +1210,7 @@ namespace BlottoBeats
                         prevWasHalf = true;
                     }
                 }
-                composeMelody(thisSection,randomizer);
+                //composeMelody(thisSection,randomizer, key, mode);
 
                 patterns.Add(thisSection);
             }
@@ -1389,7 +1389,7 @@ namespace BlottoBeats
             generate(seed, input);
         }*/
         //composes a melody for a SongSegment. This SongSegment is assumed to not already have a melody
-        void composeMelody(Song.SongSegment thisSection, Random randomizer)
+        void composeMelody(Song.SongSegment thisSection, Random randomizer, String key, int mode)
         {
             //TODO check for bad input
             int chordLength;
@@ -1397,7 +1397,48 @@ namespace BlottoBeats
             String prevNoteVal = "";
             String noteVal = "";
             int noteRhythm = 0;
-            String[] notearray = { "C3", "D3", "E3", "F3", "G3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4", "B4" };
+            String[] notes = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+            String[] keySig = new String[7];
+            String[] notearray = new String[14];
+            int keynum = Array.IndexOf(notes, key);
+
+            if (mode == 0)
+            {
+                keySig[0] = notes[keynum];
+                keySig[1] = notes[(keynum + 2) % 12];
+                keySig[2] = notes[(keynum + 4) % 12];
+                keySig[3] = notes[(keynum + 5) % 12];
+                keySig[4] = notes[(keynum + 7) % 12];
+                keySig[5] = notes[(keynum + 9) % 12];
+                keySig[6] = notes[(keynum + 11) % 12];
+
+            }
+            if (mode == 1)
+            {
+                keySig[0] = notes[keynum];
+                keySig[1] = notes[(keynum + 2) % 12];
+                keySig[2] = notes[(keynum + 3) % 12];
+                keySig[3] = notes[(keynum + 5) % 12];
+                keySig[4] = notes[(keynum + 7) % 12];
+                keySig[5] = notes[(keynum + 8) % 12];
+                keySig[6] = notes[(keynum + 10) % 12];
+
+            }
+
+            int octave = 3;
+            String lastNote = "";
+            String nextNote = "";
+            for (int i = 0; i < 14; i++)
+            {
+                nextNote = keySig[i % 7];
+                if (!lastNote.Equals("") && !nextNote.Equals("") && lastNote[0]<'C' && nextNote[0]>='C')
+                {
+                    octave++;
+                }
+                notearray[i] = nextNote + octave.ToString();
+                lastNote = nextNote;
+            }
+
             for (int i = 0; i < thisSection.chordPattern.Count; i++)
             {
                 chordLength = thisSection.chordPattern[i].chordVoice.First().length;
@@ -1503,7 +1544,7 @@ namespace BlottoBeats
 
                     }
                     //END TODO
-
+                    //TODO: Raise and lower leading tones in dominant functions of minor modes in melodic lines
                     int sumWeights = 0;
                     for (int j = 0; j < 14; j++)
                     {
