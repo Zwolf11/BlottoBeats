@@ -1210,6 +1210,7 @@ namespace BlottoBeats
                         prevWasHalf = true;
                     }
                 }
+                composeMelody(thisSection,randomizer);
 
                 patterns.Add(thisSection);
             }
@@ -1387,5 +1388,147 @@ namespace BlottoBeats
             int seed = 3000;
             generate(seed, input);
         }*/
+        //composes a melody for a SongSegment. This SongSegment is assumed to not already have a melody
+        void composeMelody(Song.SongSegment thisSection, Random randomizer)
+        {
+            //TODO check for bad input
+            int chordLength;
+            int currentSum =0;
+            String prevNoteVal = "";
+            String noteVal = "";
+            int noteRhythm = 0;
+            String[] notearray = { "C3", "D3", "E3", "F3", "G3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4", "B4" };
+            for (int i = 0; i < thisSection.chordPattern.Count; i++)
+            {
+                chordLength = thisSection.chordPattern[i].chordVoice.First().length;
+                currentSum = 0;
+                while (currentSum < chordLength)
+                {
+                    
+                    //TODO: Define Rhythm for each note
+                        //Note to self: If a melody falls onto the last chord of a segment just make the rhythm of note #1 the length of the chord
+                    //END TODO
+
+                    //Define noteValue for each note
+                    int[] noteWeights = new int[14];
+                    if (prevNoteVal.Equals(""))
+                    {
+                        for (int j = 0; j < 14; j++)
+                        {
+                            noteWeights[j] = 1;
+
+                        }
+
+                    }
+                    else
+                    {
+                        int index = Array.IndexOf(notearray, prevNoteVal);
+                        int difference = 0;
+                        for (int j = 0; j < 14; j++)
+                        {
+                            difference = index - j;
+                            difference = Math.Abs(difference);
+                            switch (difference){
+                                case 0:
+                                    noteWeights[j] = 16;
+                                    break;
+                                case 1: 
+                                    noteWeights[j] = 14;
+                                    break;
+                                case 2: 
+                                    noteWeights[j] = 10;
+                                    break;
+                                case 3: 
+                                    noteWeights[j] = 3;
+                                    break;
+                                case 4: 
+                                    noteWeights[j] = 4;
+                                    break;
+                                case 5:
+                                    noteWeights[j] = 3;
+                                    break;
+                                case 6: 
+                                    noteWeights[j] = 2;
+                                    break;
+                                case 7: 
+                                    noteWeights[j] = 4;
+                                    break;
+                                case 8:
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 9: 
+                                    noteWeights[j] = 2;
+                                    break;
+                                case 10: 
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 11: 
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 12: 
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 13: 
+                                    noteWeights[j] = 1;
+                                    break;
+
+
+                            }
+
+
+                        }
+
+                    }
+
+                    //TODO: Weightings as defined on page 2 of my notes
+                    if (currentSum == 0)
+                    {
+                        if (currentSum + noteRhythm == chordLength)
+                        {
+                            //if lastChord do something unique
+                            //Else see below for code I'll copy paste
+
+                        }
+
+                    }
+                    else if (currentSum + noteRhythm == chordLength)
+                    {
+
+
+
+                    }
+                    else
+                    {
+
+
+                    }
+                    //END TODO
+
+                    int sumWeights = 0;
+                    for (int j = 0; j < 14; j++)
+                    {
+                        sumWeights += noteWeights[j];
+                    }
+
+                    int randOut = randomizer.Next(sumWeights);
+                    sumWeights = 0;
+                    for (int j = 0; j < 14; j++)
+                    {
+                        sumWeights += noteWeights[j];
+                        if (randOut < sumWeights)
+                        {
+                            noteVal = notearray[j];
+
+                        }
+
+                    }
+                    thisSection.melodies[0].melodicLine.Add(new Song.Note(noteVal, noteRhythm));
+                    currentSum += noteRhythm;
+                    prevNoteVal = noteVal;
+                }
+            }
+
+
+        }
     }
 }
