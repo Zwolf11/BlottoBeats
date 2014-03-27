@@ -34,10 +34,12 @@ namespace BlottoBeats
         private bool menuDropped;
         private bool autoPlay;
         private double songLen;
+        private Setting genre;
         private Setting tempo;
         private Setting seed;
         private System.Windows.Forms.Timer timer;
-        private SongParameters curSong;
+        private int songPos;
+        private List<SongParameters> backlog;
         private Generator generator;
         private BBServerConnection server;
         private MediaPlayer.MediaPlayer player;
@@ -76,6 +78,8 @@ namespace BlottoBeats
             menuDropped = false;
             autoPlay = false;
             songLen = 0;
+            songPos = -1;
+            backlog = new List<SongParameters>();
             generator = new Generator(this);
             server = new BBServerConnection("127.0.0.1", 3000);
             player = new MediaPlayer.MediaPlayer();
@@ -96,8 +100,10 @@ namespace BlottoBeats
             lightOutline = new Pen(Color.FromArgb(130, 130, 130));
             lightOutline.Alignment = System.Drawing.Drawing2D.PenAlignment.Outset;
 
-            tempo = new Setting(0, "Tempo", this, 60, 200, size);
-            seed = new Setting(1, "Seed", this, int.MinValue, int.MaxValue, size);
+            genre = new DropDownSetting(0, "Genre", this, new string[]{"Chord Progression", "Classical"}, size);
+            tempo = new TextBoxSetting(1, "Tempo", this, 60, 200, size);
+            seed = new TextBoxSetting(2, "Seed", this, int.MinValue, int.MaxValue, size);
+            settings.Add(genre);
             settings.Add(tempo);
             settings.Add(seed);
 
@@ -289,22 +295,27 @@ namespace BlottoBeats
             playButton.img = pauseImg;
             playing = PLAYING;
             player.CurrentPosition = progress * songLen;
-            Console.WriteLine("Progress=" + progress);
-            Console.WriteLine("SongLen=" + songLen);
-            Console.WriteLine("Pos=" + player.CurrentPosition);
             player.Play();
             timer.Start();
         }
 
-        private void loadSong()
+        private void loadSong(bool nextSong)
         {
+            if (nextSong) songPos++;
+            else if(songPos > 0) songPos--;
+
+            if (songPos < 0 || songPos > backlog.Count)
+                return;
+
             playButton.img = loadImg;
             playing = LOADING;
             foreach (Setting setting in settings)
-                if (setting.checkbox.Checked)
+                if (setting.isChecked())
                     setting.randomize();
-            curSong = new SongParameters(seed.Value, tempo.Value, "Unknown");
-            generator.generate(curSong);
+
+            if(songPos >= backlog.Count)
+                backlog.Add(new SongParameters(seed.getIntValue(), tempo.getIntValue(), genre.getStringValue()));
+            generator.generate(backlog[songPos]);
         }
 
         private void stopSong()
@@ -325,8 +336,8 @@ namespace BlottoBeats
 
         private void sendScore()
         {
-            if (score > 0) new Thread(() => server.SendRequest(new BBRequest(curSong, true, null))).Start();
-            else if (score < 0) new Thread(() => server.SendRequest(new BBRequest(curSong, false, null))).Start();
+            if (score > 0) new Thread(() => server.SendRequest(new BBRequest(backlog[songPos], true, null))).Start();
+            else if (score < 0) new Thread(() => server.SendRequest(new BBRequest(backlog[songPos], false, null))).Start();
         }
 
         private void playClicked(object sender, MouseEventArgs e)
@@ -336,7 +347,7 @@ namespace BlottoBeats
             else if (playing == PAUSED)
             {
                 if (songLoaded) playSong();
-                else loadSong();
+                else loadSong(true);
             }
             Invalidate();
         }
@@ -356,14 +367,14 @@ namespace BlottoBeats
         {
             sendScore();
             resetPlayBar();
-            loadSong();
+            loadSong(false);
         }
 
         private void nextClicked(object sender, MouseEventArgs e)
         {
             sendScore();
             resetPlayBar();
-            loadSong();
+            loadSong(true);
         }
 
         private void upvoteClicked(object sender, MouseEventArgs e)
@@ -499,7 +510,7 @@ namespace BlottoBeats
             {
                 sendScore();
                 resetPlayBar();
-                if (autoPlay) loadSong();
+                if (autoPlay) loadSong(true);
                 else stopSong();
             }
             Invalidate();
