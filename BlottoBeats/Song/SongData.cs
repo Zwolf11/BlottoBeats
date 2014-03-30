@@ -29,9 +29,11 @@ namespace SongData {
         public class Chord
         {
             public HashSet<Note> chordVoice { get; private set; }
-            public Chord(String[] notes, int rhythm)
+            public int chordVal { get; private set; }
+            public Chord(String[] notes, int rhythm, int chordNum)
             {
                 chordVoice = new HashSet<Note>();
+                chordVal = chordNum;
                 int len = notes.Length;
                 for (int i = 0; i < len; i++)
                 {

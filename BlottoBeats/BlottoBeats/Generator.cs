@@ -1328,7 +1328,7 @@ namespace BlottoBeats
                 noteNames[2] = keySig[(chordNumIndex + 2)%7] + "4";
                 noteNames[3] = keySig[(chordNumIndex + 4)%7] + "4";
                 Console.Out.WriteLine(chordNumIndex+1 + " " + length);
-                return new Song.Chord(noteNames, length);
+                return new Song.Chord(noteNames, length,chordNumIndex+1);
             }
 
 
@@ -1373,7 +1373,7 @@ namespace BlottoBeats
                 }
 
                 Console.Out.WriteLine(chordNumIndex+1+" "+ length);
-                return new Song.Chord(noteNames, length);
+                return new Song.Chord(noteNames, length,chordNumIndex + 1);
             }
             return null;
 
@@ -1428,6 +1428,8 @@ namespace BlottoBeats
             int octave = 3;
             String lastNote = "";
             String nextNote = "";
+            int thisChord = 0;
+            int nextChord = 0;
             for (int i = 0; i < 14; i++)
             {
                 nextNote = keySig[i % 7];
@@ -1521,29 +1523,268 @@ namespace BlottoBeats
 
                     }
 
-                    //TODO: Weightings as defined on page 2 of my notes
-                    if (currentSum == 0)
+                    //Defines the current chord and the upcoming chord for usage below
+                    thisChord = thisSection.chordPattern[i].chordVal;
+                    if (i < thisSection.chordPattern.Count - 1)
                     {
-                        if (currentSum + noteRhythm == chordLength)
-                        {
-                            //if lastChord do something unique
-                            //Else see below for code I'll copy paste
-
-                        }
-
-                    }
-                    else if (currentSum + noteRhythm == chordLength)
-                    {
-
-
+                        nextChord = thisSection.chordPattern[i+1].chordVal;
 
                     }
                     else
                     {
-
+                        nextChord = 0;
 
                     }
-                    //END TODO
+
+                    if (currentSum == 0)
+                    {
+                        //If first and last note of the chord
+                        if (currentSum + noteRhythm == chordLength)
+                        {
+                            //if chord is last chord weight towards chord
+                            if (nextChord == 0)
+                            {
+                                int indexerForChordVals = thisChord - 1;
+                                for (int j = 0; j < 6; j++)
+                                {
+                                    noteWeights[indexerForChordVals] *= 2;
+                                    if (j == 2)
+                                        indexerForChordVals += 3;
+                                    else
+                                        indexerForChordVals += 2;
+                                    indexerForChordVals %= 14;
+                                }
+
+                            }
+                            //Otherwise weight towards notes that lead into the next chord
+                            if (nextChord == 1)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[6] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[13] *= 3;
+                            }
+                            if (nextChord == 2)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[4] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[11] *= 3;
+                            }
+                            if (nextChord == 3)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[12] *= 3;
+                                noteWeights[0] *= 3;
+                                noteWeights[7] *= 3;
+                            }
+                            if (nextChord == 4)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[4] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[11] *= 3;
+                            }
+                            if (nextChord == 5)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[12] *= 3;
+                            }
+                            if (nextChord == 6)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[6] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[13] *= 3;
+                            }
+                            if (nextChord == 7)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[12] *= 3;
+                            }
+                            
+                           
+                        }
+                        if (thisChord == 1)
+                        {
+                            noteWeights[0] *= 3;
+                            noteWeights[2] *= 2;
+                            noteWeights[4] *= 1;
+                            noteWeights[7] *= 3;
+                            noteWeights[9] *= 2;
+                            noteWeights[11] *= 1;
+                        }
+                        if (thisChord == 2)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 1;
+                            noteWeights[5] *= 2;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 1;
+                            noteWeights[12] *= 2;
+                        }
+                        if (thisChord == 3)
+                        {
+                            noteWeights[2] *= 3;
+                            noteWeights[4] *= 2;
+                            noteWeights[6] *= 1;
+                            noteWeights[9] *= 3;
+                            noteWeights[11] *= 2;
+                            noteWeights[13] *= 1;
+                        }
+                        if (thisChord == 4)
+                        {
+                            noteWeights[3] *= 3;
+                            noteWeights[5] *= 1;
+                            noteWeights[7] *= 2;
+                            noteWeights[10] *= 3;
+                            noteWeights[12] *= 1;
+                            noteWeights[0] *= 2;
+                        }
+                        if (thisChord == 5)
+                        {
+                            noteWeights[4] *= 1;
+                            noteWeights[6] *= 2;
+                            noteWeights[8] *= 3;
+                            noteWeights[11] *= 1;
+                            noteWeights[13] *= 2;
+                            noteWeights[1] *= 3;
+                        }
+                        if (thisChord == 6)
+                        {
+                            noteWeights[5] *= 2;
+                            noteWeights[7] *= 1;
+                            noteWeights[9] *= 3;
+                            noteWeights[12] *= 2;
+                            noteWeights[0] *= 1;
+                            noteWeights[2] *= 3;
+                        }
+                        if (thisChord == 7)
+                        {
+                            noteWeights[6] *= 2;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *=1;
+                            noteWeights[13] *= 2;
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 1;
+                        }
+                        //if the note is not a chord tone, set the weight to be 0
+                        for (int j = 0; j < 14; j++)
+                        {
+                            int thisChordIndex = thisChord - 1;
+                            if(j!=thisChordIndex && j!=thisChordIndex+2 && j!=thisChordIndex+4 && j!=thisChordIndex+7&& j!=(thisChordIndex+9)%13&& j!=(thisChordIndex+11)%13 )
+                            {
+                                noteWeights[j] = 0;
+                            }
+                        }
+                        
+
+                    }
+                    else if (currentSum + noteRhythm == chordLength)
+                    {
+                      
+                        //weight towards notes that lead into the next chord
+                            if (nextChord == 1)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[6] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[13] *= 3;
+                            }
+                            if (nextChord == 2)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[4] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[11] *= 3;
+                            } 
+                            if (nextChord == 3)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[12] *= 3;
+                                noteWeights[0] *= 3;
+                                noteWeights[7] *= 3;
+                            } 
+                            if (nextChord == 4)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[4] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[11] *= 3;
+                            } 
+                            if (nextChord == 5)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[12] *= 3;
+                            } 
+                            if (nextChord == 6)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[6] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[13] *= 3;
+                            } 
+                            if (nextChord == 7)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[12] *= 3;
+                            }
+                    }
+                    //If a note isn't first or last of a chord. Double it's weighting towards chord tones.
+                    else
+                    {
+                        int indexerForChordVals = thisChord - 1;
+                        for (int j = 0; j < 6; j++)
+                        {
+                            noteWeights[indexerForChordVals] *= 2;
+                            if (j == 2)
+                                indexerForChordVals += 3;
+                            else
+                                indexerForChordVals += 2;
+                            indexerForChordVals %= 14;
+                        }
+
+                    }
                     //TODO: Raise and lower leading tones in dominant functions of minor modes in melodic lines
                     int sumWeights = 0;
                     for (int j = 0; j < 14; j++)
