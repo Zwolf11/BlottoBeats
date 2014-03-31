@@ -88,7 +88,17 @@ namespace SongData {
             }
         }
         
-        public string Genre { get; set; }
+        public string Genre 
+        {
+            get
+            {
+                return this.genre;
+            }
+            set
+            {
+                this.genre = value;
+            }
+        }
     }
 
 	/// <summary>

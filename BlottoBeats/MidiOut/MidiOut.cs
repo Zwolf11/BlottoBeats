@@ -43,15 +43,11 @@ namespace MidiOut
             tempoBuilder.Build();
             track[0].Insert(0, tempoBuilder.Result);
             //Set instrument
-            builder.Command = ChannelCommand.ProgramChange;
-            if (output.Genre == null)
-            {
-                builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
-            }
+            /*builder.Command = ChannelCommand.ProgramChange;
             //builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
             builder.Data2 = 0;
             builder.Build();
-            track[1].Insert(0, builder.Result);
+            track[1].Insert(0, builder.Result);*/
             //Tick position
             int pos = 0;
             //Note length
@@ -73,6 +69,18 @@ namespace MidiOut
                         String note = item.noteValue; //C, C#, D, D#, E, F, F#, G, G#, A, A#
                         len = item.length; //in 16th notes
                         //Switch note on
+                        builder.Command = ChannelCommand.ProgramChange;
+                        if (output.Genre == "Chord Progression")
+                        {
+                            builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
+                        }
+                        else if (output.Genre == "Classical")
+                        {
+                            builder.Data1 = (int)GeneralMidiInstrument.Violin;
+                        }
+                        builder.Data2 = 0;
+                        builder.Build();
+                        track[1].Insert(pos, builder.Result);
                         builder.Command = ChannelCommand.NoteOn;
                         switch (note)
                         {
