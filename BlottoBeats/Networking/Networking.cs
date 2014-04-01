@@ -204,6 +204,10 @@ namespace Networking {
 			responseType = new AuthFailed();
 		}
 
+		public BBResponse(string type, string message) {
+			responseType = new Error(type, message);
+		}
+
 		public BBResponse(SongParameters song) {
 			responseType = new SingleSong(song);
 		}
@@ -224,6 +228,19 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class AuthFailed : Response { }
+
+		/// <summary>
+		/// Response for an error
+		/// </summary>
+		[SerializableAttribute]
+		public class Error : Response {
+			public string type { get; private set; }
+			public string message { get; private set; }
+
+			public Error(string type, string message) {
+				this.message = message;
+			}
+		}
 
 		/// <summary>
 		/// Responds with a single song
