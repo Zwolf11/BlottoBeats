@@ -16,7 +16,7 @@ namespace BlottoBeats
         public AdvancedSettings(MainForm form)
         {
             InitializeComponent();
-            this.textBox1.Text = form.server.getIP();
+            this.textBox1.Text = form.server.ip;
             this.label3.Text = Convert.ToString(form.backlog.Count);
         }
     }
