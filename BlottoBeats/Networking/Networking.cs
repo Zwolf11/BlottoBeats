@@ -10,13 +10,15 @@ namespace Networking {
 	/// </summary>
 	public class BBServerConnection {
 		private IPEndPoint serverEndPoint;
+        private string ip;
 
 		/// <summary>
 		/// Initializes a new connection to a BlottoBeats Server with a default
 		/// ip address of localhost and a default port of 3000
 		/// </summary>
 		public BBServerConnection() {
-			serverEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 3000);
+            ip = "127.0.0.1";
+			serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), 3000);
 		}
 
 		/// <summary>
@@ -25,8 +27,15 @@ namespace Networking {
 		/// <param name="ipAddress">IP address of the server</param>
 		/// <param name="port">Port to connect to the server with</param>
 		public BBServerConnection(string ipAddress, int port) {
-			serverEndPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
+            ip = ipAddress;
+			serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 		}
+
+
+        public String getIP()
+        {
+            return ip;
+        }
 
 		/// <summary>
 		/// Sends an authentication request to the server.  Returns a UserToken

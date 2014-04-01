@@ -38,9 +38,9 @@ namespace BlottoBeats
         private Setting seed;
         private System.Windows.Forms.Timer timer;
         private int songPos;
-        private List<SongParameters> backlog;
+        public List<SongParameters> backlog;
         private Generator generator;
-        private BBServerConnection server;
+        public BBServerConnection server;
         private MediaPlayer.MediaPlayer player;
 
         private Font font;
@@ -53,6 +53,11 @@ namespace BlottoBeats
         private SolidBrush white;
         private Pen lightInline;
         private Pen lightOutline;
+
+        AdvancedSettings settingsForm;
+        //private bool advSettingOpen = false;
+
+        
 
         public MainForm()
         {
@@ -109,6 +114,8 @@ namespace BlottoBeats
                 setting.setVisible(menuDropped);
 
             initButtons();
+
+            settingsForm = new AdvancedSettings(this);
         }
 
         private void initButtons()
@@ -312,8 +319,11 @@ namespace BlottoBeats
                     setting.randomize();
 
             player.Open("");
-            if(songPos >= backlog.Count)
+            if (songPos >= backlog.Count)
+            {
                 backlog.Add(new SongParameters(seed.getIntValue(), tempo.getIntValue(), genre.getStringValue()));
+                settingsForm.label3.Text = Convert.ToString(backlog.Count);
+            }
             else
             {
                 genre.setValue(backlog[songPos].genre);
@@ -413,7 +423,11 @@ namespace BlottoBeats
 
         private void advSettingClicked(object sender, MouseEventArgs e)
         {
-
+            if (settingsForm == null)
+                //System.Diagnostics.Debug.Write("settingsForm == null");
+                settingsForm = new AdvancedSettings(this);
+            settingsForm.ShowDialog();
+                
         }
 
         private void minimizeClicked(object sender, MouseEventArgs e)
