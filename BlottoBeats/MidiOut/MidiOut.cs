@@ -117,32 +117,35 @@ namespace MidiOut
                     }//endforeach
                     
                 }//endfor
-                pos=startOfSegment;
-                for (int j = 0; j < output.songData[i].melodies[0].melodicLine.Count(); j++)
+                
+                for (int q = 0; q < output.songData[i].melodies.Count(); q++)
                 {
-                    SongData.Song.Note outputNote = output.songData[i].melodies[0].melodicLine[j];
-                    String note = outputNote.noteValue;
-                    int noteLength = outputNote.length; //in 16th notes
-                    //Switch note on
-                    builder.Command = ChannelCommand.ProgramChange;
-                    if (output.Genre == "Chord Progression")
+                    pos = startOfSegment;
+                    for (int j = 0; j < output.songData[i].melodies[q].melodicLine.Count(); j++)
                     {
-                        builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
-                    }
-                    else if (output.Genre == "Classical")
-                    {
-                        builder.Data1 = (int)GeneralMidiInstrument.Violin;
-                    }
-                    builder.Data2 = 0;
-                    builder.Build();
-                    track[2].Insert(pos, builder.Result);
-                    builder.Command = ChannelCommand.NoteOn;
-                    builder.Data1 = midiValOfNote(note);
-                    builder.Data2 = 127; //Set volume to max
-                    builder.Build(); //Build the message
-                    track[2].Insert(pos, builder.Result); //Insert into Track 1 at tick position 'pos'
-                    //Increment MIDI channel by 1
-                    pos += (PpqnClock.PpqnMinValue / 4 * noteLength);
+                        SongData.Song.Note outputNote = output.songData[i].melodies[q].melodicLine[j];
+                        String note = outputNote.noteValue;
+                        int noteLength = outputNote.length; //in 16th notes
+                        //Switch note on
+                        builder.Command = ChannelCommand.ProgramChange;
+                        if (output.Genre == "Chord Progression")
+                        {
+                            builder.Data1 = (int)GeneralMidiInstrument.ElectricGuitarJazz;
+                        }
+                        else if (output.Genre == "Classical")
+                        {
+                            builder.Data1 = (int)GeneralMidiInstrument.Violin;
+                        }
+                        builder.Data2 = 0;
+                        builder.Build();
+                        track[2].Insert(pos, builder.Result);
+                        builder.Command = ChannelCommand.NoteOn;
+                        builder.Data1 = midiValOfNote(note);
+                        builder.Data2 = 127; //Set volume to max
+                        builder.Build(); //Build the message
+                        track[2].Insert(pos, builder.Result); //Insert into Track 1 at tick position 'pos'
+                        //Increment MIDI channel by 1
+                        pos += (PpqnClock.PpqnMinValue / 4 * noteLength);
                         //Set Note Off
                         builder.Command = ChannelCommand.NoteOff;
                         builder.Data1 = midiValOfNote(note);
@@ -150,6 +153,7 @@ namespace MidiOut
                         builder.Build(); //Build the message
                         track[2].Insert(pos, builder.Result);
 
+                    }
                 }
             }//endfor
             //Submits file to the C:\BlottoBeats Folder where it is stored until another song is generated

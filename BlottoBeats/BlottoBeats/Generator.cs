@@ -2749,7 +2749,7 @@ namespace BlottoBeats
                 {
                     
                     //Randomly pick a length within the current measure that doesn't overlap chords
-                    int maxVal = Math.Min(measureLen-(totalSectionSum%measureLen), chordLength);
+                    int maxVal = Math.Min(measureLen-(totalSectionSum%measureLen), chordLength-currentSum);
                     //If a melody falls onto the last chord of a segment just make the rhythm of note #1 the length of the chord
                     if (i == thisSection.chordPattern.Count - 1)
                     {
