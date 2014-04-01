@@ -1219,7 +1219,7 @@ namespace BlottoBeats
                         prevWasHalf = true;
                     }
                 }
-                //composeMelody(thisSection,randomizer, key, mode);
+                composeMelody(thisSection,randomizer, key, mode,timeSigPattern,timeSigQuant);
 
                 patterns.Add(thisSection);
             }
@@ -2680,7 +2680,7 @@ namespace BlottoBeats
             generate(seed, input);
         }*/
         //composes a melody for a SongSegment. This SongSegment is assumed to not already have a melody
-        void composeMelody(Song.SongSegment thisSection, Random randomizer, String key, int mode)
+        void composeMelody(Song.SongSegment thisSection, Random randomizer, String key, int mode, String timeSigPattern, int timeSigQuant)
         {
             //TODO check for bad input
             int chordLength;
@@ -2692,6 +2692,7 @@ namespace BlottoBeats
             String[] keySig = new String[7];
             String[] notearray = new String[14];
             int keynum = Array.IndexOf(notes, key);
+            thisSection.melodies.Add(new Song.Melody());
 
             if (mode == 0)
             {
@@ -2731,7 +2732,15 @@ namespace BlottoBeats
                 notearray[i] = nextNote + octave.ToString();
                 lastNote = nextNote;
             }
-
+            int totalSectionSum = 0;
+            int measureLen = 0;
+            if (timeSigPattern.Equals("Simple"))
+            {
+                measureLen += 4;
+            }
+            else
+                measureLen += 6;
+            measureLen *= timeSigQuant;
             for (int i = 0; i < thisSection.chordPattern.Count; i++)
             {
                 chordLength = thisSection.chordPattern[i].chordVoice.First().length;
@@ -2739,9 +2748,16 @@ namespace BlottoBeats
                 while (currentSum < chordLength)
                 {
                     
-                    //TODO: Define Rhythm for each note
-                        //Note to self: If a melody falls onto the last chord of a segment just make the rhythm of note #1 the length of the chord
-                    //END TODO
+                    //Randomly pick a length within the current measure that doesn't overlap chords
+                    int maxVal = Math.Min(measureLen-(totalSectionSum%measureLen), chordLength);
+                    //If a melody falls onto the last chord of a segment just make the rhythm of note #1 the length of the chord
+                    if (i == thisSection.chordPattern.Count - 1)
+                    {
+                        noteRhythm = chordLength;
+                    }
+                    else
+                        noteRhythm = randomizer.Next(maxVal) + 1;
+
 
                     //Define noteValue for each note
                     int[] noteWeights = new int[14];
@@ -3091,12 +3107,13 @@ namespace BlottoBeats
                         if (randOut < sumWeights)
                         {
                             noteVal = notearray[j];
-
+                            break;
                         }
 
                     }
                     thisSection.melodies[0].melodicLine.Add(new Song.Note(noteVal, noteRhythm));
                     currentSum += noteRhythm;
+                    totalSectionSum += noteRhythm;
                     prevNoteVal = noteVal;
                 }
             }
