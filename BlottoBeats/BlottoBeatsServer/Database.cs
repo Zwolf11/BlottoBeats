@@ -154,15 +154,40 @@ namespace BlottoBeatsServer {
 			return returnId;
 		}
 
+        //Returns id of an item from the users table
+        private int GetID(string username)
+        {
+            string connString = "Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;";
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            command.CommandText = "Select idusers from users where username like '%" + username + "%'";
+            int returnId = 0;
+            try
+            {
+                conn.Open();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            MySqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                returnId = (int)reader["idusers"];
+            }
+
+            return returnId;
+        }
+
 
 		/// <summary>
 		/// Gets the next available ID for the server
 		/// </summary>
 		/// <returns>ID</returns>
-		private int GetNextAvailableID(int currID) {
-			int testId = currID;
+		private int GetNextAvailableID(string table) {
+			int testId = 1;
 
-			while (returnItem(testId, "iduploadedsongs") != null) {
+			while (returnItem(testId, "id"+table, table) != null) {
 				testId += 1;
 			}
 
@@ -188,7 +213,7 @@ namespace BlottoBeatsServer {
 		private void updateScore(int id, bool vote) {
 			MySqlConnection conn = new MySqlConnection(connString);
 			MySqlCommand command = conn.CreateCommand();
-			int scoreUpdate = (int)(returnItem(id, "voteScore"));
+			int scoreUpdate = (int)(returnItem(id, "voteScore", "iduploadedsongs"));
 
 			if (vote == true) {
 				scoreUpdate += 1;
@@ -207,10 +232,10 @@ namespace BlottoBeatsServer {
 			}
 		}
 
-		private object returnItem(int id, string col) {
+		private object returnItem(int id, string col, string table) {
 			MySqlConnection conn = new MySqlConnection(connString);
 			MySqlCommand command = conn.CreateCommand();
-			command.CommandText = "Select " + col + " from uploadedsongs where iduploadedsongs=" + id;
+			command.CommandText = "Select " + col + " from " + table + " where id" + table + "=" + id;
 			object item = null;
 
 			try {
@@ -229,38 +254,57 @@ namespace BlottoBeatsServer {
 		}
 
 		private bool createUser(string username, string hash) {
-			// TODO: Joe, write this method
-			// The user needs these fields:
-			//   User ID (int)
-			//   Username (string)
-			//   Password Hash (string)
-			//   Token Expiry Date (DateTime object - can be converted to a string or whatever, as long as it's recoverable)
-			//   Token String (string)
+			
 			// The token expiry date and string should both start null
 
 			// This function should check to see if the username is already in use.
 			// If so, it should not create a new entry in the table, and the function should return false.
 			// If the username is not already in use, it should create a new entry in the user table and return true.
-			return false;
+            string connString = "Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;";
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+
+            if (getUserID(username) == 0)
+            {
+                int nextId = GetNextAvailableID("users");
+                string token = null;
+                String date = "1000-01-01 00:00:00";
+                Console.WriteLine(nextId);
+                command.CommandText = "Insert into users (idusers,username,passwordHash,tokenExpire,tokenStr) values('" + nextId + "','" + username + "','" + hash + "','" + date + "','" + token + "')";
+                conn.Open();
+                command.ExecuteNonQuery();
+                conn.Close();
+                return true;
+            }
+
+            return false;
 		}
 
 		private int getUserID(string username) {
-			// TODO: Joe, write this method
 			// This function should return the ID of a user based on the username if they exist in the table, and 0 otherwise.
 
-			return 0;
+			return GetID(username);
 		}
 
 		private string getUserHash(int userID) {
-			// TODO: Joe, write this method
-			// This function should get the password hash of the specified user.
 
-			return null;
+            return (string)returnItem(userID, "passwordHash", "users");
 		}
 
 		private void storeUserToken(int userID, DateTime expires, string token) {
-			// TODO: Joe, write this method
-			// This function should store both the expires date and the token string in the specified user's entry
+            const string FMT = "yyyy-MM-dd HH:mm:ss";
+            string strDate = expires.ToString(FMT);
+            string connString = "Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;";
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            command.CommandText = "Update users SET tokenExpire='" + strDate + "' WHERE idusers='" + userId + "'";
+            conn.Open();
+            command.ExecuteNonQuery();
+            conn.Close();
+            command.CommandText = "Update users SET tokenStr='" + token + "' WHERE idusers='" + userId + "'";
+            conn.Open();
+            command.ExecuteNonQuery();
+            conn.Close();
 		}
 
 		private UserToken getUserToken(int userID) {
