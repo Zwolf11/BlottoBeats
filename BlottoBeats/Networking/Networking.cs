@@ -11,12 +11,10 @@ namespace Networking {
 	public class BBServerConnection {
 		private IPEndPoint serverEndPoint;
 		public string ip {
-            get
-            {
+            get {
                 return this.serverEndPoint.Address.ToString();
             }
-            set
-            {
+            set {
                 this.serverEndPoint.Address = IPAddress.Parse(value);
             }
 		}
@@ -139,7 +137,7 @@ namespace Networking {
 		}
 
 		/// <summary>
-		/// Sends a request for a list of songs that match the given parameters.
+		/// Sends a request for a list of songs that match the given parameters.  If a parameter is null, it will match all values for that parameter.
 		/// 
 		/// The response will contain a list of songs that match the parameters.
 		/// </summary>

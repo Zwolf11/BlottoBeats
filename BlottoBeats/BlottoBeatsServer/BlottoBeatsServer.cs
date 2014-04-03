@@ -94,14 +94,13 @@ namespace BlottoBeatsServer {
 			TcpClient tcpClient = (TcpClient)client;
 			NetworkStream networkStream = tcpClient.GetStream();
 			IPAddress address = ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address;
-			
 
 			Log("Remote client connected", address, 0);
 			
 			object message = Message.Recieve(networkStream);
 			while (tcpClient.Connected && message != null) {
 				
-				if (message is string && (string)message == "Test") {
+				if (message is string && message as string == "Test") {
 
 					// A test message was recieved.  Send a response back.
 					Log("Recieved a connection test request", address, 1);
@@ -201,7 +200,7 @@ namespace BlottoBeatsServer {
 								// Request a list of songs
 								BBRequest.RequestSongs req = bbmessage.requestType as BBRequest.RequestSongs;
 
-								List<SongParameters> songList = database.GetSongList(req.parameters, req.num);
+								List<SongParameters> songList = database.GetSongList(req.num);
 								Message.Send(networkStream, new BBResponse(songList));
 
 								Log("    Returned " + songList.Count + " songs", address, 2);

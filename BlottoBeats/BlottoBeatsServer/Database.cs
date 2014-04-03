@@ -71,7 +71,7 @@ namespace BlottoBeatsServer {
 		/// <param name="songParameters">The parameters to match</param>
 		/// <param name="numSongs">The maximum number of songs to return</param>
 		/// <returns>The list of songs</returns>
-		internal List<SongParameters> GetSongList(SongParameters songParameters, int numSongs) {
+		internal List<SongParameters> GetSongList(int numSongs) {
 			List<SongParameters> list = new List<SongParameters>();
 
 			// TODO: Implement
