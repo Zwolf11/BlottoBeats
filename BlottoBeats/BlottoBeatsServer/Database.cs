@@ -17,7 +17,7 @@ namespace BlottoBeatsServer {
 		/// </summary>
 		internal Database(string connString) {
 			this.connString = connString;
-			this.nextID = GetNextAvailableID(1);
+			this.nextID = GetNextAvailableID("songsuploaded");
 		}
 
 		/// <summary>
@@ -33,10 +33,10 @@ namespace BlottoBeatsServer {
 				song.ID = nextID;
 				song.score = (vote) ? 1 : -1;
 				insertData(song);
-				nextID = GetNextAvailableID(nextID);
+				nextID = GetNextAvailableID("songsuploaded");
 			} else {
 				updateScore(song.ID, vote);
-				object score = returnItem(song.ID, "voteScore");
+				object score = returnItem(song.ID, "voteScore", "songsuploaded");
 				if (score != null && score is int)
 					song.score = (int)score;
 				else
@@ -58,7 +58,7 @@ namespace BlottoBeatsServer {
 				// Song is not in the database. Return score of 0.
 				song.score = 0;
 			} else {
-				object score = returnItem(song.ID, "voteScore");
+				object score = returnItem(song.ID, "voteScore", "songsuploaded");
 				if (score != null && score is int)
 					song.score = (int)score;
 				else
@@ -297,11 +297,11 @@ namespace BlottoBeatsServer {
             string connString = "Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;";
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "Update users SET tokenExpire='" + strDate + "' WHERE idusers='" + userId + "'";
+            command.CommandText = "Update users SET tokenExpire='" + strDate + "' WHERE idusers='" + userID + "'";
             conn.Open();
             command.ExecuteNonQuery();
             conn.Close();
-            command.CommandText = "Update users SET tokenStr='" + token + "' WHERE idusers='" + userId + "'";
+            command.CommandText = "Update users SET tokenStr='" + token + "' WHERE idusers='" + userID + "'";
             conn.Open();
             command.ExecuteNonQuery();
             conn.Close();
