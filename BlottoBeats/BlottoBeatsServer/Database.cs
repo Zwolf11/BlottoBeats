@@ -10,14 +10,12 @@ namespace BlottoBeatsServer {
 	/// </summary>
 	internal class Database {
 		string connString;
-		int nextID;
 
 		/// <summary>
 		/// Loads a database from the given path
 		/// </summary>
 		internal Database(string connString) {
 			this.connString = connString;
-			this.nextID = GetNextAvailableID("songsuploaded");
 		}
 
 		/// <summary>
@@ -30,13 +28,12 @@ namespace BlottoBeatsServer {
 			if (song.ID == -1) song.ID = GetID(song);	// Song has no ID.  Search the server
 			if (song.ID == -1) {
 				// Song is not in the database.  Insert it into the database.
-				song.ID = nextID;
+				song.ID = GetNextAvailableID("songs");
 				song.score = (vote) ? 1 : -1;
 				insertData(song);
-				nextID = GetNextAvailableID("songsuploaded");
 			} else {
 				updateScore(song.ID, vote);
-				object score = returnItem(song.ID, "voteScore", "songsuploaded");
+				object score = returnItem(song.ID, "voteScore", "songs");
 				if (score != null && score is int)
 					song.score = (int)score;
 				else
@@ -58,7 +55,7 @@ namespace BlottoBeatsServer {
 				// Song is not in the database. Return score of 0.
 				song.score = 0;
 			} else {
-				object score = returnItem(song.ID, "voteScore", "songsuploaded");
+				object score = returnItem(song.ID, "voteScore", "songs");
 				if (score != null && score is int)
 					song.score = (int)score;
 				else
@@ -94,11 +91,11 @@ namespace BlottoBeatsServer {
 			if (register) {
 				// Register a new user
 				if (createUser(credentials.username, credentials.GenerateHash()))
-					userID = getUserID(credentials.username); // User was created
+					userID = GetID(credentials.username); // User was created
 				else
 					return null; // User was not created
 			} else {
-				userID = getUserID(credentials.username);
+				userID = GetID(credentials.username);
 				string hash = getUserHash(userID);
 
 				if (hash != null && !credentials.Verify(hash))
@@ -119,7 +116,7 @@ namespace BlottoBeatsServer {
 		/// <param name="tokenToVerify">The token to verify</param>
 		/// <returns>The ID of the user if authentication was successful, 0 otherwise</returns>
 		internal int VerifyToken(UserToken tokenToVerify) {
-			int userID = getUserID(tokenToVerify.username);
+			int userID = GetID(tokenToVerify.username);
 			UserToken userToken = getUserToken(userID);
 
 			if (userToken.Verify(tokenToVerify))
@@ -139,6 +136,7 @@ namespace BlottoBeatsServer {
 			MySqlCommand command = conn.CreateCommand();
 			command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + song.genre + "%' and songseed like '%" + song.seed + "%' and tempo like '%" + song.tempo + "%'";
 			int returnId = -1;
+
 			try {
 				conn.Open();
 				MySqlDataReader reader = command.ExecuteReader();
@@ -146,35 +144,38 @@ namespace BlottoBeatsServer {
 					returnId = (int)reader["iduploadedsongs"];
 				}
 			} catch (Exception ex) {
-				Console.Error.WriteLine(ex.Message);
+				throw ex;	// Propagate the exception upwards after handling the finally block
 			} finally {
 				conn.Close();
 			}
-
+			
 			return returnId;
 		}
 
-        //Returns id of an item from the users table
+        /// <summary>
+		/// Returns id of an item from the users table
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
         private int GetID(string username)
         {
-            string connString = "Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;";
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             command.CommandText = "Select idusers from users where username like '%" + username + "%'";
             int returnId = 0;
-            try
-            {
-                conn.Open();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            MySqlDataReader reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                returnId = (int)reader["idusers"];
-            }
+
+			try {
+				conn.Open();
+				MySqlDataReader reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					returnId = (int)reader["idusers"];
+				}
+			} catch (Exception ex) {
+				throw ex;	// Propagate the exception upwards after handling the finally block
+			} finally {
+				conn.Close();
+			}
 
             return returnId;
         }
@@ -197,17 +198,7 @@ namespace BlottoBeatsServer {
 		private void insertData(SongParameters song) {
 			MySqlConnection conn = new MySqlConnection(connString);
 			MySqlCommand command = conn.CreateCommand();
-			command.CommandText = "Insert into uploadedsongs (iduploadedsongs,genre,songseed,tempo,voteScore) values('" + song.ID + "','" + song.genre + "','" + song.seed + "','" + song.tempo + "','" + song.score + "')";
-
-			try {
-				conn.Open();
-				command.ExecuteNonQuery();
-			} catch (Exception ex) {
-				Console.Error.WriteLine(ex.Message);
-			} finally {
-				conn.Close();
-			}
-
+			SQLNonQuery(conn, "Insert into uploadedsongs (iduploadedsongs,genre,songseed,tempo,voteScore) values('" + song.ID + "','" + song.genre + "','" + song.seed + "','" + song.tempo + "','" + song.score + "')");
 		}
 
 		private void updateScore(int id, bool vote) {
@@ -221,15 +212,7 @@ namespace BlottoBeatsServer {
 				scoreUpdate -= 1;
 			}
 
-			command.CommandText = "Update uploadedsongs SET voteScore='" + scoreUpdate + "' WHERE iduploadedsongs='" + id + "'";
-			try {
-				conn.Open();
-				command.ExecuteNonQuery();
-			} catch (Exception ex) {
-				Console.Error.WriteLine(ex.Message);
-			} finally {
-				conn.Close();
-			}
+			SQLNonQuery(conn, "Update uploadedsongs SET voteScore='" + scoreUpdate + "' WHERE iduploadedsongs='" + id + "'");
 		}
 
 		private object returnItem(int id, string col, string table) {
@@ -245,7 +228,7 @@ namespace BlottoBeatsServer {
 					item = reader[col];
 				}
 			} catch (Exception ex) {
-				Console.Error.WriteLine(ex.Message);
+				throw ex;	// Propagate the exception upwards after handling the finally block
 			} finally {
 				conn.Close();
 			}
@@ -253,68 +236,59 @@ namespace BlottoBeatsServer {
 			return item;
 		}
 
-		private bool createUser(string username, string hash) {
-			
+		private bool createUser(string username, string hash) {			
 			// The token expiry date and string should both start null
 
 			// This function should check to see if the username is already in use.
 			// If so, it should not create a new entry in the table, and the function should return false.
 			// If the username is not already in use, it should create a new entry in the user table and return true.
-            string connString = "Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;";
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
 
-            if (getUserID(username) == 0)
+            if (GetID(username) == 0)
             {
                 int nextId = GetNextAvailableID("users");
                 string token = null;
                 String date = "1000-01-01 00:00:00";
                 Console.WriteLine(nextId);
-                command.CommandText = "Insert into users (idusers,username,passwordHash,tokenExpire,tokenStr) values('" + nextId + "','" + username + "','" + hash + "','" + date + "','" + token + "')";
-                conn.Open();
-                command.ExecuteNonQuery();
-                conn.Close();
+                SQLNonQuery(conn, "Insert into users (idusers,username,passwordHash,tokenExpire,tokenStr) values('" + nextId + "','" + username + "','" + hash + "','" + date + "','" + token + "')");
                 return true;
             }
 
             return false;
 		}
 
-		private int getUserID(string username) {
-			// This function should return the ID of a user based on the username if they exist in the table, and 0 otherwise.
-
-			return GetID(username);
-		}
-
 		private string getUserHash(int userID) {
-
             return (string)returnItem(userID, "passwordHash", "users");
 		}
 
 		private void storeUserToken(int userID, DateTime expires, string token) {
             const string FMT = "yyyy-MM-dd HH:mm:ss";
             string strDate = expires.ToString(FMT);
-            string connString = "Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;";
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "Update users SET tokenExpire='" + strDate + "' WHERE idusers='" + userID + "'";
-            conn.Open();
-            command.ExecuteNonQuery();
-            conn.Close();
-            command.CommandText = "Update users SET tokenStr='" + token + "' WHERE idusers='" + userID + "'";
-            conn.Open();
-            command.ExecuteNonQuery();
-            conn.Close();
+            SQLNonQuery(conn, "Update users SET tokenExpire='" + strDate + "' WHERE idusers='" + userID + "'");
+			SQLNonQuery(conn, "Update users SET tokenStr='" + token + "' WHERE idusers='" + userID + "'");
 		}
 
 		private UserToken getUserToken(int userID) {
-			// TODO: Joe, write this method
-			// This function should return a UserToken object with the username, expiry date, and token string initialized with the values in the user's entry
-
-			string username = null;
-			DateTime expires = new DateTime();
-			string token = null;
+			string username = (string)returnItem(userID, "username", "users");
+			DateTime expires = DateTime.Parse((string)returnItem(userID, "tokenExpire", "users"));
+			string token = (string)returnItem(userID, "tokenStr", "users");
 			return new UserToken(username, expires, token);
+		}
+
+		private void SQLNonQuery(MySqlConnection conn, string comString) {
+            MySqlCommand command = conn.CreateCommand();
+            command.CommandText = comString;
+			try {
+				conn.Open();
+				command.ExecuteNonQuery();
+			} catch (Exception ex) {
+				throw ex;	// Propagate the exception upwards after handling the finally block
+			} finally {
+				conn.Close();
+			}
 		}
 	}
 }

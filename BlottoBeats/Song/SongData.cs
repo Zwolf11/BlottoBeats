@@ -61,6 +61,11 @@ namespace SongData {
         public class Melody
         {
             public List<Note> melodicLine { get; private set; }
+            public Melody()
+            {
+
+                melodicLine = new List<Note>();
+            }
         }
 
         [SerializableAttribute]

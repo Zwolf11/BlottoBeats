@@ -10,6 +10,16 @@ namespace Networking {
 	/// </summary>
 	public class BBServerConnection {
 		private IPEndPoint serverEndPoint;
+		public string ip {
+            get
+            {
+                return this.serverEndPoint.Address.ToString();
+            }
+            set
+            {
+                this.serverEndPoint.Address = IPAddress.Parse(value);
+            }
+		}
 
 		/// <summary>
 		/// Initializes a new connection to a BlottoBeats Server with a default
@@ -25,7 +35,7 @@ namespace Networking {
 		/// <param name="ipAddress">IP address of the server</param>
 		/// <param name="port">Port to connect to the server with</param>
 		public BBServerConnection(string ipAddress, int port) {
-			serverEndPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
+			serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 		}
 
 		/// <summary>
@@ -204,6 +214,10 @@ namespace Networking {
 			responseType = new AuthFailed();
 		}
 
+		public BBResponse(string type, string message) {
+			responseType = new Error(type, message);
+		}
+
 		public BBResponse(SongParameters song) {
 			responseType = new SingleSong(song);
 		}
@@ -224,6 +238,19 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class AuthFailed : Response { }
+
+		/// <summary>
+		/// Response for an error
+		/// </summary>
+		[SerializableAttribute]
+		public class Error : Response {
+			public string type { get; private set; }
+			public string message { get; private set; }
+
+			public Error(string type, string message) {
+				this.message = message;
+			}
+		}
 
 		/// <summary>
 		/// Responds with a single song
