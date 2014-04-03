@@ -39,7 +39,8 @@ namespace BlottoBeats
         private Generator generator;
         public BBServerConnection server;
         private MediaPlayer.MediaPlayer player;
-        AdvancedSettings settingsForm;
+        public AdvancedSettings settingsForm;
+        public AccountCreation accountForm;
 
         private Font font;
         private SolidBrush lightGrey;
@@ -109,6 +110,7 @@ namespace BlottoBeats
             initButtons();
 
             settingsForm = new AdvancedSettings(this);
+            accountForm = new AccountCreation(this);
         }
 
         private void initButtons()
