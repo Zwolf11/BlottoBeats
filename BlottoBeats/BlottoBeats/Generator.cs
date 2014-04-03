@@ -28,14 +28,14 @@ namespace BlottoBeats
 
         }
 
-        public Generator(MainForm form)
+        public Generator()
         {
             this.form = form;
         }
 
         //NOTE: CURRENTLY ASSUMING VALID/NON-NULL INPUT!!!!! (will crash with invalid input) 
         //TODO (soon, but not priority) check for validity of input
-        public void generate(SongParameters paramets)
+        public double generate(SongParameters paramets)
         {
             Random randomizer = new Random(paramets.seed);
             int mode; // 0 = Major 1 = Minor
@@ -56,10 +56,7 @@ namespace BlottoBeats
             //Set genre
             gen = paramets.genre;
             if (gen == "Classical")
-            {
-                generate_Classical(paramets);
-                return;
-            }
+                return generate_Classical(paramets);
 
             //Now also sets the genre
             Song output = new Song(paramets.tempo, key, paramets.genre);
@@ -1310,11 +1307,11 @@ namespace BlottoBeats
             MidiOut.MidiOut outgoing = new MidiOut.MidiOut();
             double songLen = outgoing.outputToMidi(output);
 
-            form.songDoneLoading(songLen);
+            return songLen;
         }
 
 
-        public void generate_Classical(SongParameters paramets)
+        public double generate_Classical(SongParameters paramets)
         {
             Random randomizer = new Random(paramets.seed);
             int mode; // 0 = Major 1 = Minor
@@ -2592,7 +2589,7 @@ namespace BlottoBeats
             MidiOut.MidiOut outgoing = new MidiOut.MidiOut();
             double songLen = outgoing.outputToMidi(output);
 
-            form.songDoneLoading(songLen);
+            return songLen;
         }
 
 

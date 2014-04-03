@@ -9,7 +9,7 @@ namespace Networking {
 	/// Server object used to store data about the server
 	/// </summary>
 	public class BBServerConnection {
-		private IPEndPoint serverEndPoint;
+        private IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 3000);
 		public string ip {
             get {
                 return this.serverEndPoint.Address.ToString();

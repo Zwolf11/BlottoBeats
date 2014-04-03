@@ -11,10 +11,6 @@ namespace BlottoBeats
 {
     public class MainForm : Form
     {
-        public const int PLAYING = 1;
-        public const int LOADING = 0;
-        public const int PAUSED = -1;
-
         private int size;
         private List<Button> buttons;
         private List<Setting> settings;
@@ -27,11 +23,12 @@ namespace BlottoBeats
         private Button advSettingButton;
         private Point dragPos;
         private bool dragging;
-        private int playing;
+        private bool playing;
         private bool songLoaded;
         private double progress;
         private int score;
-        private bool menuDropped;
+        private bool settingsDropped;
+        private bool redditDropped;
         private double songLen;
         private Setting genre;
         private Setting tempo;
@@ -42,6 +39,7 @@ namespace BlottoBeats
         private Generator generator;
         public BBServerConnection server;
         private MediaPlayer.MediaPlayer player;
+        AdvancedSettings settingsForm;
 
         private Font font;
         private SolidBrush lightGrey;
@@ -53,11 +51,6 @@ namespace BlottoBeats
         private SolidBrush white;
         private Pen lightInline;
         private Pen lightOutline;
-
-        AdvancedSettings settingsForm;
-        //private bool advSettingOpen = false;
-
-        
 
         public MainForm()
         {
@@ -75,15 +68,15 @@ namespace BlottoBeats
             buttons = new List<Button>();
             settings = new List<Setting>();
             dragging = false;
-            playing = PAUSED;
+            playing = false;
             songLoaded = false;
             progress = 0;
             score = 0;
-            menuDropped = false;
+            settingsDropped = false;
             songLen = 0;
             songPos = -1;
             backlog = new List<SongParameters>();
-            generator = new Generator(this);
+            generator = new Generator();
             server = new BBServerConnection("127.0.0.1", 3000);
             player = new MediaPlayer.MediaPlayer();
 
@@ -111,7 +104,7 @@ namespace BlottoBeats
             settings.Add(seed);
 
             foreach (Setting setting in settings)
-                setting.setVisible(menuDropped);
+                setting.setVisible(settingsDropped);
 
             initButtons();
 
@@ -121,7 +114,7 @@ namespace BlottoBeats
         private void initButtons()
         {
             buttons.Clear();
-            if (menuDropped) this.Size = new Size(33 * size / 8, 23 * size / 8);
+            if (settingsDropped || redditDropped) this.Size = new Size(33 * size / 8, 23 * size / 8);
             else this.Size = new Size(33 * size / 8, size);
             font = new Font("Arial", 3 * size / 20);
             lightInline.Width = size / 40;
@@ -225,11 +218,6 @@ namespace BlottoBeats
             buttonShape.Add(new Point(3 * size / 4, size / 4));
             buttonShape.Add(new Point(0, size / 4));
 
-            List<Point> advSetImg = new List<Point>();
-            advSettingButton = new Button(buttonShape, new Point(22 * size / 8, 20 * size / 8), darkGrey, lightOutline, advSetImg);
-            advSettingButton.Clicked += advSettingClicked;
-            buttons.Add(advSettingButton);
-
             List<Point> slider = new List<Point>();
             slider.Add(new Point(0, 0));
             slider.Add(new Point(size / 8, 3 * size / 16));
@@ -257,8 +245,8 @@ namespace BlottoBeats
             pauseImg.Add(new Point(3 * size / 4, size / 4));
             loadImg = new List<Point>();
             List<Point> playButtonImg = playImg;
-            if (playing == PLAYING) playButtonImg = pauseImg;
-            else if (playing == LOADING) playButtonImg = loadImg;
+            if (playing) playButtonImg = pauseImg;
+            else playButtonImg = playImg;
             playButton = new Button(play, new Point(0, 0), medGrey, lightInline, playButtonImg);
             playButton.Clicked += this.playClicked;
             buttons.Add(playButton);
@@ -283,22 +271,17 @@ namespace BlottoBeats
             exitButton.Clicked += exitClicked;
             buttons.Add(exitButton);
 
+            advSettingButton = new Button(buttonShape, new Point(22 * size / 8, 20 * size / 8), darkGrey, lightOutline, null);
+            advSettingButton.Clicked += advSettingClicked;
+
             foreach (Setting setting in settings)
                 setting.init(size);
-        }
-
-        public void songDoneLoading(double songLen)
-        {
-            this.songLen = songLen;
-            player.Open(@"C:\BlottoBeats\temp.mid");
-            songLoaded = true;
-            playSong();
         }
 
         private void playSong()
         {
             playButton.img = pauseImg;
-            playing = PLAYING;
+            playing = true;
             player.CurrentPosition = progress * songLen;
             player.Play();
             timer.Start();
@@ -313,12 +296,11 @@ namespace BlottoBeats
                 return;
 
             playButton.img = loadImg;
-            playing = LOADING;
+            playing = false;
             foreach (Setting setting in settings)
                 if (setting.isChecked())
                     setting.randomize();
 
-            player.Open("");
             if (songPos >= backlog.Count)
             {
                 backlog.Add(new SongParameters(seed.getIntValue(), tempo.getIntValue(), genre.getStringValue()));
@@ -330,13 +312,18 @@ namespace BlottoBeats
                 tempo.setValue(backlog[songPos].tempo + "");
                 seed.setValue(backlog[songPos].seed + "");
             }
-            generator.generate(backlog[songPos]);
+
+            player.Open("");
+            songLen = generator.generate(backlog[songPos]);
+            player.Open(@"C:\BlottoBeats\temp.mid");
+            songLoaded = true;
+            playSong();
         }
 
         private void stopSong()
         {
             playButton.img = playImg;
-            playing = PAUSED;
+            playing = false;
             player.Stop();
             timer.Stop();
         }
@@ -357,9 +344,9 @@ namespace BlottoBeats
 
         private void playClicked(object sender, MouseEventArgs e)
         {
-            if (playing == PLAYING)
+            if (playing)
                 stopSong();
-            else if (playing == PAUSED)
+            else
             {
                 if (songLoaded) playSong();
                 else loadSong(true);
@@ -373,7 +360,7 @@ namespace BlottoBeats
             {
                 sliderButton.loc.X = e.X;
                 progress = 1.0 * (sliderButton.loc.X - size) / (193 * size / 64);
-                if (playing == PLAYING) playSong();
+                if (playing) playSong();
                 Invalidate();
             }
         }
@@ -406,17 +393,35 @@ namespace BlottoBeats
 
         private void redditClicked(object sender, MouseEventArgs e)
         {
+            redditDropped = !redditDropped;
 
+            if (settingsDropped)
+            {
+                settingsDropped = false;
+                foreach (Setting setting in settings)
+                    setting.setVisible(settingsDropped);
+            }
+
+            if (redditDropped) this.Size = new Size(33 * size / 8, 23 * size / 8);
+            else this.Size = new Size(33 * size / 8, size);
+
+            Invalidate();
         }
 
         private void settingsClicked(object sender, MouseEventArgs e)
         {
-            if (menuDropped) this.Size = new Size(33 * size / 8, size);
-            else this.Size = new Size(33 * size / 8, 23 * size / 8);
+            settingsDropped = !settingsDropped;
 
-            menuDropped = !menuDropped;
+            if (redditDropped)
+            {
+                redditDropped = false;
+            }
+
+            if (settingsDropped) this.Size = new Size(33 * size / 8, 23 * size / 8);
+            else this.Size = new Size(33 * size / 8, size);
+
             foreach (Setting setting in settings)
-                setting.setVisible(menuDropped);
+                setting.setVisible(settingsDropped);
 
             Invalidate();
         }
@@ -424,8 +429,8 @@ namespace BlottoBeats
         private void advSettingClicked(object sender, MouseEventArgs e)
         {
             if (settingsForm == null)
-                //System.Diagnostics.Debug.Write("settingsForm == null");
                 settingsForm = new AdvancedSettings(this);
+
             settingsForm.ShowDialog();
                 
         }
@@ -443,7 +448,7 @@ namespace BlottoBeats
 
         private void sliderClicked(object sender, MouseEventArgs e)
         {
-            if (playing == PLAYING)
+            if (playing)
             {
                 player.Stop();
                 timer.Stop();
@@ -472,7 +477,7 @@ namespace BlottoBeats
             this.MouseMove -= dragSlider;
             this.MouseUp -= undragSlider;
             this.MouseUp += this.mouseUp;
-            if (playing == PLAYING) playSong();
+            if (playing) playSong();
         }
 
         private void mouseUp(object sender, MouseEventArgs e)
@@ -480,12 +485,18 @@ namespace BlottoBeats
             this.MouseMove -= this.mouseMove;
 
             if (!dragging)
+            {
                 for (int i = buttons.Count - 1; i >= 0; i--)
                     if (pointInPolygon(e.Location, buttons[i].ClickLocation))
                     {
                         buttons[i].onClicked(e);
                         break;
                     }
+
+                if(settingsDropped)
+                    if (pointInPolygon(e.Location, advSettingButton.ClickLocation))
+                        advSettingButton.onClicked(e);
+            }
 
             dragging = false;
         }
@@ -527,10 +538,12 @@ namespace BlottoBeats
             }
             else
             {
+                timer.Stop();
                 sendScore();
                 resetPlayBar();
                 loadSong(true);
             }
+            
             Invalidate();
         }
 
@@ -574,7 +587,7 @@ namespace BlottoBeats
 
             g.FillEllipse(darkGrey, 31 * size / 8, size / 8 - 1, size / 4, 3 * size / 8);
 
-            if (menuDropped)
+            if (settingsDropped)
             {
                 g.FillRectangle(medGrey, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
                 g.DrawRectangle(lightInline, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
@@ -582,10 +595,12 @@ namespace BlottoBeats
                 g.DrawString("Randomized?", font, lightGrey, 15 * size / 4 - g.MeasureString("Randomized?", font).Width, 15 * size / 16);
                 g.DrawString("Advanced Settings", font, lightGrey, 13 * size / 16, 40 * size / 16);
                 g.FillPolygon(advSettingButton.inside, advSettingButton.ClickLocation);
-                if (advSettingButton.stroke != null)
-                    g.DrawPolygon(advSettingButton.stroke, advSettingButton.ClickLocation);
-                if (advSettingButton.ImgLocation != null)
-                    g.FillPolygon(lightGrey, advSettingButton.ImgLocation);
+                g.DrawPolygon(advSettingButton.stroke, advSettingButton.ClickLocation);
+            }
+            else if(redditDropped)
+            {
+                g.FillRectangle(medGrey, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
+                g.DrawRectangle(lightInline, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
             }
 
             foreach(Button button in buttons)
