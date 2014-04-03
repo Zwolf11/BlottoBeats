@@ -144,8 +144,8 @@ namespace Networking {
 		/// <param name="parameters">Parameters to match</param>
 		/// <param name="numberOfSongs">Number of songs to return</param>
 		/// <param name="userInfo">The user authentication token</param>
-		public BBRequest(SongParameters parameters, int numberOfSongs, UserToken userInfo) {
-			requestType = new RequestSongs(parameters, numberOfSongs, userInfo);
+		public BBRequest(int numberOfSongs) {
+			requestType = new RequestSongs(numberOfSongs);
 		}
 
 		/// <summary>
@@ -191,11 +191,9 @@ namespace Networking {
 		/// </summary>
 		[SerializableAttribute]
 		public class RequestSongs : Request {
-			public SongParameters parameters { get; private set; }
 			public int num { get; private set; }
 
-			public RequestSongs(SongParameters parameters, int num, UserToken userInfo) : base(userInfo) {
-				this.parameters = parameters;
+			public RequestSongs(int num) : base(null) {
 				this.num = num;
 			}
 		}
