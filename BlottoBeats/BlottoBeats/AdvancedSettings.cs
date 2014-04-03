@@ -22,20 +22,27 @@ namespace BlottoBeats
             this.label3.Text = Convert.ToString(form.backlog.Count);
         }
 
+        //update ip button
         private void button1_Click(object sender, EventArgs e)
         {
             form.server.ip = this.textBox1.Text;
         }
 
+        //update max backlog button
         private void button2_Click(object sender, EventArgs e)
         {
 
         }
 
+        //account management button
         private void button3_Click(object sender, EventArgs e)
         {
             form.accountForm.textBox1.Clear();
-            form.accountForm.textBox2.Clear();
+            if (form.currentUser == null)
+            {
+                form.accountForm.textBox2.Text = form.currentUser.username;
+            }
+            
             form.accountForm.ShowDialog();
         }
     }
