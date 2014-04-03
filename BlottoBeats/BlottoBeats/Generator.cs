@@ -2753,7 +2753,58 @@ namespace BlottoBeats
                         noteRhythm = chordLength;
                     }
                     else
-                        noteRhythm = randomizer.Next(maxVal) + 1;
+                    {
+                        int[] rhythmWeight = new int[maxVal];
+                        for (int j = 0; j < maxVal; j++)
+                        {
+                            int beatSize = measureLen / timeSigQuant;
+                            if (j > beatSize)
+                            {
+                                rhythmWeight[j] = 4;
+
+                            }
+                            else
+                            {
+                                rhythmWeight[j] = 1;
+                              
+                            }
+                            if (maxVal < beatSize)
+                               {
+                                   rhythmWeight[maxVal - 1] = 10;
+
+                              }
+                            if (j+1 % beatSize == 0)
+                            {
+                                rhythmWeight[j] *= 4;
+
+                            }
+                            if (j + 1 == beatSize)
+                            {
+                                rhythmWeight[j] *= 4;
+
+                            }
+
+                        }
+                        int sumRythWeights = 0;
+                        for (int k = 0; k < maxVal; k++)
+                        {
+                            sumRythWeights += rhythmWeight[k];
+                        }
+
+                        int randOutput = randomizer.Next(sumRythWeights);
+                        sumRythWeights = 0;
+                        for (int k= 0; k < maxVal; k++)
+                        {
+                            sumRythWeights += rhythmWeight[k];
+                            if (randOutput < sumRythWeights)
+                            {
+                                noteRhythm = k+1;
+                                break;
+                            }
+
+                        }
+                    }
+                        
 
 
                     //Define noteValue for each note
