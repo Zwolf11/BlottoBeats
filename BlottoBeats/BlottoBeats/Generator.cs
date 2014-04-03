@@ -3089,7 +3089,7 @@ namespace BlottoBeats
                         }
 
                     }
-                    //TODO: Raise and lower leading tones in dominant functions of minor modes in melodic lines
+                    //Selects a note randomly based upon weighting
                     int sumWeights = 0;
                     for (int j = 0; j < 14; j++)
                     {
@@ -3105,6 +3105,35 @@ namespace BlottoBeats
                         {
                             noteVal = notearray[j];
                             break;
+                        }
+
+                    }
+                    //Raise and lower leading tones in dominant functions of minor modes in melodic lines
+                    if (mode == 1)
+                    {
+                        if (thisChord == 5 || thisChord == 7)
+                        {
+                            if (noteVal.Equals(notearray[6]) || noteVal.Equals(notearray[13]))
+                            {
+                                if (noteVal[1] == '#')
+                                {
+                                    octave = int.Parse(noteVal[2].ToString());
+                                    String sub = noteVal.Substring(0, 2);
+                                    int index = Array.IndexOf(notes, sub);
+                                    noteVal = notes[index + 1] + octave.ToString();
+                                }
+                                else
+                                {
+                                    octave = int.Parse(noteVal[1].ToString());
+                                    String sub = noteVal.Substring(0, 1);
+                                    int index = Array.IndexOf(notes, sub);
+                                    if (sub.Equals("B"))
+                                    {
+                                        octave++;
+                                    }
+                                    noteVal = notes[index + 1] + octave.ToString();
+                                }
+                            }
                         }
 
                     }
