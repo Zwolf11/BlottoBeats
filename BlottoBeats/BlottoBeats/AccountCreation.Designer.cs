@@ -56,7 +56,7 @@
             this.label2.Location = new System.Drawing.Point(32, 101);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(113, 26);
-            this.label2.TabIndex = 1;
+            this.label2.TabIndex = 5;
             this.label2.Text = "Username";
             // 
             // label3
@@ -67,7 +67,7 @@
             this.label3.Location = new System.Drawing.Point(32, 174);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(108, 26);
-            this.label3.TabIndex = 2;
+            this.label3.TabIndex = 6;
             this.label3.Text = "Password";
             // 
             // textBox1
@@ -77,7 +77,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.PasswordChar = '*';
             this.textBox1.Size = new System.Drawing.Size(195, 32);
-            this.textBox1.TabIndex = 3;
+            this.textBox1.TabIndex = 2;
             // 
             // textBox2
             // 
@@ -85,7 +85,7 @@
             this.textBox2.Location = new System.Drawing.Point(206, 98);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(195, 32);
-            this.textBox2.TabIndex = 4;
+            this.textBox2.TabIndex = 1;
             // 
             // button1
             // 
@@ -95,7 +95,7 @@
             this.button1.Location = new System.Drawing.Point(106, 287);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 35);
-            this.button1.TabIndex = 5;
+            this.button1.TabIndex = 3;
             this.button1.Text = "Login";
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
@@ -108,7 +108,7 @@
             this.button2.Location = new System.Drawing.Point(240, 287);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(93, 35);
-            this.button2.TabIndex = 6;
+            this.button2.TabIndex = 4;
             this.button2.Text = "Register";
             this.button2.UseVisualStyleBackColor = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
