@@ -11,8 +11,6 @@ namespace BlottoBeats
 {
     public class Generator
     {
-        private MainForm form;
-
         internal class SongPattern
         {
             public int totalNumMeasures { get; private set; }
@@ -30,7 +28,7 @@ namespace BlottoBeats
 
         public Generator()
         {
-            this.form = form;
+            
         }
 
         //NOTE: CURRENTLY ASSUMING VALID/NON-NULL INPUT!!!!! (will crash with invalid input) 

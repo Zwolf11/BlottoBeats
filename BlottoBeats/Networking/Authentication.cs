@@ -8,11 +8,7 @@ namespace Networking {
 	public class UserToken {
 		public string username { get; private set; }
 		public DateTime expires { get; private set; }
-<<<<<<< HEAD
-		public string token { get; set; }
-=======
 		public string token { get; private set; }
->>>>>>> 47004ec8e0941c0acd6ac41ceaf60d922c37526f
 
 		private static TimeSpan offset = new TimeSpan(30, 0, 0, 0);	// 30 day expiry on tokens
 
