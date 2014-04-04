@@ -80,7 +80,7 @@ namespace BlottoBeats
             backlog = new List<SongParameters>();
             redditSongs = new List<SongParameters>();
             generator = new Generator();
-            server = new BBServerConnection("127.0.0.1", 3000);
+            server = new BBServerConnection("68.234.183.70", 3000);
             player = new MediaPlayer.MediaPlayer();
 
             timer = new System.Windows.Forms.Timer();
@@ -129,6 +129,7 @@ namespace BlottoBeats
                     if (server.VerifyToken(tempToken) == true)
                     {
                         currentUser = tempToken;
+                        accountForm.textBox2.Text = currentUser.username;
                     }
                     else
                     {
