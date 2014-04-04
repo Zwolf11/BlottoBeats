@@ -72,7 +72,6 @@ namespace BlottoBeatsServer {
 		/// <param name="numSongs">The maximum number of songs to return</param>
 		/// <returns>The list of songs</returns>
 		internal int[] GetSongList(int numSongs) {
-            string connString = "Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;";
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + numSongs;
@@ -94,6 +93,7 @@ namespace BlottoBeatsServer {
                 score = (int)reader["iduploadedsongs"];
                 idArray[i] = score;
             }
+
             conn.Close();
 
             return idArray;
