@@ -118,10 +118,10 @@ namespace BlottoBeats
 
             refreshReddit();
 
-            redditSongs = new List<SongParameters>();
+            /*redditSongs = new List<SongParameters>();
             Random rand = new Random(DateTime.Now.Millisecond);
             for (int i = 0; i < 12; i++ )
-                redditSongs.Add(new SongParameters(rand.Next(int.MinValue, int.MaxValue), rand.Next(60, 200), "Classical"));
+                redditSongs.Add(new SongParameters(rand.Next(int.MinValue, int.MaxValue), rand.Next(60, 200), "Classical"));*/
 
             if (Properties.Settings.Default.username == "null")
             {
