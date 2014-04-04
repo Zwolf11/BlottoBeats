@@ -3201,7 +3201,7 @@ namespace BlottoBeats
                                     octave = int.Parse(noteVal[2].ToString());
                                     String sub = noteVal.Substring(0, 2);
                                     int index = Array.IndexOf(notes, sub);
-                                    noteVal = notes[index + 1] + octave.ToString();
+                                    noteVal = notes[(index + 1)%12] + octave.ToString();
                                 }
                                 else
                                 {
@@ -3212,7 +3212,7 @@ namespace BlottoBeats
                                     {
                                         octave++;
                                     }
-                                    noteVal = notes[index + 1] + octave.ToString();
+                                    noteVal = notes[(index + 1) % 12] + octave.ToString();
                                 }
                             }
                         }
