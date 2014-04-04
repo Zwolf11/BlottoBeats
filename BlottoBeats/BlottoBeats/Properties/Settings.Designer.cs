@@ -60,7 +60,7 @@ namespace BlottoBeats.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("68.234.183.70")]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
         public string lastIP {
             get {
                 return ((string)(this["lastIP"]));
