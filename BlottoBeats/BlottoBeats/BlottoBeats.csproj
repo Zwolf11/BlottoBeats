@@ -68,6 +68,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Setting.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="TextBoxSetting.cs" />
     <EmbeddedResource Include="AccountCreation.resx">
       <DependentUpon>AccountCreation.cs</DependentUpon>
@@ -85,7 +86,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <Compile Include="Properties\Settings.Designer.cs">

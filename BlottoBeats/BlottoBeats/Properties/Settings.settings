@@ -1,7 +1,15 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="BlottoBeats.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="username" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">null</Value>
+    </Setting>
+    <Setting Name="token" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">null</Value>
+    </Setting>
+    <Setting Name="expires" Type="System.DateTime" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
 </SettingsFile>

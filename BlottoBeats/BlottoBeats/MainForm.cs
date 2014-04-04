@@ -41,6 +41,7 @@ namespace BlottoBeats
         private MediaPlayer.MediaPlayer player;
         public AdvancedSettings settingsForm;
         public AccountCreation accountForm;
+        public UserToken currentUser;
 
         private Font font;
         private SolidBrush lightGrey;
@@ -111,6 +112,15 @@ namespace BlottoBeats
 
             settingsForm = new AdvancedSettings(this);
             accountForm = new AccountCreation(this);
+
+            if (Properties.Settings.Default.username == null)
+            {
+                accountForm.ShowDialog();
+            }
+            else
+            {
+                currentUser = new UserToken(Properties.Settings.Default.username, Properties.Settings.Default.expires, Properties.Settings.Default.token);
+            }
         }
 
         private void initButtons()
