@@ -124,13 +124,18 @@ namespace Networking {
 		/// <returns>True if the connection is valid, false otherwise</returns>
 		public bool Test() {
 			bool result = false;
-			
-			using (TcpClient client = new TcpClient()) {
-				client.Connect(serverEndPoint);
-				NetworkStream networkStream = client.GetStream();
 
-				result = Message.Test(networkStream);
-			}
+            try
+            {
+                using (TcpClient client = new TcpClient())
+                {
+                    client.Connect(serverEndPoint);
+                    NetworkStream networkStream = client.GetStream();
+
+                    result = Message.Test(networkStream);
+                }
+            }
+            catch (SocketException) { return false; }
 
 			return result;
 		}

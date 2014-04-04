@@ -72,7 +72,7 @@ namespace MidiOut
                         len = item.length; //in 16th notes
                         //Switch note on
                         builder.Command = ChannelCommand.ProgramChange;
-                        if (output.Genre == "Chord Progression")
+                        if (output.Genre == "Generic")
                         {
                             builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
                         }
@@ -128,7 +128,7 @@ namespace MidiOut
                         int noteLength = outputNote.length; //in 16th notes
                         //Switch note on
                         builder.Command = ChannelCommand.ProgramChange;
-                        if (output.Genre == "Chord Progression")
+                        if (output.Genre == "Generic")
                         {
                             builder.Data1 = (int)GeneralMidiInstrument.ElectricGuitarJazz;
                         }
