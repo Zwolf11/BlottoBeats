@@ -389,6 +389,8 @@ namespace BlottoBeats
                     redditSongs = songList.songs;
                 }
             }
+
+            Invalidate();
         }
 
         private void playClicked(object sender, MouseEventArgs e)
