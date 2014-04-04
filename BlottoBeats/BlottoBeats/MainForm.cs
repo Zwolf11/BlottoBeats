@@ -117,7 +117,7 @@ namespace BlottoBeats
 
             if (server.Test())
             {
-                BBResponse response = server.SendRequest(new BBRequest(10));
+                BBResponse response = server.SendRequest(new BBRequest(12));
 
                 if(response.responseType is BBResponse.SongList)
                 {
@@ -680,7 +680,11 @@ namespace BlottoBeats
 
                 if (redditSongs.Count > 0)
                     for (int i = 0; i < redditSongs.Count; i++)
-                        g.DrawString("+" + redditSongs[i].score + " | Genre: " + redditSongs[i].genre + " | Tempo: " + redditSongs[i].tempo + " | Seed: " + redditSongs[i].seed, smallFont, lightGrey, 13 * size / 16, 15 * size / 16 + i * smallFont.Size * 2);
+                    {
+                        String preString = "";
+                        if (redditSongs[i].score >= 0) preString = "+";
+                        g.DrawString(preString + redditSongs[i].score + " | Genre: " + redditSongs[i].genre + " | Tempo: " + redditSongs[i].tempo + " | Seed: " + redditSongs[i].seed, smallFont, lightGrey, 13 * size / 16, 15 * size / 16 + i * smallFont.Size * 2);
+                    }
                 else
                     g.DrawString("Could not connect to server.", font, lightGrey, 13 * size / 16, 15 * size / 16);
             }

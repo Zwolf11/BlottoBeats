@@ -168,6 +168,7 @@ namespace MidiOut
             }
 
             sequence.Save(@"C:\BlottoBeats\temp.mid");
+
             return ((double) pos)/(PpqnClock.PpqnMinValue / 4)/4 / output.Tempo * 60;
 
             //Code to play sequence in client. Currently not functioning
