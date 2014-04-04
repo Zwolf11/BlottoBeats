@@ -47,6 +47,7 @@ namespace BlottoBeats
             else
             {
                 MessageBox.Show("Server is not connected. Try again later");
+                this.Close();
             }
 
         }
@@ -78,6 +79,7 @@ namespace BlottoBeats
             else
             {
                 MessageBox.Show("Server is not connected. Try again later");
+                this.Close();
             }
         }
     }
