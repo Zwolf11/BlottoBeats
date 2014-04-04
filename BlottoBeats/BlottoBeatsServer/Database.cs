@@ -99,7 +99,12 @@ namespace BlottoBeatsServer {
             List<SongParameters> list = new List<SongParameters>();
             
             for (int j = 0; j<numSongs; j++) {
+                
                 int tempId = idArray[j];
+                if (tempId == 0)
+                {
+                    break;
+                }
                 int vote = (int)returnItem(tempId, "voteScore", "uploadedsongs");
                 int seed = (int)returnItem(tempId, "songseed", "uploadedsongs");
                 int tempo = (int)returnItem(tempId, "tempo", "uploadedsongs");
