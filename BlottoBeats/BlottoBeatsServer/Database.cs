@@ -96,7 +96,7 @@ namespace BlottoBeatsServer {
 
             conn.Close();
 
-            List<SongParameters> list = new List<SongParameters>;
+            List<SongParameters> list = new List<SongParameters>();
             
             for (int j = 0; j<numSongs; j++) {
                 int tempId = idArray[j];
