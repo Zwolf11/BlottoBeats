@@ -41,6 +41,7 @@ namespace BlottoBeats
         private MediaPlayer.MediaPlayer player;
         public AdvancedSettings settingsForm;
         public AccountCreation accountForm;
+        public UserToken currentUser;
 
         private Font font;
         private Font smallFont;
@@ -128,6 +129,15 @@ namespace BlottoBeats
             Random rand = new Random(DateTime.Now.Millisecond);
             for (int i = 0; i < 12; i++ )
                 redditSongs.Add(new SongParameters(rand.Next(int.MinValue, int.MaxValue), rand.Next(60, 200), "Classical"));*/
+
+            if (Properties.Settings.Default.username == null)
+            {
+                accountForm.ShowDialog();
+            }
+            else
+            {
+                currentUser = new UserToken(Properties.Settings.Default.username, Properties.Settings.Default.expires, Properties.Settings.Default.token);
+            }
         }
 
         private void initButtons()

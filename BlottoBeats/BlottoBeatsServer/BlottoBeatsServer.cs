@@ -144,7 +144,35 @@ namespace BlottoBeatsServer {
 
 					Message.Send(networkStream, new AuthResponse(token));
 					
+				} else if (message is TokenVerifyRequest) {
+					
+					// A TokenVerifyRequest was recieved.  Test the token for validity.
+					Log("Recieved a token verification request", address, 1);
+					TokenVerifyRequest req = message as TokenVerifyRequest;
+					
+					Log("    Verifying token for user: " + req.token.username, address, 2);
+
+					try {
+
+						bool valid;
+
+						if (database.VerifyToken(req.token) != 0) {
+							Log("    Verification Successful", address, 2);
+							valid = true;
+						} else {
+							Log("    Verification Failed", address, 2);
+							valid = false;
+						}
+
+						Message.Send(networkStream, new TokenVerifyResponse(valid));
+					} catch (Exception ex) {
+						Log("DATABASE ERROR: Could not process request", address, 0);
+						Log(ex.Message, 0);
+						Message.Send(networkStream, new BBResponse("Database", "An unknown database error occured.  Could not process request."));
+					}
+
 				} else if (message is BBRequest) {
+
 					try {
 						// A BBRequest was recieved.  Process the request
 						BBRequest bbmessage = message as BBRequest;

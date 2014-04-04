@@ -9,7 +9,7 @@ namespace Networking {
 	/// Server object used to store data about the server
 	/// </summary>
 	public class BBServerConnection {
-        private IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 3000);
+        private IPEndPoint serverEndPoint;
 		public string ip {
             get {
                 return this.serverEndPoint.Address.ToString();
@@ -17,6 +17,14 @@ namespace Networking {
             set {
                 this.serverEndPoint.Address = IPAddress.Parse(value);
             }
+		}
+		public int port {
+			get {
+				return this.serverEndPoint.Port;
+			}
+			set {
+				this.serverEndPoint.Port = value;
+			}
 		}
 
 		/// <summary>
@@ -33,7 +41,7 @@ namespace Networking {
 		/// <param name="ipAddress">IP address of the server</param>
 		/// <param name="port">Port to connect to the server with</param>
 		public BBServerConnection(string ipAddress, int port) {
-			serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+			serverEndPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
 		}
 
 		/// <summary>
@@ -60,7 +68,32 @@ namespace Networking {
 			else if (!(reply is AuthResponse))
 				throw new Exception("BBRequest Error: Expected AuthResponse but recieved unknown response type");
 			else
-				return (reply as AuthResponse).token;
+				return ((AuthResponse)reply).token;
+		}
+
+		/// <summary>
+		/// Sends a request to the server to verify a user token is valid.
+		/// </summary>
+		/// <param name="token">Token to verify</param>
+		/// <returns>True if the token is valid</returns>
+		public bool VerifyToken(UserToken token) {
+			TokenVerifyRequest request = new TokenVerifyRequest(token);
+			object reply;
+
+			using (TcpClient client = new TcpClient()) {
+				client.Connect(serverEndPoint);
+				NetworkStream networkStream = client.GetStream();
+
+				Message.Send(networkStream, request);
+				reply = Message.Recieve(networkStream);
+			}
+
+			if (reply == null)
+				throw new Exception("BBRequest Error: Expected reply but recieved none");//Console.Error.WriteLine("BBRequest Error: Expected reply but recieved none");
+			else if (!(reply is TokenVerifyResponse))
+				throw new Exception("BBRequest Error: Expected VerifyTokenResponse but recieved unknown response type");
+			else
+				return ((TokenVerifyResponse)reply).valid;
 		}
 
 		/// <summary>
@@ -275,6 +308,25 @@ namespace Networking {
 			public SongList(List<SongParameters> songs) {
 				this.songs = songs;
 			}
+		}
+	}
+
+	/// <summary>
+	/// Request from the client to the server to verify a user token.
+	/// </summary>
+	public class TokenVerifyRequest {
+		public UserToken token { get; private set; }
+
+		public TokenVerifyRequest(UserToken token) {
+			this.token = token;
+		}
+	}
+
+	public class TokenVerifyResponse {
+		public bool valid { get; private set; }
+
+		public TokenVerifyResponse(bool valid) {
+			this.valid = valid;
 		}
 	}
 

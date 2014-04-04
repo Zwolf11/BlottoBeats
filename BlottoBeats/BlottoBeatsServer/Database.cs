@@ -71,12 +71,34 @@ namespace BlottoBeatsServer {
 		/// <param name="songParameters">The parameters to match</param>
 		/// <param name="numSongs">The maximum number of songs to return</param>
 		/// <returns>The list of songs</returns>
-		internal List<SongParameters> GetSongList(int numSongs) {
-			List<SongParameters> list = new List<SongParameters>();
+		internal int[] GetSongList(int numSongs) {
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + numSongs;
+            int score = 0;
+            int[] idArray = new int[numSongs];
+            int i = -1;
+            try
+            {
+                conn.Open();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            MySqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                i++;
+                score = (int)reader["iduploadedsongs"];
+                idArray[i] = score;
+            }
 
-			// TODO: Implement
+            conn.Close();
 
-			return list;
+            return idArray;
+
+			
 		}
 
 
