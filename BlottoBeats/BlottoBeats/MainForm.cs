@@ -29,6 +29,7 @@ namespace BlottoBeats
         private bool settingsDropped;
         private bool redditDropped;
         private double songLen;
+        public int maxSongs;
         private Setting genre;
         private Setting tempo;
         private Setting seed;
@@ -341,6 +342,11 @@ namespace BlottoBeats
             if (songPos >= backlog.Count)
             {
                 backlog.Add(new SongParameters(seed.getIntValue(), tempo.getIntValue(), genre.getStringValue()));
+                if(backlog.Count > Properties.Settings.Default.maxSongs)
+                {
+                    backlog.RemoveAt(0);
+                    songPos--;
+                }
                 settingsForm.label3.Text = Convert.ToString(backlog.Count);
             }
             else

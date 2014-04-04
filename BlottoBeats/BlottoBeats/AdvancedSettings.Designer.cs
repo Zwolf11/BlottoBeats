@@ -92,7 +92,7 @@
             this.label3.AutoSize = true;
             this.label3.BackColor = System.Drawing.Color.White;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F);
-            this.label3.Location = new System.Drawing.Point(341, 160);
+            this.label3.Location = new System.Drawing.Point(335, 160);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(60, 24);
@@ -117,7 +117,7 @@
             this.textBox2.Location = new System.Drawing.Point(215, 101);
             this.textBox2.Margin = new System.Windows.Forms.Padding(2);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(63, 29);
+            this.textBox2.Size = new System.Drawing.Size(88, 29);
             this.textBox2.TabIndex = 6;
             // 
             // button2

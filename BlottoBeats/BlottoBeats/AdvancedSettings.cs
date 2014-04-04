@@ -20,6 +20,7 @@ namespace BlottoBeats
             InitializeComponent();
             this.form = form;
             this.textBox1.Text = form.server.ip;
+            this.textBox2.Text = Properties.Settings.Default.maxSongs + "";
             this.label3.Text = Convert.ToString(form.backlog.Count);
         }
 
@@ -42,7 +43,7 @@ namespace BlottoBeats
         //update max backlog button
         private void button2_Click(object sender, EventArgs e)
         {
-
+            Properties.Settings.Default.maxSongs = form.maxSongs;
         }
 
         //account management button
