@@ -38,7 +38,7 @@ namespace BlottoBeats
         private void button3_Click(object sender, EventArgs e)
         {
             form.accountForm.textBox1.Clear();
-            if (form.currentUser == null)
+            if (form.currentUser != null)
             {
                 form.accountForm.textBox2.Text = form.currentUser.username;
             }

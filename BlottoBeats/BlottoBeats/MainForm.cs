@@ -137,14 +137,22 @@ namespace BlottoBeats
             else
             {
                 UserToken tempToken = new UserToken(Properties.Settings.Default.username, Properties.Settings.Default.expires, Properties.Settings.Default.token);
-                if (server.VerifyToken(tempToken) == true)
+                if (server.Test())
                 {
-                    currentUser = tempToken;
+
+                    if (server.VerifyToken(tempToken) == true)
+                    {
+                        currentUser = tempToken;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Login has expired. Please log in again");
+                        accountForm.ShowDialog();
+                    }
                 }
                 else
                 {
-                    MessageBox.Show("Login has expired. Please log in again");
-                    accountForm.ShowDialog();
+                    MessageBox.Show("Server is not connected. Try again later");
                 }
             }
         }

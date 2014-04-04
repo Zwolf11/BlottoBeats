@@ -25,21 +25,28 @@ namespace BlottoBeats
         {
             UserToken token;
 
-            token = form.server.Authenticate(new Credentials(textBox2.Text, textBox1.Text), false);
-
-            if (token == null)
+            if (form.server.Test())
             {
-                MessageBox.Show("Username/Password was incorrect. Please try again");
+                token = form.server.Authenticate(new Credentials(textBox2.Text, textBox1.Text), false);
+
+                if (token == null)
+                {
+                    MessageBox.Show("Username/Password was incorrect. Please try again");
+                }
+                else
+                {
+                    form.currentUser = token;
+                    Properties.Settings.Default.username = form.currentUser.username;
+                    Properties.Settings.Default.expires = form.currentUser.expires;
+                    Properties.Settings.Default.token = form.currentUser.token;
+                    Properties.Settings.Default.Save();
+
+                    this.Close();
+                }
             }
             else
             {
-                form.currentUser = token;
-                Properties.Settings.Default.username = form.currentUser.username;
-                Properties.Settings.Default.expires = form.currentUser.expires;
-                Properties.Settings.Default.token = form.currentUser.token;
-                Properties.Settings.Default.Save();
-
-                this.Close();
+                MessageBox.Show("Server is not connected. Try again later");
             }
 
         }
@@ -48,17 +55,24 @@ namespace BlottoBeats
         private void button2_Click(object sender, EventArgs e)
         {
             UserToken token;
-
-            token = form.server.Authenticate(new Credentials(textBox2.Text, textBox1.Text), true);
-
-            if (token == null)
+            if (form.server.Test())
             {
-                MessageBox.Show("Error occurred. Username might already be taken");
-                form.currentUser = token;
+
+                token = form.server.Authenticate(new Credentials(textBox2.Text, textBox1.Text), true);
+
+                if (token == null)
+                {
+                    MessageBox.Show("Error occurred. Username might already be taken");
+                    form.currentUser = token;
+                }
+                else
+                {
+                    this.Close();
+                }
             }
             else
             {
-                this.Close();
+                MessageBox.Show("Server is not connected. Try again later");
             }
         }
     }
