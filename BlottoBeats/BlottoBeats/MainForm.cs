@@ -24,7 +24,6 @@ namespace BlottoBeats
         private Point dragPos;
         private bool dragging;
         private bool playing;
-        private bool songLoaded;
         private double progress;
         private int score;
         private bool settingsDropped;
@@ -73,7 +72,6 @@ namespace BlottoBeats
             settings = new List<Setting>();
             dragging = false;
             playing = false;
-            songLoaded = false;
             progress = 0;
             score = 0;
             settingsDropped = false;
@@ -117,11 +115,6 @@ namespace BlottoBeats
             accountForm = new AccountCreation(this);
 
             refreshReddit();
-
-            /*redditSongs = new List<SongParameters>();
-            Random rand = new Random(DateTime.Now.Millisecond);
-            for (int i = 0; i < 12; i++ )
-                redditSongs.Add(new SongParameters(rand.Next(int.MinValue, int.MaxValue), rand.Next(60, 200), "Classical"));*/
 
             if (Properties.Settings.Default.username == "null")
             {
@@ -330,6 +323,10 @@ namespace BlottoBeats
 
         private void loadSong(bool nextSong)
         {
+            stopSong();
+            sendScore();
+            resetPlayBar();
+
             if (nextSong) songPos++;
             else if(songPos > 0) songPos--;
 
@@ -352,15 +349,9 @@ namespace BlottoBeats
                 seed.setValue(backlog[songPos].seed + "");
             }
 
-            generateSong();
-        }
-
-        private void generateSong()
-        {
             player.Open("");
             songLen = generator.generate(backlog[songPos]);
             player.Open(@"C:\BlottoBeats\temp.mid");
-            songLoaded = true;
             playSong();
         }
 
@@ -377,13 +368,12 @@ namespace BlottoBeats
             progress = 0;
             sliderButton.loc.X = size;
             score = 0;
-            songLoaded = false;
         }
 
         private void sendScore()
         {
-            if (score > 0 && server.Test()) new Thread(() => server.SendRequest(new BBRequest(backlog[songPos], true, currentUser))).Start();
-            else if (score < 0 && server.Test()) new Thread(() => server.SendRequest(new BBRequest(backlog[songPos], false, currentUser))).Start();
+            if (score > 0 && server.Test()) server.SendRequest(new BBRequest(backlog[songPos], true, currentUser));
+            else if (score < 0 && server.Test()) server.SendRequest(new BBRequest(backlog[songPos], false, currentUser));
         }
 
         private void refreshReddit()
@@ -406,7 +396,7 @@ namespace BlottoBeats
                 stopSong();
             else
             {
-                if (songLoaded) playSong();
+                if (songPos >= 0) playSong();
                 else loadSong(true);
             }
             Invalidate();
@@ -425,27 +415,23 @@ namespace BlottoBeats
 
         private void backClicked(object sender, MouseEventArgs e)
         {
-            sendScore();
-            resetPlayBar();
             loadSong(false);
         }
 
         private void nextClicked(object sender, MouseEventArgs e)
         {
-            sendScore();
-            resetPlayBar();
             loadSong(true);
         }
 
         private void upvoteClicked(object sender, MouseEventArgs e)
         {
-            score = score == 1 ? 0 : 1;
+            if(songPos >= 0) score = score == 1 ? 0 : 1;
             Invalidate();
         }
 
         private void downvoteClicked(object sender, MouseEventArgs e)
         {
-            score = score == -1 ? 0 : -1;
+            if (songPos >= 0) score = score == -1 ? 0 : -1;
             Invalidate();
         }
 
@@ -569,9 +555,6 @@ namespace BlottoBeats
                         for (int i = 0; i < redditSongs.Count; i++)
                             if (e.Location.X >= 3 * size / 4 && e.Location.X < 3 * size / 4 + 3 * size && e.Location.Y >= 15 * size / 16 + i * smallFont.Size * 2 && e.Location.Y < 15 * size / 16 + (i + 1) * smallFont.Size * 2)
                             {
-                                sendScore();
-                                resetPlayBar();
-
                                 bool[] checks = new bool[settings.Count];
                                 for (int j = 0; j < settings.Count; j++)
                                 {
@@ -634,9 +617,6 @@ namespace BlottoBeats
             }
             else
             {
-                timer.Stop();
-                sendScore();
-                resetPlayBar();
                 loadSong(true);
             }
             
