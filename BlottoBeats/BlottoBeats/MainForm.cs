@@ -20,6 +20,7 @@ namespace BlottoBeats
         private List<Point> pauseImg;
         private Button playBarButton;
         private Button advSettingButton;
+        private Button refreshRedditButton;
         private Point dragPos;
         private bool dragging;
         private bool playing;
@@ -115,20 +116,12 @@ namespace BlottoBeats
             settingsForm = new AdvancedSettings(this);
             accountForm = new AccountCreation(this);
 
-            if (server.Test())
-            {
-                BBResponse response = server.SendRequest(new BBRequest(12));
+            refreshReddit();
 
-                if(response.responseType is BBResponse.SongList)
-                {
-                    BBResponse.SongList songList = (BBResponse.SongList)response.responseType;
-                    redditSongs = songList.songs;
-                }
-            }
-            /*redditSongs = new List<SongParameters>();
+            redditSongs = new List<SongParameters>();
             Random rand = new Random(DateTime.Now.Millisecond);
             for (int i = 0; i < 12; i++ )
-                redditSongs.Add(new SongParameters(rand.Next(int.MinValue, int.MaxValue), rand.Next(60, 200), "Classical"));*/
+                redditSongs.Add(new SongParameters(rand.Next(int.MinValue, int.MaxValue), rand.Next(60, 200), "Classical"));
 
             if (Properties.Settings.Default.username == "null")
             {
@@ -319,6 +312,9 @@ namespace BlottoBeats
             advSettingButton = new Button(buttonShape, new Point(27 * size / 8, 20 * size / 8), darkGrey, lightOutline, null);
             advSettingButton.Clicked += advSettingClicked;
 
+            refreshRedditButton = new Button(buttonShape, new Point(27 * size / 8, 20 * size / 8), darkGrey, lightOutline, null);
+            refreshRedditButton.Clicked += refreshRedditClicked;
+
             foreach (Setting setting in settings)
                 setting.init(size);
         }
@@ -388,6 +384,20 @@ namespace BlottoBeats
         {
             if (score > 0 && server.Test()) new Thread(() => server.SendRequest(new BBRequest(backlog[songPos], true, currentUser))).Start();
             else if (score < 0 && server.Test()) new Thread(() => server.SendRequest(new BBRequest(backlog[songPos], false, currentUser))).Start();
+        }
+
+        private void refreshReddit()
+        {
+            if (server.Test())
+            {
+                BBResponse response = server.SendRequest(new BBRequest(12));
+
+                if (response.responseType is BBResponse.SongList)
+                {
+                    BBResponse.SongList songList = (BBResponse.SongList)response.responseType;
+                    redditSongs = songList.songs;
+                }
+            }
         }
 
         private void playClicked(object sender, MouseEventArgs e)
@@ -480,7 +490,12 @@ namespace BlottoBeats
                 settingsForm = new AdvancedSettings(this);
 
             settingsForm.ShowDialog();
-                
+        }
+
+        private void refreshRedditClicked(object sender, MouseEventArgs e)
+        {
+            refreshReddit();
+            Invalidate();
         }
 
         private void minimizeClicked(object sender, MouseEventArgs e)
@@ -547,30 +562,35 @@ namespace BlottoBeats
 
                 if(redditDropped)
                 {
-                    for(int i=0;i<redditSongs.Count;i++)
-                        if (e.Location.X >= 3 * size / 4 && e.Location.X < 3 * size / 4 + 3 * size && e.Location.Y >= 15 * size / 16 + i * smallFont.Size * 2 && e.Location.Y < 15 * size / 16 + (i + 1) * smallFont.Size * 2)
-                        {
-                            sendScore();
-                            resetPlayBar();
-
-                            bool[] checks = new bool[settings.Count];
-                            for (int j = 0; j < settings.Count; j++ )
+                    if (pointInPolygon(e.Location, refreshRedditButton.ClickLocation))
+                        refreshRedditButton.onClicked(e);
+                    else
+                    {
+                        for (int i = 0; i < redditSongs.Count; i++)
+                            if (e.Location.X >= 3 * size / 4 && e.Location.X < 3 * size / 4 + 3 * size && e.Location.Y >= 15 * size / 16 + i * smallFont.Size * 2 && e.Location.Y < 15 * size / 16 + (i + 1) * smallFont.Size * 2)
                             {
-                                checks[j] = settings[j].isChecked();
-                                settings[j].setChecked(false);
+                                sendScore();
+                                resetPlayBar();
+
+                                bool[] checks = new bool[settings.Count];
+                                for (int j = 0; j < settings.Count; j++)
+                                {
+                                    checks[j] = settings[j].isChecked();
+                                    settings[j].setChecked(false);
+                                }
+
+                                genre.setValue(redditSongs[i].genre);
+                                tempo.setValue(redditSongs[i].tempo + "");
+                                seed.setValue(redditSongs[i].seed + "");
+
+                                loadSong(true);
+
+                                for (int j = 0; j < settings.Count; j++)
+                                    settings[j].setChecked(checks[j]);
+
+                                break;
                             }
-
-                            genre.setValue(redditSongs[i].genre);
-                            tempo.setValue(redditSongs[i].tempo + "");
-                            seed.setValue(redditSongs[i].seed + "");
-
-                            loadSong(true);
-
-                            for (int j = 0; j < settings.Count; j++)
-                                settings[j].setChecked(checks[j]);
-
-                            break;
-                        }
+                    }
                 }
             }
 
@@ -687,6 +707,9 @@ namespace BlottoBeats
                     }
                 else
                     g.DrawString("Could not connect to server.", font, lightGrey, 13 * size / 16, 15 * size / 16);
+
+                g.FillPolygon(refreshRedditButton.inside, refreshRedditButton.ClickLocation);
+                g.DrawPolygon(refreshRedditButton.stroke, refreshRedditButton.ClickLocation);
             }
 
             foreach(Button button in buttons)
