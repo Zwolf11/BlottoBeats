@@ -152,6 +152,8 @@ namespace BlottoBeatsServer {
 					TokenVerifyRequest req = message as TokenVerifyRequest;
 					
 					Log("    Verifying token for user: " + req.token.username, address, 2);
+					Log("        Expires: " + req.token.expires, address, 2);
+					Log("        Token: " + req.token.token, address, 2);
 
 					try {
 
@@ -266,8 +268,10 @@ namespace BlottoBeatsServer {
 		private void Log(string message, int level) {
 			if (logLevel >= level) {
 				Console.WriteLine("<{0}> {1}", Timestamp(), message);
-				using (System.IO.StreamWriter file = new System.IO.StreamWriter(logFileLocation, true)) {
-					file.WriteLine("<{0}> {1}", Timestamp(), message);
+				lock (logFileLocation) {
+					using (System.IO.StreamWriter file = new System.IO.StreamWriter(logFileLocation, true)) {
+						file.WriteLine("<{0}> {1}", Timestamp(), message);
+					}
 				}
 			}
 		}
