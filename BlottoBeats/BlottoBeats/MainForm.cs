@@ -80,7 +80,7 @@ namespace BlottoBeats
             backlog = new List<SongParameters>();
             redditSongs = new List<SongParameters>();
             generator = new Generator();
-            server = new BBServerConnection("68.234.183.70", 3000);
+            server = new BBServerConnection(Properties.Settings.Default.lastIP, 3000);
             player = new MediaPlayer.MediaPlayer();
 
             timer = new System.Windows.Forms.Timer();

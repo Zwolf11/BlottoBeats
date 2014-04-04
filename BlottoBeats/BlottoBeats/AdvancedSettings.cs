@@ -28,6 +28,7 @@ namespace BlottoBeats
             if (form.server.Test())
             {
                 form.server.ip = this.textBox1.Text;
+                Properties.Settings.Default.lastIP = form.server.ip;
             }
             else
             {
