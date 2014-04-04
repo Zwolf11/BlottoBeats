@@ -3,6 +3,7 @@ using Networking;
 using SongData;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace BlottoBeatsServer {
 	/// <summary>
@@ -37,7 +38,7 @@ namespace BlottoBeatsServer {
 				if (score != null && score is int)
 					song.score = (int)score;
 				else
-					throw new Exception("Database Error: Invalid data type returned");
+					throw new DatabaseException("Database Error: Invalid data type returned");
 			}
 
 			return song;
@@ -59,7 +60,7 @@ namespace BlottoBeatsServer {
 				if (score != null && score is int)
 					song.score = (int)score;
 				else
-					throw new Exception("Database Error: Invalid data type returned");
+					throw new DatabaseException("Database Error: Invalid data type returned");
 			}
 
 			return song;
@@ -177,8 +178,8 @@ namespace BlottoBeatsServer {
 				while (reader.Read()) {
 					returnId = (int)reader["iduploadedsongs"];
 				}
-			} catch (Exception ex) {
-				throw ex;	// Propagate the exception upwards after handling the finally block
+			} catch (MySqlException ex) {
+				throw new DatabaseException("SQL Exception: " + ex.Message, ex);	// Propagate the exception upwards after handling the finally block
 			} finally {
 				conn.Close();
 			}
@@ -205,8 +206,8 @@ namespace BlottoBeatsServer {
 				{
 					returnId = (int)reader["idusers"];
 				}
-			} catch (Exception ex) {
-				throw ex;	// Propagate the exception upwards after handling the finally block
+			} catch (MySqlException ex) {
+				throw new DatabaseException("SQL Exception: " + ex.Message, ex);	// Propagate the exception upwards after handling the finally block
 			} finally {
 				conn.Close();
 			}
@@ -261,8 +262,8 @@ namespace BlottoBeatsServer {
 				while (reader.Read()) {
 					item = reader[col];
 				}
-			} catch (Exception ex) {
-				throw ex;	// Propagate the exception upwards after handling the finally block
+			} catch (MySqlException ex) {
+				throw new DatabaseException("SQL Exception: " + ex.Message, ex);	// Propagate the exception upwards after handling the finally block
 			} finally {
 				conn.Close();
 			}
@@ -318,11 +319,23 @@ namespace BlottoBeatsServer {
 			try {
 				conn.Open();
 				command.ExecuteNonQuery();
-			} catch (Exception ex) {
-				throw ex;	// Propagate the exception upwards after handling the finally block
+			} catch (MySqlException ex) {
+				throw new DatabaseException("SQL Exception: " + ex.Message, ex);	// Propagate the exception upwards after handling the finally block
 			} finally {
 				conn.Close();
 			}
 		}
+	}
+
+
+	[SerializableAttribute]
+	public class DatabaseException : Exception {
+		public DatabaseException() : base() { }
+		public DatabaseException(string message) : base(message) { }
+		public DatabaseException(string message, Exception inner) : base(message, inner) { }
+
+		// A constructor is needed for serialization when an 
+		// exception propagates from a remoting server to the client.  
+		protected DatabaseException(SerializationInfo info, StreamingContext context) { }
 	}
 }

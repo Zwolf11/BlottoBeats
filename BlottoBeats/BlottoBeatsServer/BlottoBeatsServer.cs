@@ -122,7 +122,7 @@ namespace BlottoBeatsServer {
 								Log("    Registration Successful", address, 2);
 							else
 								Log("    Registration Failed", address, 2);
-						} catch (Exception ex) {
+						} catch (DatabaseException ex) {
 							Log("DATABASE ERROR: Registration could not proceed", address, 0);
 							Log(ex.Message, 0);
 						}
@@ -136,7 +136,7 @@ namespace BlottoBeatsServer {
 								Log("    Authentication Successful", address, 2);
 							else
 								Log("    Authentication Failed", address, 2);
-						} catch (Exception ex) {
+						} catch (DatabaseException ex) {
 							Log("DATABASE ERROR: Authentication could not proceed", address, 0);
 							Log(ex.Message, 0);
 						}
@@ -165,7 +165,7 @@ namespace BlottoBeatsServer {
 						}
 
 						Message.Send(networkStream, new TokenVerifyResponse(valid));
-					} catch (Exception ex) {
+					} catch (DatabaseException ex) {
 						Log("DATABASE ERROR: Could not process request", address, 0);
 						Log(ex.Message, 0);
 						Message.Send(networkStream, new BBResponse("Database", "An unknown database error occured.  Could not process request."));
@@ -238,7 +238,7 @@ namespace BlottoBeatsServer {
 								Message.Send(networkStream, new BBResponse("BBRequest", "Unknown BBRequest type '" + bbmessage.GetType() + "'"));
 							}
 						}
-					} catch (Exception ex) {
+					} catch (DatabaseException ex) {
 						Log("DATABASE ERROR: Could not process request", address, 0);
 						Log(ex.Message, 0);
 						Message.Send(networkStream, new BBResponse("Database", "An unknown database error occured.  Could not process request."));
