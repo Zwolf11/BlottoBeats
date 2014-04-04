@@ -76,7 +76,7 @@ namespace BlottoBeats
                     Properties.Settings.Default.token = form.currentUser.token;
                     Properties.Settings.Default.Save();
 
-                    MessageBox.Show("Current User: " + form.currentUser.username + " Current Token: " + form.currentUser.token);
+                    //MessageBox.Show("Current User: " + form.currentUser.username + " Current Token: " + form.currentUser.token);
                     this.Close();
                 }
             }
