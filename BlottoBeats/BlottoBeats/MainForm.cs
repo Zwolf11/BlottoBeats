@@ -386,8 +386,8 @@ namespace BlottoBeats
 
         private void sendScore()
         {
-            if (score > 0 && server.Test()) new Thread(() => server.SendRequest(new BBRequest(backlog[songPos], true, null))).Start();
-            else if (score < 0 && server.Test()) new Thread(() => server.SendRequest(new BBRequest(backlog[songPos], false, null))).Start();
+            if (score > 0 && server.Test()) new Thread(() => server.SendRequest(new BBRequest(backlog[songPos], true, currentUser))).Start();
+            else if (score < 0 && server.Test()) new Thread(() => server.SendRequest(new BBRequest(backlog[songPos], false, currentUser))).Start();
         }
 
         private void playClicked(object sender, MouseEventArgs e)
