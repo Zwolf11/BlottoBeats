@@ -57,5 +57,17 @@ namespace BlottoBeats.Properties {
                 this["expires"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("68.234.183.70")]
+        public string lastIP {
+            get {
+                return ((string)(this["lastIP"]));
+            }
+            set {
+                this["lastIP"] = value;
+            }
+        }
     }
 }

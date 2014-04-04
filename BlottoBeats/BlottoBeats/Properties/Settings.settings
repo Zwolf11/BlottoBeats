@@ -11,5 +11,8 @@
     <Setting Name="expires" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="lastIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">68.234.183.70</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
