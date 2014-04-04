@@ -5,6 +5,7 @@ namespace Networking {
 	/// <summary>
 	/// Authorization token for a user
 	/// </summary>
+	[SerializableAttribute]
 	public class UserToken {
 		public string username { get; private set; }
 		public DateTime expires { get; private set; }
@@ -57,6 +58,7 @@ namespace Networking {
 	/// <summary>
 	/// Login Credentials for a user
 	/// </summary>
+	[SerializableAttribute]
 	public class Credentials {
 		public string username { get; private set; }
 		private string password { get; set; }

@@ -314,6 +314,7 @@ namespace Networking {
 	/// <summary>
 	/// Request from the client to the server to verify a user token.
 	/// </summary>
+	[SerializableAttribute]
 	public class TokenVerifyRequest {
 		public UserToken token { get; private set; }
 
@@ -322,6 +323,7 @@ namespace Networking {
 		}
 	}
 
+	[SerializableAttribute]
 	public class TokenVerifyResponse {
 		public bool valid { get; private set; }
 
@@ -333,6 +335,7 @@ namespace Networking {
 	/// <summary>
 	/// Request from the client to the server to register a new user, or authenticate an existing one.
 	/// </summary>
+	[SerializableAttribute]
 	public class AuthRequest {
 		public Credentials credentials { get; private set; }
 		public bool register;
@@ -351,6 +354,7 @@ namespace Networking {
 	/// <summary>
 	/// Response from the server with an authentication token, or null if unsuccessful
 	/// </summary>
+	[SerializableAttribute]
 	public class AuthResponse {
 		public UserToken token { get; private set; }
 
