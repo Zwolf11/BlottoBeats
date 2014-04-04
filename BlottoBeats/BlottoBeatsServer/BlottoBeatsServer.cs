@@ -151,9 +151,9 @@ namespace BlottoBeatsServer {
 					Log("Recieved a token verification request", address, 1);
 					TokenVerifyRequest req = message as TokenVerifyRequest;
 					
-					Log("    Verifying token for user: " + req.token.username, address, 2);
-					Log("        Expires: " + req.token.expires, address, 2);
-					Log("        Token: " + req.token.token, address, 2);
+					Log("    User: " + req.token.username, address, 2);
+					Log("    Expires: " + req.token.expires, address, 2);
+					Log("    Token: " + req.token.token, address, 2);
 
 					try {
 
@@ -188,6 +188,8 @@ namespace BlottoBeatsServer {
 							userID = -1;
 						} else {
 							Log("    Username: " + bbmessage.requestType.userToken.username, address, 2);
+							Log("    Expires: " + bbmessage.requestType.userToken.expires, address, 2);
+							Log("    Token: " + bbmessage.requestType.userToken.token, address, 2);
 							userID = database.VerifyToken(bbmessage.requestType.userToken);
 						}
 
@@ -245,6 +247,9 @@ namespace BlottoBeatsServer {
 						Log("DATABASE ERROR: Could not process request", address, 0);
 						Log(ex.Message, 0);
 						Message.Send(networkStream, new BBResponse("Database", "An unknown database error occured.  Could not process request."));
+					} catch (System.IO.IOException ex) {
+						Log("IO ERROR: Could not send response", address, 0);
+						Log(ex.Message, 0);
 					}
 
 				} else {

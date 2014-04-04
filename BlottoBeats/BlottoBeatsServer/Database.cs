@@ -239,7 +239,7 @@ namespace BlottoBeatsServer {
 		private void updateScore(int id, bool vote) {
 			MySqlConnection conn = new MySqlConnection(connString);
 			MySqlCommand command = conn.CreateCommand();
-			int scoreUpdate = (int)(returnItem(id, "voteScore", "iduploadedsongs"));
+			int scoreUpdate = (int)(returnItem(id, "voteScore", "uploadedsongs"));
 
 			if (vote == true) {
 				scoreUpdate += 1;
