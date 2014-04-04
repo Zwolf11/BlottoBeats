@@ -72,13 +72,12 @@ namespace BlottoBeatsServer {
 		/// <param name="numSongs">The maximum number of songs to return</param>
 		/// <returns>The list of songs</returns>
 		internal int[] GetSongList(int numSongs) {
-            string connString = "Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;";
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "Select voteScore, iduploadedsongs from uploadedsongs where voteScore = (Select max(voteScore) from uploadedsongs)";
-            int maxID = 0;
-            int maxVote = 0;
+            command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + numSongs;
+            int score = 0;
             int[] idArray = new int[numSongs];
+            int i = -1;
             try
             {
                 conn.Open();
@@ -90,51 +89,12 @@ namespace BlottoBeatsServer {
             MySqlDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
-                maxID = (int)reader["iduploadedsongs"];
-                maxVote = (int)reader["voteScore"];
+                i++;
+                score = (int)reader["iduploadedsongs"];
+                idArray[i] = score;
             }
+
             conn.Close();
-
-            idArray[0] = maxID;
-
-
-            int i;
-            maxVote = maxVote - 1;
-            for (i = 1; i < numSongs; i++)
-            {
-
-                int returnId = 0;
-                do
-                {
-
-                    command.CommandText = "Select iduploadedsongs from uploadedsongs where voteScore like '%" + maxVote + "%'";
-
-                    try
-                    {
-                        conn.Open();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                    MySqlDataReader newReader = command.ExecuteReader();
-                    while (newReader.Read())
-                    {
-                        returnId = (int)newReader["iduploadedsongs"];
-                    }
-
-                    maxVote -= 1;
-
-                    conn.Close();
-
-
-
-                } while (returnId == 0);
-
-
-
-                idArray[i] = returnId;
-            }
 
             return idArray;
 
