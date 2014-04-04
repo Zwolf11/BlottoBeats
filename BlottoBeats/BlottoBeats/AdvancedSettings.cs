@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Networking;
 
 namespace BlottoBeats
 {
@@ -25,7 +26,9 @@ namespace BlottoBeats
         //update ip button
         private void button1_Click(object sender, EventArgs e)
         {
-            if (form.server.Test())
+            BBServerConnection newServer = new BBServerConnection(this.textBox1.Text, 3000);
+
+            if (newServer.Test())
             {
                 form.server.ip = this.textBox1.Text;
                 Properties.Settings.Default.lastIP = form.server.ip;
