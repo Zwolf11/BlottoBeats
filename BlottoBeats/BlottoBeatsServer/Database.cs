@@ -79,23 +79,19 @@ namespace BlottoBeatsServer {
             int score = 0;
             int[] idArray = new int[numSongs];
             int i = -1;
-            try
-            {
-                conn.Open();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            MySqlDataReader reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                i++;
-                score = (int)reader["iduploadedsongs"];
-                idArray[i] = score;
-            }
-
-            conn.Close();
+			try {
+				conn.Open();
+				MySqlDataReader reader = command.ExecuteReader();
+				while (reader.Read()) {
+					i++;
+					score = (int)reader["iduploadedsongs"];
+					idArray[i] = score;
+				}
+			} catch (MySqlException ex) {
+				throw new DatabaseException("SQL Exception: " + ex.Message, ex);	// Propagate the exception upwards after handling the finally block
+			} finally {
+				conn.Close();
+			}
 
             List<SongParameters> list = new List<SongParameters>();
             
@@ -289,7 +285,6 @@ namespace BlottoBeatsServer {
                 int nextId = GetNextAvailableID("users");
                 string token = null;
                 String date = "1000-01-01 00:00:00";
-                Console.WriteLine(nextId);
                 SQLNonQuery(conn, "Insert into users (idusers,username,passwordHash,tokenExpire,tokenStr) values('" + nextId + "','" + username + "','" + hash + "','" + date + "','" + token + "')");
                 return true;
             }
