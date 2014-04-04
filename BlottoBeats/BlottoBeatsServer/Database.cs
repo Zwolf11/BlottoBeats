@@ -29,12 +29,12 @@ namespace BlottoBeatsServer {
 			if (song.ID == -1) song.ID = GetID(song);	// Song has no ID.  Search the server
 			if (song.ID == -1) {
 				// Song is not in the database.  Insert it into the database.
-				song.ID = GetNextAvailableID("songs");
+				song.ID = GetNextAvailableID("uploadedsongs");
 				song.score = (vote) ? 1 : -1;
 				insertData(song);
 			} else {
 				updateScore(song.ID, vote);
-				object score = returnItem(song.ID, "voteScore", "songs");
+				object score = returnItem(song.ID, "voteScore", "uploadedsongs");
 				if (score != null && score is int)
 					song.score = (int)score;
 				else
@@ -56,7 +56,7 @@ namespace BlottoBeatsServer {
 				// Song is not in the database. Return score of 0.
 				song.score = 0;
 			} else {
-				object score = returnItem(song.ID, "voteScore", "songs");
+				object score = returnItem(song.ID, "voteScore", "uploadedsongs");
 				if (score != null && score is int)
 					song.score = (int)score;
 				else
@@ -115,8 +115,6 @@ namespace BlottoBeatsServer {
             }
 
             return list;
-
-			
 		}
 
 
@@ -136,8 +134,10 @@ namespace BlottoBeatsServer {
 					return null; // User was not created
 			} else {
 				userID = GetID(credentials.username);
-				string hash = getUserHash(userID);
+				if (userID == 0)
+					return null;
 
+				string hash = getUserHash(userID);
 				if (hash != null && !credentials.Verify(hash))
 					return null; // Credentials were invalid
 			}
@@ -157,9 +157,8 @@ namespace BlottoBeatsServer {
 		/// <returns>The ID of the user if authentication was successful, 0 otherwise</returns>
 		internal int VerifyToken(UserToken tokenToVerify) {
 			int userID = GetID(tokenToVerify.username);
-			UserToken userToken = getUserToken(userID);
 
-			if (userToken.Verify(tokenToVerify))
+			if (userID != 0 && getUserToken(userID).Verify(tokenToVerify))
 				return userID;
 			else
 				return 0;
@@ -313,7 +312,7 @@ namespace BlottoBeatsServer {
 
 		private UserToken getUserToken(int userID) {
 			string username = (string)returnItem(userID, "username", "users");
-			DateTime expires = DateTime.Parse((string)returnItem(userID, "tokenExpire", "users"));
+			DateTime expires = (DateTime)returnItem(userID, "tokenExpire", "users");
 			string token = (string)returnItem(userID, "tokenStr", "users");
 			return new UserToken(username, expires, token);
 		}

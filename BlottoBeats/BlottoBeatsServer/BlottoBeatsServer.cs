@@ -25,7 +25,8 @@ namespace BlottoBeatsServer {
 		public static void Main() {
 			// Create a new server that listens on port 3000;
 			//Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log", 3);
-			Server server = new Server(3000, new Database("Server=68.234.183.70;Port=3001;Database=songdatabase;Uid=BlottoServer;password=JJLrDtcrfvjym8gh1zUVklF19KDf1CTM;"), "server.log", 3);
+			//Server server = new Server(3000, new Database("Server=68.234.183.70;Port=3001;Database=songdatabase;Uid=BlottoServer;password=JJLrDtcrfvjym8gh1zUVklF19KDf1CTM;"), "server.log", 3);
+			Server server = new Server(3000, new Database("Server=BlottoBeats.db.11772669.hostedresource.com;Port=3306;Database=BlottoBeats;Uid=BlottoBeats;password=JoeSwanson307!;"), "server.log", 3);
 
 			// Checks the state of the server every 5 seconds
 			// If the server thread has died, restart it
