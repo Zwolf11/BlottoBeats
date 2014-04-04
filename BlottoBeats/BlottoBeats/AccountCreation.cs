@@ -34,6 +34,11 @@ namespace BlottoBeats
             else
             {
                 form.currentUser = token;
+                Properties.Settings.Default.username = form.currentUser.username;
+                Properties.Settings.Default.expires = form.currentUser.expires;
+                Properties.Settings.Default.token = form.currentUser.token;
+                Properties.Settings.Default.Save();
+
                 this.Close();
             }
 

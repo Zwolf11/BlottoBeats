@@ -119,7 +119,16 @@ namespace BlottoBeats
             }
             else
             {
-                currentUser = new UserToken(Properties.Settings.Default.username, Properties.Settings.Default.expires, Properties.Settings.Default.token);
+                UserToken tempToken = new UserToken(Properties.Settings.Default.username, Properties.Settings.Default.expires, Properties.Settings.Default.token);
+                if (server.VerifyToken(tempToken) == true)
+                {
+                    currentUser = tempToken;
+                }
+                else
+                {
+                    MessageBox.Show("Login has expired. Please log in again");
+                    accountForm.ShowDialog();
+                }
             }
         }
 

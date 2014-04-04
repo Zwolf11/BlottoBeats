@@ -2,13 +2,13 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="BlottoBeats.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="username" Type="System.String" Scope="Application">
+    <Setting Name="username" Type="System.String" Scope="User">
       <Value Profile="(Default)">null</Value>
     </Setting>
-    <Setting Name="token" Type="System.String" Scope="Application">
+    <Setting Name="token" Type="System.String" Scope="User">
       <Value Profile="(Default)">null</Value>
     </Setting>
-    <Setting Name="expires" Type="System.DateTime" Scope="Application">
+    <Setting Name="expires" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>
