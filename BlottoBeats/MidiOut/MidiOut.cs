@@ -58,10 +58,10 @@ namespace MidiOut
             builder.MidiChannel = c;
             //Iterate through the chord voice and turn them on; Each iteration will save the note and length values
             int startOfSegment = 0;
-            for (int i=0; i<output.songData.Count; i++)
+            for (int i = 0; i < output.songData.Count; i++)
             {
-                startOfSegment=pos;
-                for (int j=0; j<output.songData[i].chordPattern.Count; j++)
+                startOfSegment = pos;
+                for (int j = 0; j < output.songData[i].chordPattern.Count; j++)
                 {
                     //Reset channel values to stop outOfBoundsException : Austin
                     c = 1;
@@ -85,13 +85,20 @@ namespace MidiOut
                         track[1].Insert(pos, builder.Result);
                         builder.Command = ChannelCommand.NoteOn;
                         builder.Data1 = midiValOfNote(note);
-                        builder.Data2 = 127; //Set volume to max
+                        if (output.Genre == "Generic")
+                        {
+                            builder.Data2 = 100;
+                        }
+                        else if (output.Genre == "Classical")
+                        {
+                            builder.Data2 = 80;
+                        }
                         builder.Build(); //Build the message
                         track[1].Insert(pos, builder.Result); //Insert into Track 1 at tick position 'pos'
                         //Increment MIDI channel by 1
                         c += 1;
                         builder.MidiChannel = c;
-                        
+
                     }//endforeach
                     /*Tick position increment; This will be based on the last note of the previous chord, but I think it's safe to assume that its length will be the same as the rest of the chord tones of that chord.
                      PpqnClock.PpqnMinValue is the minimum PPQ value (24) set by the class library PpqnClock.*/
@@ -115,9 +122,9 @@ namespace MidiOut
                         builder.MidiChannel = c;
                         //songLen += item.length / 16;
                     }//endforeach
-                    
+
                 }//endfor
-                
+
                 for (int q = 0; q < output.songData[i].melodies.Count(); q++)
                 {
                     pos = startOfSegment;
@@ -162,18 +169,19 @@ namespace MidiOut
                 Directory.CreateDirectory(@"C:\BlottoBeats");
 
             }
-            if(File.Exists(@"C:\BlottoBeats\temp.mid")){
+            if (File.Exists(@"C:\BlottoBeats\temp.mid"))
+            {
                 File.Delete(@"C:\BlottoBeats\temp.mid");
 
             }
 
             sequence.Save(@"C:\BlottoBeats\temp.mid");
 
-            return ((double) pos)/(PpqnClock.PpqnMinValue / 4)/4 / output.Tempo * 60;
+            return ((double)pos) / (PpqnClock.PpqnMinValue / 4) / 4 / output.Tempo * 60;
 
             //Code to play sequence in client. Currently not functioning
             //s.Sequence = sequence;  
-           //s.Start();
+            //s.Start();
         }
         private int midiValOfNote(String note)
         {
@@ -569,6 +577,6 @@ namespace MidiOut
 
         }
     }
-    
+
 
 }
