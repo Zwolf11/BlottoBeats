@@ -25,7 +25,15 @@ namespace BlottoBeats
         //update ip button
         private void button1_Click(object sender, EventArgs e)
         {
-            form.server.ip = this.textBox1.Text;
+            if (form.server.Test())
+            {
+                form.server.ip = this.textBox1.Text;
+                Properties.Settings.Default.lastIP = form.server.ip;
+            }
+            else
+            {
+                MessageBox.Show("Server is not connected. Try again later");
+            }
         }
 
         //update max backlog button
