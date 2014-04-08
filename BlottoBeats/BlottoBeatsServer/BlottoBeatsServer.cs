@@ -25,15 +25,162 @@ namespace BlottoBeats.Server {
 		/// </summary>
 		public static void Main() {
 			// Create a new server that listens on port 3000;
-			//Server server = new Server(3000, new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;"), "server.log", 3);
-			//Server server = new Server(3000, new Database("Server=68.234.183.70;Port=3001;Database=songdatabase;Uid=BlottoServer;password=JJLrDtcrfvjym8gh1zUVklF19KDf1CTM;"), "server.log", 3);
-			Server server = new Server(3000, new Database("Server=BlottoBeats.db.11772669.hostedresource.com;Port=3306;Database=BlottoBeats;Uid=BlottoBeats;password=JoeSwanson307!;"), "server.log", 3);
+			//Database database = new Database("Server=localhost;Port=3306;Database=songdatabase;Uid=root;password=joeswanson;");
+			//Database database = new Database("Server=68.234.183.70;Port=3001;Database=songdatabase;Uid=BlottoServer;password=JJLrDtcrfvjym8gh1zUVklF19KDf1CTM;");
+			//Database database = new Database("Server=BlottoBeats.db.11772669.hostedresource.com;Port=3306;Database=BlottoBeats;Uid=BlottoBeats;password=JoeSwanson307!;");
+			//Server server = new Server(3000, database, "server.log", 3);
+			Database database = null;
+			Server server = null;
 
-			// Checks the state of the server every 5 seconds
-			// If the server thread has died, restart it
+			// Server startup screen
+			Console.WriteLine("---------------------------------------------");
+			Console.WriteLine("      BlottoBeats Server v1.0 (Stopped)");
+			Console.WriteLine("---------------------------------------------");
+			Console.WriteLine("Host ID: " + Properties.Settings.Default.hostID);
+			Console.WriteLine("Port:    " + Properties.Settings.Default.port);
+			Console.WriteLine();
+			Console.WriteLine("Database Name: " + Properties.Settings.Default.databaseName);
+			Console.WriteLine();
+			Console.WriteLine("Username: " + Properties.Settings.Default.userID);
+			Console.WriteLine("---------------------------------------------");
+			Console.WriteLine("Type update to log into the database and then start to start the server.");
+			Console.WriteLine("Type help or ? for more commands.");
+
 			while (true) {
-				if (!server.IsAlive()) server.Restart();
-				Thread.Sleep(5000);
+				CommandLine line = CommandLine.Prompt();
+
+				switch (line.command.ToLower()) {
+					case "start":
+						if (server != null && server.IsAlive())
+							Console.WriteLine("ERROR: Can't start the server, the server is already started");
+						else if (database == null || server == null)
+							Console.WriteLine("ERROR: The update command needs to be run first");
+						else
+							server.Start();
+						break;
+
+					case "stop":
+						if (server == null || !server.IsAlive())
+							Console.WriteLine("ERROR: Can't stop the server, the server is already stopped");
+						else
+							server.Stop();
+						break;
+
+					case "restart":
+						if (server == null || !server.IsAlive())
+							Console.WriteLine("ERROR: Can't restart the server, the server is stopped");
+						else
+							server.Restart();
+						break;
+
+					case "host":
+					case "hostid":
+						if (line.value == null) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires a value");
+						} else {
+							Properties.Settings.Default.hostID = line.value;
+							Properties.Settings.Default.Save();
+							Console.WriteLine("Setting is updated.  You need to run the update command in order for the changes to be applied to the server.");
+						}
+						break;
+
+					case "port":
+						int port;
+						if (line.value == null) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires a value");
+						} else if (int.TryParse(line.value, out port) && port > 1024 && port <= 65535) {
+							Properties.Settings.Default.port = port;
+							Properties.Settings.Default.Save();
+							Console.WriteLine("Setting is updated.  You need to run the update command in order for the changes to be applied to the server.");
+						} else {
+							Console.WriteLine("ERROR: The argument must be an integer between 1024 and 65535");
+						}
+						break;
+
+					case "database":
+					case "databasename":
+						if (line.value == null) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires a value");
+						} else {
+							Properties.Settings.Default.databaseName = line.value;
+							Properties.Settings.Default.Save();
+							Console.WriteLine("Setting is updated.  You need to run the update command in order for the changes to be applied to the server.");
+						}
+						break;
+
+					case "user":
+					case "userid":
+						if (line.value == null) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires a value");
+						} else {
+							Properties.Settings.Default.userID = line.value;
+							Properties.Settings.Default.Save();
+							Console.WriteLine("Setting is updated.  You need to run the update command in order for the changes to be applied to the server.");
+						}
+						break;
+
+					case "info":
+						string health = "Stopped";
+						if (server != null && server.IsAlive()) health = "Running";
+						
+						Console.WriteLine("---------------------------------------------");
+						Console.WriteLine("      BlottoBeats Server v1.0 (" + health + ")");
+						Console.WriteLine("---------------------------------------------");
+						Console.WriteLine("Host ID: " + Properties.Settings.Default.hostID);
+						Console.WriteLine("Port:    " + Properties.Settings.Default.port);
+						Console.WriteLine();
+						Console.WriteLine("Database Name: " + Properties.Settings.Default.databaseName);
+						Console.WriteLine();
+						Console.WriteLine("Username: " + Properties.Settings.Default.userID);
+						Console.WriteLine("---------------------------------------------");
+						break;
+
+					case "update":
+					case "updatedatabase":
+						if (line.value == null) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires a value");
+						} else if (server != null && server.IsAlive()) {
+							Console.WriteLine("ERROR: Can't update the database if the server is running.  Stop the server first.");
+						} else {
+							database = new Database(Properties.Settings.Default.hostID,
+								Properties.Settings.Default.port,
+								Properties.Settings.Default.databaseName,
+								Properties.Settings.Default.userID,
+								line.value);
+							server = new Server(3000, database, "server.log", 3);
+							Console.WriteLine("Database updated successfully.");
+						}
+						break;
+
+					case "help":
+					case "?":
+						Console.WriteLine("COMMAND LIST");
+						Console.WriteLine("Start");
+						Console.WriteLine("    Starts the server");
+						Console.WriteLine("Stop");
+						Console.WriteLine("    Stops the server");
+						Console.WriteLine("Restart");
+						Console.WriteLine("    Restarts the server");
+						Console.WriteLine();
+						Console.WriteLine("Host/HostID <new ID>");
+						Console.WriteLine("    Changes the hostID of the database.  Requires an update to take effect.");
+						Console.WriteLine("Port <new Port>");
+						Console.WriteLine("    Changes the port of the database.  Requires an update to take effect.");
+						Console.WriteLine("Database/DatabaseName <new name>");
+						Console.WriteLine("    Changes the name of the database.  Requires an update to take effect.");
+						Console.WriteLine("User/UserID <new id>");
+						Console.WriteLine("    Changes the userID to use with the database.  Requires an update to take effect.");
+						Console.WriteLine("Info");
+						Console.WriteLine("    Displays information about the server.");
+						Console.WriteLine();
+						Console.WriteLine("Update <password>");
+						Console.WriteLine("    Modifies the database according to the changes.  The server must be stopped.");
+						
+						break;
+					default:
+						Console.WriteLine("'" + line.command + "' is not a valid command.  Type help or ? for a list of commands.");
+						break;
+				}
 			}
 		}
 
@@ -49,9 +196,7 @@ namespace BlottoBeats.Server {
 			this.logFileLocation = logFileLocation;
 			this.logLevel = logLevel;
 
-			tcpListener = new TcpListener(IPAddress.Any, port);
-			listenThread = new Thread(new ThreadStart(ListenForClients));
-			listenThread.Start();
+			this.tcpListener = new TcpListener(IPAddress.Any, port);
 		}
 
 		/// <summary>
@@ -59,7 +204,30 @@ namespace BlottoBeats.Server {
 		/// </summary>
 		/// <returns>Returns true if the server is alive, false otherwise</returns>
 		internal bool IsAlive() {
-			return listenThread.IsAlive;
+			if (listenThread == null)
+				return false;
+			else
+				return listenThread.IsAlive;
+		}
+
+		/// <summary>
+		/// Starts the server thread.
+		/// </summary>
+		internal void Start() {
+			Log("Server started", 0);
+
+			listenThread = new Thread(new ThreadStart(ListenForClients));
+			listenThread.Start();
+		}
+
+		/// <summary>
+		/// Stops the server thread
+		/// </summary>
+		internal void Stop() {
+			Log("Stopping Server", 0);
+
+			listenThread.Abort();
+			listenThread = null;
 		}
 
 		/// <summary>
@@ -68,9 +236,8 @@ namespace BlottoBeats.Server {
 		internal void Restart() {
 			Log("Restarting Server...", 0);
 			
-			listenThread.Abort();
-			listenThread = new Thread(new ThreadStart(ListenForClients));
-			listenThread.Start();
+			Stop();
+			Start();
 		}
 
 		/// <summary>
@@ -79,8 +246,7 @@ namespace BlottoBeats.Server {
 		/// </summary>
 		private void ListenForClients() {
 			tcpListener.Start();
-			Log("Server started", 0);
-
+			
 			while (true) {
 				TcpClient client = tcpListener.AcceptTcpClient();
 				ThreadPool.QueueUserWorkItem(new WaitCallback(HandleConnectionWithClient), client);
@@ -297,6 +463,35 @@ namespace BlottoBeats.Server {
 		/// <returns></returns>
 		private string Timestamp() {
 			return String.Format("{0:hh:mm:ss}", DateTime.Now);
+		}
+	}
+
+	/// <summary>
+	/// A very basic command-line parser.  Supports only single commands with an optional value.
+	/// </summary>
+	internal class CommandLine {
+		internal string command { get; private set; }
+		internal string value { get; private set; }
+
+		internal CommandLine(string command) {
+			this.command = command;
+			this.value = null;
+		}
+
+		internal CommandLine(string command, string value) {
+			this.command = command;
+			this.value = value;
+		}
+
+		internal static CommandLine Prompt() {
+			Console.Write("> ");
+
+			string[] tokens = Console.ReadLine().Split(new[] { ' ' }, 2);
+
+			if (tokens.Length > 1)
+				return new CommandLine(tokens[0], tokens[1]);
+			else
+				return new CommandLine(tokens[0]);
 		}
 	}
 }

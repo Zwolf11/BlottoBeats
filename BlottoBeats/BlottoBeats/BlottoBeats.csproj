@@ -32,7 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>BlottoBeats.Program</StartupObject>
+    <StartupObject>BlottoBeats.Client.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

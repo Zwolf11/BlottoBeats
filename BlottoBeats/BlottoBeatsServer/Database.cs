@@ -13,10 +13,35 @@ namespace BlottoBeats.Server {
 		string connString;
 
 		/// <summary>
-		/// Loads a database from the given path
+		/// Loads a database from the given connection string
+		/// </summary>
+		internal Database(string hostID, int port, string databaseName, string userID, string password) {
+			// No sanitization because I like to live on the edge
+			this.connString = String.Format("Server={0};Port={1};Database={2};Uid={3};password={4}", hostID, port, databaseName, userID, password);
+		}
+
+		/// <summary>
+		/// Loads a database from the given connection string
 		/// </summary>
 		internal Database(string connString) {
 			this.connString = connString;
+		}
+
+		/// <summary>
+		/// Tests the connection to the database
+		/// </summary>
+		/// <returns>True if the connection is valid, false otherwise.</returns>
+		internal bool TestConnection() {
+			MySqlConnection conn = new MySqlConnection(connString);
+			try {
+				conn.Open();
+			} catch {
+				return false;
+			} finally {
+				conn.Close();
+			}
+
+			return true;
 		}
 
 		/// <summary>
