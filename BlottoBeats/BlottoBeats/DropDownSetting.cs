@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Windows.Forms;
 using System.Drawing;
+using System.Windows.Forms;
 
-namespace BlottoBeats
+namespace BlottoBeats.Client
 {
     public class DropDownSetting : Setting
     {

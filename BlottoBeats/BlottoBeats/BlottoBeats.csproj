@@ -7,7 +7,7 @@
     <ProjectGuid>{0CD0CFF1-5997-4891-B2BB-4D38DC76C9B2}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BlottoBeats</RootNamespace>
+    <RootNamespace>BlottoBeats.Client</RootNamespace>
     <AssemblyName>BlottoBeats</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -84,6 +84,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
@@ -103,13 +104,9 @@
       <Project>{4d5528c3-3614-4a5d-a7fc-eb78229b2688}</Project>
       <Name>MidiOut</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Networking\Networking.csproj">
+    <ProjectReference Include="..\Networking\Shared Libraries.csproj">
       <Project>{efd41bca-a637-4861-a0d7-7af1b9669627}</Project>
-      <Name>Networking</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Song\SongData.csproj">
-      <Project>{3f834156-7b00-4538-ac27-1fb8b615c591}</Project>
-      <Name>SongData</Name>
+      <Name>Shared Libraries</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,13 +1,9 @@
-﻿using System;
+﻿using BlottoBeats.Library.SongData;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using SongData;
-using MidiOut;
 
-namespace BlottoBeats
+namespace BlottoBeats.Client
 {
     public class Generator
     {
@@ -1309,7 +1305,7 @@ namespace BlottoBeats
 
 
 
-            MidiOut.MidiOut outgoing = new MidiOut.MidiOut();
+            BlottoBeats.MidiOut.MidiOut outgoing = new BlottoBeats.MidiOut.MidiOut();
             double songLen = outgoing.outputToMidi(output);
 
             return songLen;
@@ -2615,7 +2611,7 @@ namespace BlottoBeats
 
             }
 
-            MidiOut.MidiOut outgoing = new MidiOut.MidiOut();
+            BlottoBeats.MidiOut.MidiOut outgoing = new BlottoBeats.MidiOut.MidiOut();
             double songLen = outgoing.outputToMidi(output);
 
             return songLen;

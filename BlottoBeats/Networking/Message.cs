@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace Networking {
+namespace BlottoBeats.Library.Networking {
 	/// <summary>
 	/// Message helper class for to clog the tubes with.
 	/// Use Message.Send() to send a message and Message.Receive() to receive it.

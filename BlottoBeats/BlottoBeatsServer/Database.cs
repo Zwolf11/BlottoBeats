@@ -1,11 +1,11 @@
-﻿using MySql.Data.MySqlClient;
-using Networking;
-using SongData;
+﻿using BlottoBeats.Library.Authentication;
+using BlottoBeats.Library.SongData;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace BlottoBeatsServer {
+namespace BlottoBeats.Server {
 	/// <summary>
 	/// Handles all communication with the MySQL database
 	/// </summary>

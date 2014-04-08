@@ -1,13 +1,12 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using BlottoBeats.Library.Authentication;
+using BlottoBeats.Library.Networking;
+using BlottoBeats.Library.SongData;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Threading;
-using Networking;
-using SongData;
+using System.Windows.Forms;
 
-namespace BlottoBeats
+namespace BlottoBeats.Client
 {
     public class MainForm : Form
     {

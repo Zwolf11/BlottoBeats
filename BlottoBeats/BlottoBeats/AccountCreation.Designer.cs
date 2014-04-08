@@ -1,4 +1,4 @@
-﻿namespace BlottoBeats
+﻿namespace BlottoBeats.Client
 {
     partial class AccountCreation
     {

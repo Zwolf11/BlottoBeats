@@ -7,7 +7,7 @@
     <ProjectGuid>{4D5528C3-3614-4A5D-A7FC-EB78229B2688}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MidiOut</RootNamespace>
+    <RootNamespace>BlottoBeats.MidiOut</RootNamespace>
     <AssemblyName>MidiOut</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -58,9 +58,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Song\SongData.csproj">
-      <Project>{3f834156-7b00-4538-ac27-1fb8b615c591}</Project>
-      <Name>SongData</Name>
+    <ProjectReference Include="..\Networking\Shared Libraries.csproj">
+      <Project>{efd41bca-a637-4861-a0d7-7af1b9669627}</Project>
+      <Name>Shared Libraries</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

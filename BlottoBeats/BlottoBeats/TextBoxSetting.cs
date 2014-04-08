@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 using System.Drawing;
 
-namespace BlottoBeats
+namespace BlottoBeats.Client
 {
     public class TextBoxSetting : Setting
     {

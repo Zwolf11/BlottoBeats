@@ -1,26 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlottoBeats", "BlottoBeats\BlottoBeats.csproj", "{0CD0CFF1-5997-4891-B2BB-4D38DC76C9B2}"
 	ProjectSection(ProjectDependencies) = postProject
-		{3F834156-7B00-4538-AC27-1FB8B615C591} = {3F834156-7B00-4538-AC27-1FB8B615C591}
 		{EFD41BCA-A637-4861-A0D7-7AF1B9669627} = {EFD41BCA-A637-4861-A0D7-7AF1B9669627}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlottoBeatsServer", "BlottoBeatsServer\BlottoBeatsServer.csproj", "{B1D7FCA9-BF95-4879-BC8D-C98EF784AC49}"
 	ProjectSection(ProjectDependencies) = postProject
-		{3F834156-7B00-4538-AC27-1FB8B615C591} = {3F834156-7B00-4538-AC27-1FB8B615C591}
 		{EFD41BCA-A637-4861-A0D7-7AF1B9669627} = {EFD41BCA-A637-4861-A0D7-7AF1B9669627}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networking", "Networking\Networking.csproj", "{EFD41BCA-A637-4861-A0D7-7AF1B9669627}"
-	ProjectSection(ProjectDependencies) = postProject
-		{3F834156-7B00-4538-AC27-1FB8B615C591} = {3F834156-7B00-4538-AC27-1FB8B615C591}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SongData", "Song\SongData.csproj", "{3F834156-7B00-4538-AC27-1FB8B615C591}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared Libraries", "Networking\Shared Libraries.csproj", "{EFD41BCA-A637-4861-A0D7-7AF1B9669627}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiOut", "MidiOut\MidiOut.csproj", "{4D5528C3-3614-4A5D-A7FC-EB78229B2688}"
 EndProject
@@ -64,16 +57,6 @@ Global
 		{EFD41BCA-A637-4861-A0D7-7AF1B9669627}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{EFD41BCA-A637-4861-A0D7-7AF1B9669627}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{EFD41BCA-A637-4861-A0D7-7AF1B9669627}.Release|Win32.ActiveCfg = Release|Any CPU
-		{3F834156-7B00-4538-AC27-1FB8B615C591}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3F834156-7B00-4538-AC27-1FB8B615C591}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3F834156-7B00-4538-AC27-1FB8B615C591}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{3F834156-7B00-4538-AC27-1FB8B615C591}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{3F834156-7B00-4538-AC27-1FB8B615C591}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{3F834156-7B00-4538-AC27-1FB8B615C591}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3F834156-7B00-4538-AC27-1FB8B615C591}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3F834156-7B00-4538-AC27-1FB8B615C591}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{3F834156-7B00-4538-AC27-1FB8B615C591}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{3F834156-7B00-4538-AC27-1FB8B615C591}.Release|Win32.ActiveCfg = Release|Any CPU
 		{4D5528C3-3614-4A5D-A7FC-EB78229B2688}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4D5528C3-3614-4A5D-A7FC-EB78229B2688}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D5528C3-3614-4A5D-A7FC-EB78229B2688}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

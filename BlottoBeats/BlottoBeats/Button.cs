@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Collections;
 using System.Windows.Forms;
 
-namespace BlottoBeats
+namespace BlottoBeats.Client
 {
     public delegate void ClickedEventHandler(object sender, MouseEventArgs e);
 

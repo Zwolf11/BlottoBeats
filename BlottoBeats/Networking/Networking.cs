@@ -1,10 +1,11 @@
-﻿using SongData;
+﻿using BlottoBeats.Library.Authentication;
+using BlottoBeats.Library.SongData;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Networking {
+namespace BlottoBeats.Library.Networking {
 	/// <summary>
 	/// Server object used to store data about the server
 	/// </summary>

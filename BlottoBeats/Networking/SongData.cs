@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BlottoBeatsLibrary {
+namespace BlottoBeats.Library.SongData {
 	/// <summary>
 	/// Song class definition; Each instance of Song will have a tempo/speed, key/mode, and song data consisting of the subclasses below.
 	/// </summary>

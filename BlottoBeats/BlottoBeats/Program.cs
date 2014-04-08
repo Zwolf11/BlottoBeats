@@ -1,10 +1,6 @@
-﻿using Networking;	// Contains protocols for communicating with the server
-using SongData;		// Contains the definitions for song objects
-using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
-namespace BlottoBeats
+namespace BlottoBeats.Client
 {
     public static class Program
     {

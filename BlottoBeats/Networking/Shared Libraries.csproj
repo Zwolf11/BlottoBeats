@@ -44,12 +44,7 @@
     <Compile Include="Networking.cs" />
     <Compile Include="PasswordHash.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Song\SongData.csproj">
-      <Project>{3f834156-7b00-4538-ac27-1fb8b615c591}</Project>
-      <Name>SongData</Name>
-    </ProjectReference>
+    <Compile Include="SongData.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

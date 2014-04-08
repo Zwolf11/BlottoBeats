@@ -1,12 +1,13 @@
-﻿using Networking;
-using SongData;
+﻿using BlottoBeats.Library.Authentication;
+using BlottoBeats.Library.Networking;
+using BlottoBeats.Library.SongData;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace BlottoBeatsServer {
+namespace BlottoBeats.Server {
 	/// <summary>
 	/// Basic TCP Server
 	/// Uses ThreadPool to handle multiple connections at the same time.

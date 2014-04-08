@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace Networking {
+namespace BlottoBeats.Library.Authentication {
 	/// <summary>
 	/// Authorization token for a user
 	/// </summary>

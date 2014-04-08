@@ -1,19 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Sanford.Collections;
-using Sanford.Multimedia;
+﻿using BlottoBeats.Library.SongData;
 using Sanford.Multimedia.Midi;
-using Sanford.Multimedia.Timers;
-using Sanford.Threading;
-using SongData;
-using System.Media;
+using System;
 using System.IO;
+using System.Linq;
 
-namespace MidiOut
+namespace BlottoBeats.MidiOut
 {
     public class MidiOut
     {
@@ -130,7 +121,7 @@ namespace MidiOut
                     pos = startOfSegment;
                     for (int j = 0; j < output.songData[i].melodies[q].melodicLine.Count(); j++)
                     {
-                        SongData.Song.Note outputNote = output.songData[i].melodies[q].melodicLine[j];
+                        Song.Note outputNote = output.songData[i].melodies[q].melodicLine[j];
                         String note = outputNote.noteValue;
                         int noteLength = outputNote.length; //in 16th notes
                         //Switch note on
