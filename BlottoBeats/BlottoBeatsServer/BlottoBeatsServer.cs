@@ -43,13 +43,14 @@ namespace BlottoBeats.Server {
 			Console.WriteLine();
 			Console.WriteLine("Username: " + Properties.Settings.Default.userID);
 			Console.WriteLine("---------------------------------------------");
-			Console.WriteLine("Type update to log into the database and then start to start the server.");
+			Console.WriteLine("Type upstart <password> to log into the database and start the server.");
 			Console.WriteLine("Type help or ? for more commands.");
 
 			while (true) {
 				CommandLine line = CommandLine.Prompt();
 
 				switch (line.command.ToLower()) {
+					// SERVER COMMANDS
 					case "start":
 						if (server != null && server.IsAlive())
 							Console.WriteLine("ERROR: Can't start the server, the server is already started");
@@ -73,22 +74,59 @@ namespace BlottoBeats.Server {
 							server.Restart();
 						break;
 
-					case "host":
-					case "hostid":
-						if (line.value == null) {
-							Console.WriteLine("ERROR: The command '" + line.command + "' requires a value");
+					case "update":
+					case "updatedb":
+					case "updatedatabase":
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else if (server != null && server.IsAlive()) {
+							Console.WriteLine("ERROR: Can't update the database if the server is running.  Stop the server first.");
 						} else {
-							Properties.Settings.Default.hostID = line.value;
+							database = new Database(Properties.Settings.Default.hostID,
+								Properties.Settings.Default.port,
+								Properties.Settings.Default.databaseName,
+								Properties.Settings.Default.userID,
+								line.args[0]);
+							server = new Server(3000, database, "server.log", 3);
+							Console.WriteLine("Database updated successfully.");
+						}
+						break;
+
+					case "upstart":
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else if (server != null && server.IsAlive()) {
+							Console.WriteLine("ERROR: Can't update the database if the server is running.  Stop the server first.");
+						} else {
+							database = new Database(Properties.Settings.Default.hostID,
+								Properties.Settings.Default.port,
+								Properties.Settings.Default.databaseName,
+								Properties.Settings.Default.userID,
+								line.args[0]);
+							server = new Server(3000, database, "server.log", 3);
+							Console.WriteLine("Database updated successfully.");
+
+							server.Start();
+						}
+						break;
+
+					// DATABASE COMMANDS
+					case "dbhost":
+					case "dbhostid":
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else {
+							Properties.Settings.Default.hostID = line.args[0];
 							Properties.Settings.Default.Save();
 							Console.WriteLine("Setting is updated.  You need to run the update command in order for the changes to be applied to the server.");
 						}
 						break;
 
-					case "port":
+					case "dbport":
 						int port;
-						if (line.value == null) {
-							Console.WriteLine("ERROR: The command '" + line.command + "' requires a value");
-						} else if (int.TryParse(line.value, out port) && port > 1024 && port <= 65535) {
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else if (int.TryParse(line.args[0], out port) && port > 1024 && port <= 65535) {
 							Properties.Settings.Default.port = port;
 							Properties.Settings.Default.Save();
 							Console.WriteLine("Setting is updated.  You need to run the update command in order for the changes to be applied to the server.");
@@ -99,27 +137,27 @@ namespace BlottoBeats.Server {
 
 					case "database":
 					case "databasename":
-						if (line.value == null) {
-							Console.WriteLine("ERROR: The command '" + line.command + "' requires a value");
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
 						} else {
-							Properties.Settings.Default.databaseName = line.value;
+							Properties.Settings.Default.databaseName = line.args[0];
 							Properties.Settings.Default.Save();
 							Console.WriteLine("Setting is updated.  You need to run the update command in order for the changes to be applied to the server.");
 						}
 						break;
 
-					case "user":
-					case "userid":
-						if (line.value == null) {
-							Console.WriteLine("ERROR: The command '" + line.command + "' requires a value");
+					case "dbuser":
+					case "dbuserid":
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
 						} else {
-							Properties.Settings.Default.userID = line.value;
+							Properties.Settings.Default.userID = line.args[0];
 							Properties.Settings.Default.Save();
 							Console.WriteLine("Setting is updated.  You need to run the update command in order for the changes to be applied to the server.");
 						}
 						break;
 
-					case "info":
+					case "dbinfo":
 						string health = "Stopped";
 						if (server != null && server.IsAlive()) health = "Running";
 						
@@ -135,47 +173,201 @@ namespace BlottoBeats.Server {
 						Console.WriteLine("---------------------------------------------");
 						break;
 
-					case "update":
-					case "updatedatabase":
-						if (line.value == null) {
-							Console.WriteLine("ERROR: The command '" + line.command + "' requires a value");
-						} else if (server != null && server.IsAlive()) {
-							Console.WriteLine("ERROR: Can't update the database if the server is running.  Stop the server first.");
+					// USER ACCOUNT COMMANDS
+					case "newaccount":
+						if (line.numArgs < 2) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires two arguments");
 						} else {
-							database = new Database(Properties.Settings.Default.hostID,
-								Properties.Settings.Default.port,
-								Properties.Settings.Default.databaseName,
-								Properties.Settings.Default.userID,
-								line.value);
-							server = new Server(3000, database, "server.log", 3);
-							Console.WriteLine("Database updated successfully.");
+							try {
+								UserToken token = database.Authenticate(new Credentials(line.args[0], line.args[1]), true);
+								if (token != null)
+									Console.WriteLine("Registration Successful");
+								else
+									Console.WriteLine("Registration Failed");
+							} catch (DatabaseException ex) {
+								Console.WriteLine("DATABASE ERROR: Registration could not proceed");
+								Console.WriteLine(ex.Message);
+							}
+						}
+						break;
+
+					case "deleteaccount":
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else {
+							Console.WriteLine(line.command + " not yet implimented");
+						}
+						break;
+
+					case "resetpassword":
+						if (line.numArgs < 2) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires two arguments");
+						} else {
+							Console.WriteLine(line.command + " not yet implimented");
+						}
+						break;
+
+					case "refreshtoken":
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else {
+							try {
+								if (database.RefreshToken(line.args[0]))
+									Console.WriteLine("Refreshed token");
+								else
+									Console.WriteLine("User '" + line.args[0] + "' does not exist");
+							} catch (DatabaseException ex) {
+								Console.WriteLine("DATABASE ERROR: Refresh could not proceed");
+								Console.WriteLine(ex.Message);
+							}
+						}
+						break;
+
+					case "whois":
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else {
+							try {
+								int id;
+								if (int.TryParse(line.args[0], out id)) {
+									string name = database.GetUsername(id);
+									if (name != null)
+										Console.WriteLine("Username of user " + id + "is '" + name + "'");
+									else
+										Console.WriteLine("User " + id + " does not exist");
+								} else {
+									Console.WriteLine("ERROR: Argument 1 must be an integer");
+								}
+							} catch (DatabaseException ex) {
+								Console.WriteLine("DATABASE ERROR: Refresh could not proceed");
+								Console.WriteLine(ex.Message);
+							}
+						}
+						break;
+
+					// SONG COMMANDS
+					case "newsong":
+						if (line.numArgs < 3) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires three arguments");
+						} else {
+							try {
+								int seed, tempo;
+								if (line.numArgs < 4) {
+									if (int.TryParse(line.args[0], out seed) && int.TryParse(line.args[1], out tempo)) {
+										SongParameters song = new SongParameters(seed, tempo, line.args[2]);
+										song = database.VoteOnSong(song, true);
+
+										Console.WriteLine("Created new song with ID '" + song.ID + "' as anonymous");
+									} else {
+										Console.WriteLine("Arguments 1 and 2 must be integers");
+									}
+								} else {
+									int userID;
+									if (int.TryParse(line.args[0], out seed) && int.TryParse(line.args[1], out tempo) && int.TryParse(line.args[3], out userID)) {
+										SongParameters song = new SongParameters(seed, tempo, line.args[2], userID);
+										song = database.VoteOnSong(song, true);
+
+										Console.WriteLine("Created new song with ID '" + song.ID + "' belonging to user " + userID);
+									} else {
+										Console.WriteLine("Arguments 1, 2, and 4 must be integers");
+									}
+								}
+							} catch (DatabaseException ex) {
+								Console.WriteLine("DATABASE ERROR: Could not create song");
+								Console.WriteLine(ex.Message);
+							}
+						}
+						break;
+
+					case "deletesong":
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else {
+							Console.WriteLine(line.command + " not yet implimented");
+						}
+						break;
+
+					case "setscore":
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else {
+							Console.WriteLine(line.command + " not yet implimented");
+						}
+						break;
+
+					case "songinfo":
+						if (line.numArgs < 1) {
+							Console.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else {
+							try {
+								int id;
+								if (int.TryParse(line.args[0], out id)) {
+									if (database.SongExists(id)) {
+										SongParameters song = database.GetSong(id);
+									} else {
+										Console.WriteLine("Song " + id + " does not exist");
+									}
+								} else {
+									Console.WriteLine("ERROR: Argument 1 must be an integer");
+								}
+							} catch (DatabaseException ex) {
+								Console.WriteLine("DATABASE ERROR: Could not get song info");
+								Console.WriteLine(ex.Message);
+							}
 						}
 						break;
 
 					case "help":
 					case "?":
-						Console.WriteLine("COMMAND LIST");
+						Console.WriteLine("-------------------------");
+						Console.WriteLine("      COMMAND LIST");
+						Console.WriteLine("-------------------------");
+						Console.WriteLine("SERVER COMMANDS");
 						Console.WriteLine("Start");
 						Console.WriteLine("    Starts the server");
 						Console.WriteLine("Stop");
 						Console.WriteLine("    Stops the server");
 						Console.WriteLine("Restart");
 						Console.WriteLine("    Restarts the server");
+						Console.WriteLine("Update <password>");
+						Console.WriteLine("    Modifies the database according to the changes.  The server must be stopped.");
+						Console.WriteLine("Upstart <password>");
+						Console.WriteLine("    Modifies the database according to the changes and starts the server.  The server must be stopped.");
 						Console.WriteLine();
-						Console.WriteLine("Host/HostID <new ID>");
+						Console.WriteLine("DATABASE COMMANDS");
+						Console.WriteLine("DBHost/DBHostID <new ID>");
 						Console.WriteLine("    Changes the hostID of the database.  Requires an update to take effect.");
-						Console.WriteLine("Port <new Port>");
+						Console.WriteLine("DBPort <new Port>");
 						Console.WriteLine("    Changes the port of the database.  Requires an update to take effect.");
 						Console.WriteLine("Database/DatabaseName <new name>");
 						Console.WriteLine("    Changes the name of the database.  Requires an update to take effect.");
-						Console.WriteLine("User/UserID <new id>");
+						Console.WriteLine("DBUser/DBUserID <new id>");
 						Console.WriteLine("    Changes the userID to use with the database.  Requires an update to take effect.");
-						Console.WriteLine("Info");
+						Console.WriteLine("DBInfo");
 						Console.WriteLine("    Displays information about the server.");
 						Console.WriteLine();
-						Console.WriteLine("Update <password>");
-						Console.WriteLine("    Modifies the database according to the changes.  The server must be stopped.");
-						
+						Console.WriteLine("USER ACCOUNT COMMANDS");
+						Console.WriteLine("Newaccount <username> <password>");
+						Console.WriteLine("    Creates a new user account with the given username and password.");
+						Console.WriteLine("Deleteaccount <username>");
+						Console.WriteLine("    Deletes a user account with the given username.");
+						Console.WriteLine("Resetpassword <username> <password>");
+						Console.WriteLine("    Resets the password of the given username to the given password.");
+						Console.WriteLine("Refreshtoken <username>");
+						Console.WriteLine("    Refreshes the token associated with the given user account.");
+						Console.WriteLine("Whois <id>");
+						Console.WriteLine("    Returns the username of the user with the given ID.");
+						Console.WriteLine();
+						Console.WriteLine("SONG COMMANDS");
+						Console.WriteLine("Newsong <seed> <tempo> <genre> [<userID>]");
+						Console.WriteLine("    Adds a new song to the database with the given seed, tempo, and genre, and optionally, userID.  Displays the ID of the newly-added song.");
+						Console.WriteLine("Deletesong <id>");
+						Console.WriteLine("    Removes the given song from the database.");
+						Console.WriteLine("Setscore <id> <score>");
+						Console.WriteLine("    Sets the score of a given song to the given score.");
+						Console.WriteLine("Songinfo <id>");
+						Console.WriteLine("    Gets all the info about the given song.");
+
 						break;
 					default:
 						Console.WriteLine("'" + line.command + "' is not a valid command.  Type help or ? for a list of commands.");
@@ -390,7 +582,7 @@ namespace BlottoBeats.Server {
 								Log("     Tempo: " + req.song.tempo, address, 3);
 								Log("      Seed: " + req.song.seed, address, 3);
 
-								SongParameters song = database.GetSongScore(req.song);
+								SongParameters song = database.RefreshSong(req.song);
 								Message.Send(networkStream, new BBResponse(song));
 
 								Log("    Response has ID of " + song.ID + " and score of " + song.score, address, 2);
@@ -467,31 +659,37 @@ namespace BlottoBeats.Server {
 	}
 
 	/// <summary>
-	/// A very basic command-line parser.  Supports only single commands with an optional value.
+	/// A very basic command-line parser.  Supports only single commands with an optional list of value.
 	/// </summary>
 	internal class CommandLine {
 		internal string command { get; private set; }
-		internal string value { get; private set; }
-
-		internal CommandLine(string command) {
-			this.command = command;
-			this.value = null;
+		internal string[] args { get; private set; }
+		internal int numArgs {
+			get {
+				if (args != null)
+					return args.Length;
+				else
+					return 0;
+			}
 		}
 
-		internal CommandLine(string command, string value) {
-			this.command = command;
-			this.value = value;
+		internal CommandLine(string[] tokens) {
+			this.command = tokens[0];
+
+			if (tokens.Length > 1) {
+				this.args = new string[tokens.Length - 1];
+				Array.ConstrainedCopy(tokens, 1, this.args, 0, this.args.Length);
+			} else {
+				this.args = null;
+			}
+			
 		}
 
 		internal static CommandLine Prompt() {
 			Console.Write("> ");
 
-			string[] tokens = Console.ReadLine().Split(new[] { ' ' }, 2);
-
-			if (tokens.Length > 1)
-				return new CommandLine(tokens[0], tokens[1]);
-			else
-				return new CommandLine(tokens[0]);
+			string[] tokens = Console.ReadLine().Split(new[] { ' ' });
+			return new CommandLine(tokens);
 		}
 	}
 }

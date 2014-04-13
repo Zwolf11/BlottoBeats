@@ -70,20 +70,58 @@ namespace BlottoBeats.Server {
 		}
 
 		/// <summary>
-		/// Returns the score of the given song.  If the song isn't in the database,
-		/// returns zero.  Does not add the song to the database if it isn't already there.
+		/// Checks to see if a song with the given ID exists in the database.
 		/// </summary>
-		/// <param name="song">Song to check the score of</param>
-		/// <returns>A SongAndVoteData item containing the song and it's score</returns>
-		internal SongParameters GetSongScore(SongParameters song) {
+		/// <param name="id">The ID to check</param>
+		/// <returns>True if the song exists, false otherwise</returns>
+		internal bool SongExists(int id) {
+			// TODO: We can probably do this better
+			try {
+				returnItem(id, "voteScore", "uploadedsongs");
+			} catch (DatabaseException) {
+				return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Returns the song with the given ID
+		/// </summary>
+		/// <param name="id">The ID of the song to get</param>
+		/// <returns>A SongParamteres object that represents the song</returns>
+		internal SongParameters GetSong(int id) {
+			int vote = (int)returnItem(id, "voteScore", "uploadedsongs");
+			int seed = (int)returnItem(id, "songseed", "uploadedsongs");
+			int tempo = (int)returnItem(id, "tempo", "uploadedsongs");
+			string genre = (string)returnItem(id, "genre", "uploadedsongs");
+			int userID = -1; // TODO: ADD USER ID
+
+			return new SongParameters(id, vote, seed, tempo, genre, userID);
+		}
+
+		/// <summary>
+		/// Returns the given song with updated ID, score and user data.
+		///  Does not add the song to the database if it isn't already there.
+		/// </summary>
+		/// <param name="song">Song to refresh</param>
+		/// <returns>A SongParameters object that represents the song</returns>
+		internal SongParameters RefreshSong(SongParameters song) {
 			if (song.ID == -1) song.ID = GetID(song);	// Song has no ID.  Search the server
 			if (song.ID == -1) {
-				// Song is not in the database. Return score of 0.
+				// Song is not in the database. Return score of 0 and userID of -1.
 				song.score = 0;
+				song.userID = -1;
 			} else {
 				object score = returnItem(song.ID, "voteScore", "uploadedsongs");
 				if (score != null && score is int)
 					song.score = (int)score;
+				else
+					throw new DatabaseException("Database Error: Invalid data type returned");
+
+				object userID = -1; // TODO: ADD USER ID
+				if (userID != null && userID is int)
+					song.userID = (int)userID;
 				else
 					throw new DatabaseException("Database Error: Invalid data type returned");
 			}
@@ -127,11 +165,7 @@ namespace BlottoBeats.Server {
                 {
                     break;
                 }
-                int vote = (int)returnItem(tempId, "voteScore", "uploadedsongs");
-                int seed = (int)returnItem(tempId, "songseed", "uploadedsongs");
-                int tempo = (int)returnItem(tempId, "tempo", "uploadedsongs");
-                string genre = (string)returnItem(tempId, "genre", "uploadedsongs");
-                SongParameters song = new SongParameters(tempId, vote, seed, tempo, genre);
+				SongParameters song = GetSong(tempId);
                 list.Add(song);
             }
 
@@ -172,6 +206,21 @@ namespace BlottoBeats.Server {
 		}
 
 		/// <summary>
+		/// Refreshes the user token of a user, effectively forcing them to login again.
+		/// </summary>
+		/// <param name="username">The user to refresh the token of</param>
+		internal bool RefreshToken(string username) {
+			int userID = GetID(username);
+			if (userID == 0) return false;
+
+			DateTime expiry = UserToken.GetExpiration();
+			string token = UserToken.GenerateToken();
+
+			storeUserToken(userID, expiry, token);
+			return true;
+		}
+
+		/// <summary>
 		/// Verifies a user token
 		/// </summary>
 		/// <param name="tokenToVerify">The token to verify</param>
@@ -183,6 +232,15 @@ namespace BlottoBeats.Server {
 				return userID;
 			else
 				return 0;
+		}
+
+		/// <summary>
+		/// Returns the username of a user with the given ID
+		/// </summary>
+		/// <param name="id">User id to get the username of</param>
+		/// <returns>The username of the user</returns>
+		internal string GetUsername(int id) {
+			return returnItem(id, "username", "users") as string;
 		}
 
 		/// <summary>
@@ -337,6 +395,11 @@ namespace BlottoBeats.Server {
 			return new UserToken(username, expires, token);
 		}
 
+		/// <summary>
+		/// Performs an SQL NonQuery to the database
+		/// </summary>
+		/// <param name="conn">the connection SQL connection</param>
+		/// <param name="comString">the command string</param>
 		private void SQLNonQuery(MySqlConnection conn, string comString) {
             MySqlCommand command = conn.CreateCommand();
             command.CommandText = comString;

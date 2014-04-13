@@ -116,6 +116,7 @@ namespace BlottoBeats.Library.SongData {
 		public int tempo { get; set; }
         public string genre { get; set; }
 		public int score { get; set; }
+		public int userID { get; set; }
 
 		/// <summary>
 		/// Creates a new SongParameters object with a default ID of -1 and a score of 0
@@ -129,6 +130,23 @@ namespace BlottoBeats.Library.SongData {
 			this.seed = seed;
 			this.tempo = tempo;
 			this.genre = genre;
+			this.userID = -1;
+		}
+
+		/// <summary>
+		/// Creates a new SongParameters object with a default ID of -1 and a score of 0
+		/// </summary>
+		/// <param name="seed">Seed of the song</param>
+		/// <param name="tempo">Tempo of the song</param>
+		/// <param name="genre">Genre of the song</param>
+		/// <param name="userID">UserID of the owner</param>
+		public SongParameters(int seed, int tempo, string genre, int userID) {
+			this.ID = -1;
+			this.score = 0;
+			this.seed = seed;
+			this.tempo = tempo;
+			this.genre = genre;
+			this.userID = userID;
 		}
 
 		/// <summary>
@@ -139,12 +157,13 @@ namespace BlottoBeats.Library.SongData {
 		/// <param name="seed">Seed of the song</param>
 		/// <param name="tempo">Tempo of the song</param>
 		/// <param name="genre">Genre of the song</param>
-		public SongParameters(int ID, int score, int seed, int tempo, string genre) {
+		public SongParameters(int ID, int score, int seed, int tempo, string genre, int userID) {
 			this.ID = ID;
 			this.score = score; 
 			this.seed = seed;
 			this.tempo = tempo;
 			this.genre = genre;
+			this.userID = userID;
 		}
 	}
 }
