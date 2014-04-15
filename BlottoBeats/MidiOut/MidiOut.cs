@@ -134,6 +134,11 @@ namespace BlottoBeats.MidiOut
                         {
                             builder.Data1 = (int)GeneralMidiInstrument.Violin;
                         }
+                        else if (output.Genre == "Twelve-tone")
+                        {
+                            builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
+
+                        }
                         builder.Data2 = 0;
                         builder.Build();
                         track[2].Insert(pos, builder.Result);

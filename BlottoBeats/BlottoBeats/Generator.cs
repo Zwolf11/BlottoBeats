@@ -32,6 +32,7 @@ namespace BlottoBeats.Client
             const int NUMTONEROWS = 2;
             Random randomizer = new Random(paramets.seed);
             String gen;
+            Song.SongSegment thisSection = new Song.SongSegment();
             String[,] toneRows = new String[NUMTONEROWS,12];
             String timeSigPattern = ""; //Simple or Compound Meter
             int timeSigQuant = 0; // 2 = Duple, 3 = Triple, etc
@@ -75,8 +76,131 @@ namespace BlottoBeats.Client
             //Select quantity of phrases (8-32)
             int phrases = randomizer.Next(25) + 8;
 
-            //TODO Define each phrase for each tone row (See notes)
+            //Make the actual twelve-tone composition
+            for (int i = 0; i < NUMTONEROWS; i++)
+            {
+                thisSection.melodies.Add(new Song.Melody());
+                for (int j = 0; j < phrases; j++)
+                {
+                    int rhythmSum = 0;
+                    //Define measureLen
+                    int measureLen=0;
+                    if (timeSigPattern.Equals("Simple"))
+                    {
+                        measureLen += 4;
+                    }
+                    else
+                        measureLen += 6;
+                    measureLen *= timeSigQuant;
 
+                    int prevNoteVal = 0;
+                    int farthestPos = 0;
+                    while (rhythmSum < measureLen * 4)
+                    {
+                        int noteVal;
+                        int noteRhythm=0;
+                        int remainderOfMeasure = measureLen - (rhythmSum % measureLen);
+                        int measure = (rhythmSum / measureLen) + 1;
+                        int measureBound = 0;
+                        if (measure == 1)
+                        {
+                            measureBound = 2;
+                        }
+                        if (measure == 2)
+                        {
+                            measureBound = 4;
+                        }
+                        if (measure == 3)
+                        {
+                            measureBound = 6;
+                        }
+                        if (measure == 4)
+                        {
+                            measureBound = 12;
+                        }
+
+
+                        if (prevNoteVal == 0)
+                        {
+                            noteVal = prevNoteVal + 1;
+
+                        }
+                        else if (remainderOfMeasure - (measureBound - prevNoteVal) <= 1)
+                        {
+                            if (remainderOfMeasure - (measureBound - prevNoteVal) == 0)
+                            {
+                                noteVal = prevNoteVal + 1;
+                            }
+                            else
+                            {
+                                int randOut = randomizer.Next(2);
+                                noteVal = prevNoteVal + randOut;
+
+                            }
+                        }
+                        else
+                        {
+                            if (farthestPos == prevNoteVal)
+                            {
+                                int randOut = randomizer.Next(3) - 1;
+                                noteVal = prevNoteVal + randOut;
+                            }
+                            else
+                            {
+                                int randOut = randomizer.Next(2);
+                                noteVal = prevNoteVal + randOut;
+                            }
+                            
+                        }
+
+                        if (measure == 1)
+                        {
+                            if (noteVal > 4)
+                                noteVal = 4;
+                        }
+                        if (measure == 2)
+                        {
+                            if (noteVal > 9)
+                                noteVal = 9;
+                        }
+                        if (measure == 3)
+                        {
+                            if (noteVal > 11)
+                                noteVal = 11;
+                        }
+                        if (noteVal > 12)
+                            noteVal = 12;
+                        if (noteVal < 1)
+                            noteVal = 1;
+
+                        int maxlen = Math.Min((remainderOfMeasure - (measureBound - noteVal)), remainderOfMeasure);
+                        noteRhythm = randomizer.Next(maxlen) + 1;
+                        String noteString = toneRows[i, noteVal-1];
+                        if (i == 0)
+                        {
+                            noteString += "5";
+                        }
+                        if (i == 1)
+                        {
+                            noteString += "3";
+                        }
+                        thisSection.melodies[i].melodicLine.Add(new Song.Note(noteString, noteRhythm));
+
+                        rhythmSum += noteRhythm;
+                        prevNoteVal = noteVal;
+                        if (farthestPos < noteVal)
+                        {
+                            farthestPos = noteVal;
+                        }
+
+                    }
+
+                }
+
+            }
+                
+
+            output.addSegment(thisSection);
             BlottoBeats.MidiOut.MidiOut outgoing = new BlottoBeats.MidiOut.MidiOut();
             double songLen = outgoing.outputToMidi(output);
 
