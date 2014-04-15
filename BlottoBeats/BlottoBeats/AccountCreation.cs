@@ -1,6 +1,7 @@
 ﻿using BlottoBeats.Library.Authentication;
 using System;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace BlottoBeats.Client
 {
@@ -15,6 +16,13 @@ namespace BlottoBeats.Client
 
         //login button
         private void button1_Click(object sender, EventArgs e)
+        {
+            Thread loginThread = new Thread(new ThreadStart(login));
+            loginThread.Start();
+            
+        }
+
+        private void login()
         {
             UserToken token;
 
@@ -41,7 +49,7 @@ namespace BlottoBeats.Client
             }
             else
             {
-                MessageBox.Show("Server is not connected. Try again later");
+                MessageBox.Show("Server is not connected. Try again later", "Login failed");
                 this.Close();
             }
 
@@ -49,6 +57,13 @@ namespace BlottoBeats.Client
 
         //Register button
         private void button2_Click(object sender, EventArgs e)
+        {
+            Thread registerThread = new Thread(new ThreadStart(register));
+            registerThread.Start();
+            
+        }
+
+        private void register()
         {
             UserToken token;
             if (form.server.Test())
@@ -75,7 +90,7 @@ namespace BlottoBeats.Client
             }
             else
             {
-                MessageBox.Show("Server is not connected. Try again later");
+                MessageBox.Show("Server is not connected. Try again later", "Registration failed");
                 this.Close();
             }
         }
