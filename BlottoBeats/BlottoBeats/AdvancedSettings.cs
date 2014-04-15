@@ -1,6 +1,7 @@
 ﻿using BlottoBeats.Library.Networking;
 using System;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace BlottoBeats.Client
 {
@@ -12,7 +13,7 @@ namespace BlottoBeats.Client
         {
             InitializeComponent();
             this.form = form;
-            this.textBox1.Text = form.server.ip;
+            this.textBox1.Text = Properties.Settings.Default.lastIP;
             this.textBox2.Text = Properties.Settings.Default.maxSongs + "";
             this.label3.Text = Convert.ToString(form.backlog.Count);
         }
@@ -20,17 +21,10 @@ namespace BlottoBeats.Client
         //update ip button
         private void button1_Click(object sender, EventArgs e)
         {
-            BBServerConnection newServer = new BBServerConnection(this.textBox1.Text, 3000);
+            Thread iPThread = new Thread(new ThreadStart(testNewIP));
+            iPThread.Start();
 
-            if (newServer.Test())
-            {
-                form.server.ip = this.textBox1.Text;
-                Properties.Settings.Default.lastIP = form.server.ip;
-            }
-            else
-            {
-                MessageBox.Show("Server is not connected. Try again later");
-            }
+            
         }
 
         //update max backlog button
@@ -49,6 +43,24 @@ namespace BlottoBeats.Client
             }
             
             form.accountForm.ShowDialog();
+        }
+
+        private void testNewIP()
+        {
+
+            BBServerConnection newServer = new BBServerConnection(this.textBox1.Text, 3000);
+
+            if (newServer.Test())
+            {
+                form.server.ip = this.textBox1.Text;
+                Properties.Settings.Default.lastIP = form.server.ip;
+                MessageBox.Show("Success!", "Change IP Success");
+            }
+            else
+            {
+                MessageBox.Show("Server is not connected. Try again later", "Change IP failed");
+            }
+
         }
     }
 }

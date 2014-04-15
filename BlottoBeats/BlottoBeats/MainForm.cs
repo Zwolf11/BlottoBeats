@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace BlottoBeats.Client
 {
@@ -114,7 +115,9 @@ namespace BlottoBeats.Client
             settingsForm = new AdvancedSettings(this);
             accountForm = new AccountCreation(this);
 
-            refreshReddit();
+            Thread refreshRed = new Thread(new ThreadStart(refreshReddit));
+            refreshRed.Start();
+            //refreshReddit();
 
             if (Properties.Settings.Default.username == "null")
             {
@@ -122,25 +125,35 @@ namespace BlottoBeats.Client
             }
             else
             {
-                UserToken tempToken = new UserToken(Properties.Settings.Default.username, Properties.Settings.Default.expires, Properties.Settings.Default.token);
-                if (server.Test())
-                {
+                Thread startThread = new Thread(new ThreadStart(startUp));
+                startThread.Start();
+                //startThread.Join();
+                
+            }
+            //refreshRed.Join();
+        }
 
-                    if (server.VerifyToken(tempToken) == true)
-                    {
-                        currentUser = tempToken;
-                        accountForm.textBox2.Text = currentUser.username;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Login has expired. Please log in again");
-                        accountForm.ShowDialog();
-                    }
+        private void startUp()
+        {
+            UserToken tempToken = new UserToken(Properties.Settings.Default.username, Properties.Settings.Default.expires, Properties.Settings.Default.token);
+            if (server.Test())
+            {
+
+                if (server.VerifyToken(tempToken) == true)
+                {
+                    currentUser = tempToken;
+                    accountForm.textBox2.Text = currentUser.username;
+                    MessageBox.Show("You have successfully logged in!", "Login Success");
                 }
                 else
                 {
-                    MessageBox.Show("Server is not connected. Try again later");
+                    MessageBox.Show("Login has expired. Please log in again");
+                    accountForm.ShowDialog();
                 }
+            }
+            else
+            {
+                MessageBox.Show("Server is not connected. Try again later", "Auto-login failed");
             }
         }
 
@@ -325,7 +338,9 @@ namespace BlottoBeats.Client
         private void loadSong(bool nextSong)
         {
             stopSong();
-            sendScore();
+            Thread sendSc = new Thread(new ThreadStart(sendScore));
+            sendSc.Start();
+            //sendScore();
             resetPlayBar();
 
             if (nextSong) songPos++;
@@ -359,6 +374,7 @@ namespace BlottoBeats.Client
             songLen = generator.generate(backlog[songPos]);
             player.Open(@"C:\BlottoBeats\temp.mid");
             playSong();
+            //sendSc.Join();
         }
 
         private void stopSong()
@@ -488,7 +504,9 @@ namespace BlottoBeats.Client
 
         private void refreshRedditClicked(object sender, MouseEventArgs e)
         {
-            refreshReddit();
+            Thread refreshRed = new Thread(new ThreadStart(refreshReddit));
+            refreshRed.Start();
+            //refreshReddit();
             Invalidate();
         }
 
