@@ -36,10 +36,10 @@ namespace BlottoBeats.Client
         //account management button
         private void button3_Click(object sender, EventArgs e)
         {
-            form.accountForm.textBox1.Clear();
+            form.accountForm.pass.Clear();
             if (form.currentUser != null)
             {
-                form.accountForm.textBox2.Text = form.currentUser.username;
+                form.accountForm.user.Text = form.currentUser.username;
             }
             
             form.accountForm.ShowDialog();

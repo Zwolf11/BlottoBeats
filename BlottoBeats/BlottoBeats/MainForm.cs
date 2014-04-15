@@ -41,7 +41,7 @@ namespace BlottoBeats.Client
         public BBServerConnection server;
         private MediaPlayer.MediaPlayer player;
         public AdvancedSettings settingsForm;
-        public AccountCreation accountForm;
+        public AccountManagement accountForm;
         public UserToken currentUser;
 
         private Font font;
@@ -100,7 +100,7 @@ namespace BlottoBeats.Client
             lightOutline = new Pen(Color.FromArgb(130, 130, 130));
             lightOutline.Alignment = System.Drawing.Drawing2D.PenAlignment.Outset;
 
-            genre = new DropDownSetting(0, "Genre", this, new string[]{"Generic", "Classical","Twelve-tone"}, size);
+            genre = new DropDownSetting(0, "Genre", this, new string[]{"Generic", "Classical", "Twelve-tone"}, size);
             tempo = new TextBoxSetting(1, "Tempo", this, 60, 200, size);
             seed = new TextBoxSetting(2, "Seed", this, int.MinValue, int.MaxValue, size);
             settings.Add(genre);
@@ -113,7 +113,7 @@ namespace BlottoBeats.Client
             initButtons();
 
             settingsForm = new AdvancedSettings(this);
-            accountForm = new AccountCreation(this);
+            accountForm = new AccountManagement(this);
 
             Thread refreshRed = new Thread(new ThreadStart(refreshReddit));
             refreshRed.Start();
@@ -142,7 +142,7 @@ namespace BlottoBeats.Client
                 if (server.VerifyToken(tempToken) == true)
                 {
                     currentUser = tempToken;
-                    accountForm.textBox2.Text = currentUser.username;
+                    accountForm.user.Text = currentUser.username;
                     MessageBox.Show("You have successfully logged in!", "Login Success");
                 }
                 else

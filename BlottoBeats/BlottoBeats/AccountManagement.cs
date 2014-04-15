@@ -1,0 +1,289 @@
+﻿using BlottoBeats.Library.Authentication;
+using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Threading;
+
+namespace BlottoBeats.Client
+{
+    public class AccountManagement : Form
+    {
+        private int size;
+        private List<Button> buttons;
+        private MainForm form;
+        private bool dragging;
+        private Point dragPos;
+        public TextBox user;
+        public TextBox pass;
+        public CheckBox remember;
+
+        private Font font;
+        private Font smallFont;
+        private SolidBrush lightGrey;
+        private SolidBrush medGrey;
+        private SolidBrush darkGrey;
+        private SolidBrush paleBlue;
+        private SolidBrush paleRed;
+        private SolidBrush paleGreen;
+        private SolidBrush white;
+        private Pen lightInline;
+        private Pen lightOutline;
+
+        public AccountManagement(MainForm form)
+        {
+            this.Text = "Blotto Beats";
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.MouseDown += this.mouseDown;
+            this.MouseUp += this.mouseUp;
+            this.Paint += this.paint;
+            this.DoubleBuffered = true;
+            this.BackColor = Color.Turquoise;
+            this.TransparencyKey = Color.Turquoise;
+
+            size = 80;
+            buttons = new List<Button>();
+            this.form = form;
+            this.Size = new Size(33 * size / 8, 5 * size / 2);
+            user = new TextBox();
+            user.Width = 2 * size + size / 4;
+            user.Font = new Font("Arial", 12);
+            user.Location = new Point(2 * size - size / 4, 9 * size / 8);
+            this.Controls.Add(user);
+            pass = new TextBox();
+            pass.PasswordChar = '*';
+            pass.Width = 2 * size + size / 4;
+            pass.Font = new Font("Arial", 12);
+            pass.Location = new Point(2 * size - size / 4, 13 * size / 8);
+            this.Controls.Add(pass);
+            remember = new CheckBox();
+            remember.BackColor = Color.Transparent;
+            remember.Location = new Point(15 * size / 4 + 3, 69 * size / 32 - 3);
+            this.Controls.Add(remember);
+
+            lightGrey = new SolidBrush(Color.FromArgb(130, 130, 130));
+            medGrey = new SolidBrush(Color.FromArgb(90, 90, 90));
+            darkGrey = new SolidBrush(Color.FromArgb(50, 50, 50));
+            paleBlue = new SolidBrush(Color.FromArgb(75, 108, 124));
+            paleRed = new SolidBrush(Color.FromArgb(107, 49, 50));
+            paleGreen = new SolidBrush(Color.FromArgb(77, 125, 74));
+            white = new SolidBrush(Color.FromArgb(255, 255, 255));
+            lightInline = new Pen(Color.FromArgb(130, 130, 130));
+            lightInline.Alignment = System.Drawing.Drawing2D.PenAlignment.Inset;
+            lightOutline = new Pen(Color.FromArgb(130, 130, 130));
+            lightOutline.Alignment = System.Drawing.Drawing2D.PenAlignment.Outset;
+            lightInline.Width = size / 40;
+            lightOutline.Width = size / 40;
+            font = new Font("Arial", 16, FontStyle.Bold);
+            smallFont = new Font("Arial", 10, FontStyle.Bold);
+
+            List<Point> button = new List<Point>();
+            button.Add(new Point(0, 0));
+            button.Add(new Point(3 * size / 4, 0));
+            button.Add(new Point(3 * size / 4, size / 4));
+            button.Add(new Point(0, size / 4));
+
+            Button loginButton = new Button(button, new Point(5 * size / 16, 17 * size / 8), medGrey, null, null);
+            loginButton.Clicked += loginClicked;
+            buttons.Add(loginButton);
+
+            Button registerButton = new Button(button, new Point(9 * size / 8, 17 * size / 8), medGrey, null, null);
+            registerButton.Clicked += registerClicked;
+            buttons.Add(registerButton);
+
+            List<Point> minimize = new List<Point>();
+            minimize.Add(new Point(0, 0));
+            minimize.Add(new Point(size / 4, 0));
+            minimize.Add(new Point(size / 4, size / 8));
+            minimize.Add(new Point(0, size / 8));
+            Button minimizeButton = new Button(minimize, new Point(7 * size / 2, 0), medGrey, null, null);
+            minimizeButton.Clicked += minimizeClicked;
+            buttons.Add(minimizeButton);
+
+            List<Point> exit = new List<Point>();
+            exit.Add(new Point(0, 0));
+            exit.Add(new Point(size / 4, 0));
+            exit.Add(new Point(size / 4, size / 8));
+            exit.Add(new Point(0, size / 8));
+            List<Point> exitImg = new List<Point>();
+            Button exitButton = new Button(exit, new Point(15 * size / 4, 0), paleRed, null, exitImg);
+            exitButton.Clicked += exitClicked;
+            buttons.Add(exitButton);
+        }
+
+        private void login()
+        {
+            UserToken token;
+
+            if (form.server.Test())
+            {
+                token = form.server.Authenticate(new Credentials(user.Text, pass.Text), false);
+
+                if (token == null)
+                {
+                    MessageBox.Show("Username/Password was incorrect. Please try again");
+                }
+                else
+                {
+                    form.currentUser = token;
+                    Properties.Settings.Default.username = form.currentUser.username;
+                    Properties.Settings.Default.expires = form.currentUser.expires;
+                    Properties.Settings.Default.token = form.currentUser.token;
+                    Properties.Settings.Default.Save();
+
+                    this.Close();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Server is not connected. Try again later", "Login failed");
+                this.Close();
+            }
+        }
+
+        private void register()
+        {
+            UserToken token;
+
+            if (form.server.Test())
+            {
+                token = form.server.Authenticate(new Credentials(user.Text, pass.Text), true);
+
+                if (token == null)
+                {
+                    MessageBox.Show("Error occurred. Username might already be taken");
+                    form.currentUser = token;
+                }
+                else
+                {
+                    form.currentUser = token;
+                    Properties.Settings.Default.username = form.currentUser.username;
+                    Properties.Settings.Default.expires = form.currentUser.expires;
+                    Properties.Settings.Default.token = form.currentUser.token;
+                    Properties.Settings.Default.Save();
+
+                    this.Close();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Server is not connected. Try again later", "Registration failed");
+                this.Close();
+            }
+        }
+
+        private void loginClicked(object sender, MouseEventArgs e)
+        {
+            Thread loginThread = new Thread(new ThreadStart(login));
+            loginThread.Start();
+        }
+
+        private void registerClicked(object sender, MouseEventArgs e)
+        {
+            Thread registerThread = new Thread(new ThreadStart(register));
+            registerThread.Start();
+        }
+
+        private void minimizeClicked(object sender, MouseEventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        private void exitClicked(object sender, MouseEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void mouseUp(object sender, MouseEventArgs e)
+        {
+            this.MouseMove -= this.mouseMove;
+
+            if (!dragging)
+                for (int i = buttons.Count - 1; i >= 0; i--)
+                    if (pointInPolygon(e.Location, buttons[i].ClickLocation))
+                    {
+                        buttons[i].onClicked(e);
+                        break;
+                    }
+
+            dragging = false;
+        }
+
+        private void mouseDown(object sender, MouseEventArgs e)
+        {
+            this.MouseMove += this.mouseMove;
+            dragPos = e.Location;
+        }
+
+        private void mouseMove(object sender, MouseEventArgs e)
+        {
+            if (dragging)
+                this.Location = new Point(Cursor.Position.X - dragPos.X, Cursor.Position.Y - dragPos.Y);
+            else
+                if (Math.Sqrt(Math.Pow(e.X - dragPos.X, 2) + Math.Pow(e.Y - dragPos.Y, 2)) > 10)
+                    dragging = true;
+        }
+
+        private bool pointInPolygon(Point p, Point[] poly)
+        {
+            Point p1, p2;
+            bool inside = false;
+
+            if (poly.Length < 3)
+                return inside;
+
+            Point oldPoint = new Point(poly[poly.Length - 1].X, poly[poly.Length - 1].Y);
+
+            for (int i = 0; i < poly.Length; i++)
+            {
+                Point newPoint = new Point(poly[i].X, poly[i].Y);
+
+                if (newPoint.X > oldPoint.X)
+                {
+                    p1 = oldPoint;
+                    p2 = newPoint;
+                }
+                else
+                {
+                    p1 = newPoint;
+                    p2 = oldPoint;
+                }
+
+                if ((newPoint.X < p.X) == (p.X <= oldPoint.X) && ((long)p.Y - (long)p1.Y) * (long)(p2.X - p1.X) < ((long)p2.Y - (long)p1.Y) * (long)(p.X - p1.X))
+                    inside = !inside;
+
+                oldPoint = newPoint;
+            }
+
+            return inside;
+        }
+
+        private void paint(object sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+
+            g.FillRectangle(darkGrey, size / 6, size / 8, 95 * size / 24, 19 * size / 8);
+            g.DrawRectangle(lightInline, size / 6, size / 8, 95 * size / 24, 19 * size / 8);
+
+            g.FillRectangle(medGrey, size / 6, size / 8, 95 * size / 24, 3 * size / 8);
+            g.DrawRectangle(lightInline, size / 6, size / 8, 95 * size / 24, 3 * size / 8);
+
+            g.FillEllipse(medGrey, 0, 0, size, size);
+            g.DrawEllipse(lightInline, 0, 0, size, size);
+
+            foreach (Button button in buttons)
+                g.FillPolygon(button.inside, button.ClickLocation);
+
+            StringFormat format = new StringFormat();
+            format.Alignment = StringAlignment.Far;
+            g.DrawString("Blotto Beats - Login", font, darkGrey, 65 * size / 16, size / 8 + size / 18, format);
+            g.DrawString("Username:", font, lightGrey, size / 4, 9 * size / 8);
+            g.DrawString("Password:", font, lightGrey, size / 4, 13 * size / 8);
+            g.DrawString("Remember me:", smallFont, lightGrey, 15 * size  / 4, 69 * size / 32, format);
+            StringFormat format2 = new StringFormat();
+            format2.Alignment = StringAlignment.Center;
+            g.DrawString("Login", smallFont, white, 11 * size / 16, 69 * size / 32, format2);
+            g.DrawString("Register", smallFont, white, 24 * size / 16, 69 * size / 32, format2);
+        }
+    }
+}
