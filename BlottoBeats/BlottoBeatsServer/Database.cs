@@ -316,7 +316,7 @@ namespace BlottoBeats.Server {
 		private void insertData(SongParameters song) {
 			MySqlConnection conn = new MySqlConnection(connString);
 			MySqlCommand command = conn.CreateCommand();
-			SQLNonQuery(conn, "Insert into uploadedsongs (iduploadedsongs,genre,songseed,tempo,voteScore) values('" + song.ID + "','" + song.genre + "','" + song.seed + "','" + song.tempo + "','" + song.score + "')");
+			SQLNonQuery(conn, "Insert into uploadedsongs (iduploadedsongs,genre,songseed,tempo,voteScore, idusers) values('" + song.ID + "','" + song.genre + "','" + song.seed + "','" + song.tempo + "','" + song.score + "','" + song.userID + "')");
 		}
 
 		private void updateScore(int id, bool vote) {
