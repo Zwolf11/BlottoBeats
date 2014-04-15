@@ -27,6 +27,63 @@ namespace BlottoBeats.Client
 
         }
 
+        public double generate_TwelveTone(SongParameters paramets)
+        {
+            const int NUMTONEROWS = 2;
+            Random randomizer = new Random(paramets.seed);
+            String gen;
+            String[,] toneRows = new String[NUMTONEROWS,12];
+            String timeSigPattern = ""; //Simple or Compound Meter
+            int timeSigQuant = 0; // 2 = Duple, 3 = Triple, etc
+
+            String[] notes = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+
+            //Set genre
+            gen = paramets.genre;
+
+            //Now also sets the genre
+            Song output = new Song(paramets.tempo, "A", paramets.genre);
+            Console.Out.WriteLine(paramets.genre);
+
+            int randOutput = randomizer.Next(2);
+            switch (randOutput)
+            {
+                case 0:
+                    timeSigPattern = "Simple";
+                    break;
+                case 1:
+                    timeSigPattern = "Compound";
+                    break;
+            }
+
+            timeSigQuant = randomizer.Next(3) + 2;
+
+            //Randomize toneRows
+            for (int i = 0; i < NUMTONEROWS; i++)
+            {
+                int[] selected = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                for (int j = 0; j<12; j++){
+                    int pos=0;
+                    do{
+                        pos = randomizer.Next(12);
+                    }while(selected[pos]==1);
+
+                    selected[pos] = 1;
+                    toneRows[i, j] = notes[pos];
+                }
+            }
+            //Select quantity of phrases (8-32)
+            int phrases = randomizer.Next(25) + 8;
+
+            //TODO Define each phrase for each tone row (See notes)
+
+            BlottoBeats.MidiOut.MidiOut outgoing = new BlottoBeats.MidiOut.MidiOut();
+            double songLen = outgoing.outputToMidi(output);
+
+            return songLen;
+
+        }
+
         //NOTE: CURRENTLY ASSUMING VALID/NON-NULL INPUT!!!!! (will crash with invalid input) 
         //TODO (soon, but not priority) check for validity of input
         public double generate(SongParameters paramets)
@@ -51,6 +108,8 @@ namespace BlottoBeats.Client
             gen = paramets.genre;
             if (gen == "Classical")
                 return generate_Classical(paramets);
+            if (gen == "Twelve-tone")
+                return generate_TwelveTone(paramets);
 
             //Now also sets the genre
             Song output = new Song(paramets.tempo, key, paramets.genre);
