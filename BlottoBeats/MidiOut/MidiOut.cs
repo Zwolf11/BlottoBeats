@@ -141,12 +141,12 @@ namespace BlottoBeats.MidiOut
                         }
                         builder.Data2 = 0;
                         builder.Build();
-                        track[2].Insert(pos, builder.Result);
+                        track[q+2].Insert(pos, builder.Result);
                         builder.Command = ChannelCommand.NoteOn;
                         builder.Data1 = midiValOfNote(note);
                         builder.Data2 = 127; //Set volume to max
                         builder.Build(); //Build the message
-                        track[2].Insert(pos, builder.Result); //Insert into Track 1 at tick position 'pos'
+                        track[q+2].Insert(pos, builder.Result); //Insert into Track 1 at tick position 'pos'
                         //Increment MIDI channel by 1
                         pos += (PpqnClock.PpqnMinValue / 4 * noteLength);
                         //Set Note Off
@@ -154,7 +154,7 @@ namespace BlottoBeats.MidiOut
                         builder.Data1 = midiValOfNote(note);
                         builder.Data2 = 0; //Set volume to mute
                         builder.Build(); //Build the message
-                        track[2].Insert(pos, builder.Result);
+                        track[q+2].Insert(pos, builder.Result);
 
                     }
                 }
