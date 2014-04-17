@@ -44,17 +44,17 @@ namespace BlottoBeats.Client
         public AccountManagement accountForm;
         public UserToken currentUser;
 
-        private Font font;
-        private Font smallFont;
-        private SolidBrush lightGrey;
-        private SolidBrush medGrey;
-        private SolidBrush darkGrey;
-        private SolidBrush paleBlue;
-        private SolidBrush paleRed;
-        private SolidBrush paleGreen;
-        private SolidBrush white;
-        private Pen lightInline;
-        private Pen lightOutline;
+        public Font font;
+        public Font smallFont;
+        public SolidBrush lightColor;
+        public SolidBrush medColor;
+        public SolidBrush darkColor;
+        public SolidBrush sliderColor;
+        public SolidBrush downvoteColor;
+        public SolidBrush upvoteColor;
+        public SolidBrush textColor;
+        public Pen lightInline;
+        public Pen lightOutline;
 
         public MainForm()
         {
@@ -67,6 +67,7 @@ namespace BlottoBeats.Client
             this.DoubleBuffered = true;
             this.BackColor = Color.Turquoise;
             this.TransparencyKey = Color.Turquoise;
+            this.TopMost = Properties.Settings.Default.alwaysOnTop;
 
             size = 80;
             buttons = new List<Button>();
@@ -88,16 +89,16 @@ namespace BlottoBeats.Client
             timer.Interval = 10;
             timer.Tick += this.tick;
 
-            lightGrey = new SolidBrush(Color.FromArgb(130, 130, 130));
-            medGrey = new SolidBrush(Color.FromArgb(90, 90, 90));
-            darkGrey = new SolidBrush(Color.FromArgb(50, 50, 50));
-            paleBlue = new SolidBrush(Color.FromArgb(75, 108, 124));
-            paleRed = new SolidBrush(Color.FromArgb(107, 49, 50));
-            paleGreen = new SolidBrush(Color.FromArgb(77, 125, 74));
-            white = new SolidBrush(Color.FromArgb(255, 255, 255));
-            lightInline = new Pen(Color.FromArgb(130, 130, 130));
+            lightColor = new SolidBrush(Properties.Settings.Default.lightColor);
+            medColor = new SolidBrush(Properties.Settings.Default.medColor);
+            darkColor = new SolidBrush(Properties.Settings.Default.darkColor);
+            sliderColor = new SolidBrush(Properties.Settings.Default.sliderColor);
+            downvoteColor = new SolidBrush(Properties.Settings.Default.downvoteColor);
+            upvoteColor = new SolidBrush(Properties.Settings.Default.upvoteColor);
+            textColor = new SolidBrush(Properties.Settings.Default.textColor);
+            lightInline = new Pen(lightColor);
             lightInline.Alignment = System.Drawing.Drawing2D.PenAlignment.Inset;
-            lightOutline = new Pen(Color.FromArgb(130, 130, 130));
+            lightOutline = new Pen(lightColor);
             lightOutline.Alignment = System.Drawing.Drawing2D.PenAlignment.Outset;
 
             genre = new DropDownSetting(0, "Genre", this, new string[]{"Generic", "Classical", "Twelve-tone", "Jazz"}, size);
@@ -157,7 +158,7 @@ namespace BlottoBeats.Client
             }
         }
 
-        private void initButtons()
+        public void initButtons()
         {
             buttons.Clear();
             if (settingsDropped || redditDropped) this.Size = new Size(33 * size / 8, 23 * size / 8);
@@ -172,7 +173,7 @@ namespace BlottoBeats.Client
             playBar.Add(new Point(13 * size / 4, 0));
             playBar.Add(new Point(13 * size / 4, 3 * size / 8));
             playBar.Add(new Point(0, 3 * size / 8));
-            playBarButton = new Button(playBar, new Point(3 * size / 4, size / 8), darkGrey, null, null);
+            playBarButton = new Button(playBar, new Point(3 * size / 4, size / 8), darkColor, null, null);
             playBarButton.Clicked += playBarClicked;
             buttons.Add(playBarButton);
 
@@ -191,7 +192,7 @@ namespace BlottoBeats.Client
             backImg.Add(new Point(10 * size / 32 + size / 16, 3 * size / 16));
             backImg.Add(new Point(10 * size / 32 + size / 16, 5 * size / 16));
             backImg.Add(new Point(9 * size / 32 + size / 16, 5 * size / 16));
-            Button backButton = new Button(menuButton, new Point(3 * size / 4, size / 2), darkGrey, lightOutline, backImg);
+            Button backButton = new Button(menuButton, new Point(3 * size / 4, size / 2), darkColor, lightOutline, backImg);
             backButton.Clicked += backClicked;
             buttons.Add(backButton);
 
@@ -204,7 +205,7 @@ namespace BlottoBeats.Client
             nextImg.Add(new Point(13 * size / 32, 5 * size / 16));
             nextImg.Add(new Point(13 * size / 32, 3 * size / 16));
             nextImg.Add(new Point(11 * size / 32, 5 * size / 16));
-            Button nextButton = new Button(menuButton, new Point(size / 2 + 3 * size / 4, size / 2), darkGrey, lightOutline, nextImg);
+            Button nextButton = new Button(menuButton, new Point(size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, nextImg);
             nextButton.Clicked += nextClicked;
             buttons.Add(nextButton);
 
@@ -223,7 +224,7 @@ namespace BlottoBeats.Client
             upvoteImg.Add(new Point(13 * size / 32, 10 * size / 32));
             upvoteImg.Add(new Point(10 * size / 32, 10 * size / 32));
             upvoteImg.Add(new Point(9 * size / 32, 9 * size / 32));
-            Button upvoteButton = new Button(menuButton, new Point(2 * size / 2 + 3 * size / 4, size / 2), paleGreen, lightOutline, upvoteImg);
+            Button upvoteButton = new Button(menuButton, new Point(2 * size / 2 + 3 * size / 4, size / 2), upvoteColor, lightOutline, upvoteImg);
             upvoteButton.Clicked += upvoteClicked;
             buttons.Add(upvoteButton);
 
@@ -242,12 +243,12 @@ namespace BlottoBeats.Client
             downvoteImg.Add(new Point(11 * size / 32, 2 * size / 32));
             downvoteImg.Add(new Point(14 * size / 32, 2 * size / 32));
             downvoteImg.Add(new Point(15 * size / 32, 3 * size / 32));
-            Button downvoteButton = new Button(menuButton, new Point(3 * size / 2 + 3 * size / 4, size / 2), paleRed, lightOutline, downvoteImg);
+            Button downvoteButton = new Button(menuButton, new Point(3 * size / 2 + 3 * size / 4, size / 2), downvoteColor, lightOutline, downvoteImg);
             downvoteButton.Clicked += downvoteClicked;
             buttons.Add(downvoteButton);
 
             List<Point> redditImg = new List<Point>();
-            Button redditButton = new Button(menuButton, new Point(4 * size / 2 + 3 * size / 4, size / 2), darkGrey, lightOutline, redditImg);
+            Button redditButton = new Button(menuButton, new Point(4 * size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, redditImg);
             redditButton.Clicked += redditClicked;
             buttons.Add(redditButton);
 
@@ -255,7 +256,7 @@ namespace BlottoBeats.Client
             settingsImg.Add(new Point(size / 4, size / 8));
             settingsImg.Add(new Point(size / 2, size / 8));
             settingsImg.Add(new Point((int)(3 * size / 8), 5 * size / 16));
-            Button settingsButton = new Button(menuButton, new Point(5 * size / 2 + 3 * size / 4, size / 2), darkGrey, lightOutline, settingsImg);
+            Button settingsButton = new Button(menuButton, new Point(5 * size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, settingsImg);
             settingsButton.Clicked += settingsClicked;
             buttons.Add(settingsButton);
 
@@ -264,7 +265,7 @@ namespace BlottoBeats.Client
             slider.Add(new Point(size / 8, 3 * size / 16));
             slider.Add(new Point(0, 3 * size / 8));
             slider.Add(new Point(-size / 8, 3 * size / 16));
-            sliderButton = new Button(slider, new Point((int)(progress * (193 * size / 64) + size), size / 8), paleBlue, lightInline, null);
+            sliderButton = new Button(slider, new Point((int)(progress * (193 * size / 64) + size), size / 8), sliderColor, lightInline, null);
             sliderButton.Clicked += sliderClicked;
             buttons.Add(sliderButton);
 
@@ -287,7 +288,7 @@ namespace BlottoBeats.Client
             List<Point> playButtonImg = playImg;
             if (playing) playButtonImg = pauseImg;
             else playButtonImg = playImg;
-            playButton = new Button(play, new Point(0, 0), medGrey, lightInline, playButtonImg);
+            playButton = new Button(play, new Point(0, 0), medColor, lightInline, playButtonImg);
             playButton.Clicked += this.playClicked;
             buttons.Add(playButton);
 
@@ -297,7 +298,7 @@ namespace BlottoBeats.Client
             minimize.Add(new Point(size / 4, size / 8));
             minimize.Add(new Point(0, size / 8));
             List<Point> minimizeImg = new List<Point>();
-            Button minimizeButton = new Button(minimize, new Point(7 * size / 2, 0), medGrey, null, minimizeImg);
+            Button minimizeButton = new Button(minimize, new Point(7 * size / 2, 0), medColor, null, minimizeImg);
             minimizeButton.Clicked += minimizeClicked;
             buttons.Add(minimizeButton);
 
@@ -307,7 +308,7 @@ namespace BlottoBeats.Client
             exit.Add(new Point(size / 4, size / 8));
             exit.Add(new Point(0, size / 8));
             List<Point> exitImg = new List<Point>();
-            Button exitButton = new Button(exit, new Point(15 * size / 4, 0), paleRed, null, exitImg);
+            Button exitButton = new Button(exit, new Point(15 * size / 4, 0), downvoteColor, null, exitImg);
             exitButton.Clicked += exitClicked;
             buttons.Add(exitButton);
 
@@ -316,10 +317,10 @@ namespace BlottoBeats.Client
             buttonShape.Add(new Point(size / 4, 0));
             buttonShape.Add(new Point(size / 4, size / 4));
             buttonShape.Add(new Point(0, size / 4));
-            advSettingButton = new Button(buttonShape, new Point(27 * size / 8, 20 * size / 8), darkGrey, lightOutline, null);
+            advSettingButton = new Button(buttonShape, new Point(27 * size / 8, 20 * size / 8), darkColor, lightOutline, null);
             advSettingButton.Clicked += advSettingClicked;
 
-            refreshRedditButton = new Button(buttonShape, new Point(27 * size / 8, 20 * size / 8), darkGrey, lightOutline, null);
+            refreshRedditButton = new Button(buttonShape, new Point(27 * size / 8, 20 * size / 8), darkColor, lightOutline, null);
             refreshRedditButton.Clicked += refreshRedditClicked;
 
             foreach (Setting setting in settings)
@@ -361,7 +362,6 @@ namespace BlottoBeats.Client
                     backlog.RemoveAt(0);
                     songPos--;
                 }
-                settingsForm.label3.Text = Convert.ToString(backlog.Count);
             }
             else
             {
@@ -687,21 +687,21 @@ namespace BlottoBeats.Client
         {
             Graphics g = e.Graphics;
 
-            g.FillEllipse(darkGrey, 31 * size / 8, size / 8 - 1, size / 4, 3 * size / 8);
+            g.FillEllipse(darkColor, 31 * size / 8, size / 8 - 1, size / 4, 3 * size / 8);
 
             if (settingsDropped)
             {
-                g.FillRectangle(medGrey, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
+                g.FillRectangle(medColor, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
                 g.DrawRectangle(lightInline, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
-                g.DrawString("Variable", font, lightGrey, 13 * size / 16, 15 * size / 16);
-                g.DrawString("Randomized?", font, lightGrey, 15 * size / 4 - g.MeasureString("Randomized?", font).Width, 15 * size / 16);
-                g.DrawString("Advanced Settings", font, lightGrey, 13 * size / 16, 40 * size / 16);
+                g.DrawString("Variable", font, lightColor, 13 * size / 16, 15 * size / 16);
+                g.DrawString("Randomized?", font, lightColor, 15 * size / 4 - g.MeasureString("Randomized?", font).Width, 15 * size / 16);
+                g.DrawString("Advanced Settings", font, lightColor, 13 * size / 16, 40 * size / 16);
                 g.FillPolygon(advSettingButton.inside, advSettingButton.ClickLocation);
                 g.DrawPolygon(advSettingButton.stroke, advSettingButton.ClickLocation);
             }
             else if(redditDropped)
             {
-                g.FillRectangle(medGrey, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
+                g.FillRectangle(medColor, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
                 g.DrawRectangle(lightInline, 3 * size / 4, 7 * size / 8, 3 * size, 2 * size);
 
                 if (redditSongs.Count > 0)
@@ -709,10 +709,10 @@ namespace BlottoBeats.Client
                     {
                         String preString = "";
                         if (redditSongs[i].score >= 0) preString = "+";
-                        g.DrawString(preString + redditSongs[i].score + " | Genre: " + redditSongs[i].genre + " | Tempo: " + redditSongs[i].tempo + " | Seed: " + redditSongs[i].seed, smallFont, lightGrey, 13 * size / 16, 15 * size / 16 + i * smallFont.Size * 2);
+                        g.DrawString(preString + redditSongs[i].score + " | Genre: " + redditSongs[i].genre + " | Tempo: " + redditSongs[i].tempo + " | Seed: " + redditSongs[i].seed, smallFont, lightColor, 13 * size / 16, 15 * size / 16 + i * smallFont.Size * 2);
                     }
                 else
-                    g.DrawString("Could not connect to server.", font, lightGrey, 13 * size / 16, 15 * size / 16);
+                    g.DrawString("Could not connect to server.", font, lightColor, 13 * size / 16, 15 * size / 16);
 
                 g.FillPolygon(refreshRedditButton.inside, refreshRedditButton.ClickLocation);
                 g.DrawPolygon(refreshRedditButton.stroke, refreshRedditButton.ClickLocation);
@@ -724,13 +724,13 @@ namespace BlottoBeats.Client
                 if(button.stroke != null)
                     g.DrawPolygon(button.stroke, button.ClickLocation);
                 if(button.ImgLocation != null)
-                    g.FillPolygon(lightGrey, button.ImgLocation);
+                    g.FillPolygon(lightColor, button.ImgLocation);
 
                 if(button == playBarButton)
                 {
-                    SolidBrush fillProgress = medGrey;
-                    if (score < 0) fillProgress = paleRed;
-                    else if (score > 0) fillProgress = paleGreen;
+                    SolidBrush fillProgress = medColor;
+                    if (score < 0) fillProgress = downvoteColor;
+                    else if (score > 0) fillProgress = upvoteColor;
 
                     g.FillRectangle(fillProgress, 3 * size / 4, size / 8, sliderButton.loc.X - 3 * size / 4, 3 * size / 8);
                     g.DrawRectangle(lightInline, 3 * size / 4, size / 8, sliderButton.loc.X - 3 * size / 4, 3 * size / 8);

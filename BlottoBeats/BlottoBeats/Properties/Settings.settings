@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="BlottoBeats.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="BlottoBeats.Client.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="username" Type="System.String" Scope="User">
@@ -16,6 +16,30 @@
     </Setting>
     <Setting Name="maxSongs" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">50</Value>
+    </Setting>
+    <Setting Name="alwaysOnTop" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="lightColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">130, 130, 130</Value>
+    </Setting>
+    <Setting Name="medColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">90, 90, 90</Value>
+    </Setting>
+    <Setting Name="darkColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">50, 50, 50</Value>
+    </Setting>
+    <Setting Name="upvoteColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">77, 125, 74</Value>
+    </Setting>
+    <Setting Name="downvoteColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">107, 49, 50</Value>
+    </Setting>
+    <Setting Name="textColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">White</Value>
+    </Setting>
+    <Setting Name="sliderColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">75, 108, 124</Value>
     </Setting>
   </Settings>
 </SettingsFile>

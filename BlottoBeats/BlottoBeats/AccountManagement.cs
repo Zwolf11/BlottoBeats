@@ -20,15 +20,6 @@ namespace BlottoBeats.Client
 
         private Font font;
         private Font smallFont;
-        private SolidBrush lightGrey;
-        private SolidBrush medGrey;
-        private SolidBrush darkGrey;
-        private SolidBrush paleBlue;
-        private SolidBrush paleRed;
-        private SolidBrush paleGreen;
-        private SolidBrush white;
-        private Pen lightInline;
-        private Pen lightOutline;
 
         public AccountManagement(MainForm form)
         {
@@ -61,21 +52,15 @@ namespace BlottoBeats.Client
             remember.Location = new Point(15 * size / 4 + 3, 69 * size / 32 - 3);
             this.Controls.Add(remember);
 
-            lightGrey = new SolidBrush(Color.FromArgb(130, 130, 130));
-            medGrey = new SolidBrush(Color.FromArgb(90, 90, 90));
-            darkGrey = new SolidBrush(Color.FromArgb(50, 50, 50));
-            paleBlue = new SolidBrush(Color.FromArgb(75, 108, 124));
-            paleRed = new SolidBrush(Color.FromArgb(107, 49, 50));
-            paleGreen = new SolidBrush(Color.FromArgb(77, 125, 74));
-            white = new SolidBrush(Color.FromArgb(255, 255, 255));
-            lightInline = new Pen(Color.FromArgb(130, 130, 130));
-            lightInline.Alignment = System.Drawing.Drawing2D.PenAlignment.Inset;
-            lightOutline = new Pen(Color.FromArgb(130, 130, 130));
-            lightOutline.Alignment = System.Drawing.Drawing2D.PenAlignment.Outset;
-            lightInline.Width = size / 40;
-            lightOutline.Width = size / 40;
             font = new Font("Arial", 16, FontStyle.Bold);
             smallFont = new Font("Arial", 10, FontStyle.Bold);
+
+            initButtons();
+        }
+
+        public void initButtons()
+        {
+            buttons.Clear();
 
             List<Point> button = new List<Point>();
             button.Add(new Point(0, 0));
@@ -83,30 +68,25 @@ namespace BlottoBeats.Client
             button.Add(new Point(3 * size / 4, size / 4));
             button.Add(new Point(0, size / 4));
 
-            Button loginButton = new Button(button, new Point(5 * size / 16, 17 * size / 8), medGrey, null, null);
+            Button loginButton = new Button(button, new Point(5 * size / 16, 17 * size / 8), form.medColor, null, null);
             loginButton.Clicked += loginClicked;
             buttons.Add(loginButton);
 
-            Button registerButton = new Button(button, new Point(9 * size / 8, 17 * size / 8), medGrey, null, null);
+            Button registerButton = new Button(button, new Point(9 * size / 8, 17 * size / 8), form.medColor, null, null);
             registerButton.Clicked += registerClicked;
             buttons.Add(registerButton);
 
-            List<Point> minimize = new List<Point>();
-            minimize.Add(new Point(0, 0));
-            minimize.Add(new Point(size / 4, 0));
-            minimize.Add(new Point(size / 4, size / 8));
-            minimize.Add(new Point(0, size / 8));
-            Button minimizeButton = new Button(minimize, new Point(7 * size / 2, 0), medGrey, null, null);
+            List<Point> menuButton = new List<Point>();
+            menuButton.Add(new Point(0, 0));
+            menuButton.Add(new Point(size / 4, 0));
+            menuButton.Add(new Point(size / 4, size / 8));
+            menuButton.Add(new Point(0, size / 8));
+
+            Button minimizeButton = new Button(menuButton, new Point(7 * size / 2, 0), form.medColor, null, null);
             minimizeButton.Clicked += minimizeClicked;
             buttons.Add(minimizeButton);
 
-            List<Point> exit = new List<Point>();
-            exit.Add(new Point(0, 0));
-            exit.Add(new Point(size / 4, 0));
-            exit.Add(new Point(size / 4, size / 8));
-            exit.Add(new Point(0, size / 8));
-            List<Point> exitImg = new List<Point>();
-            Button exitButton = new Button(exit, new Point(15 * size / 4, 0), paleRed, null, exitImg);
+            Button exitButton = new Button(menuButton, new Point(15 * size / 4, 0), form.downvoteColor, null, null);
             exitButton.Clicked += exitClicked;
             buttons.Add(exitButton);
         }
@@ -262,28 +242,28 @@ namespace BlottoBeats.Client
         {
             Graphics g = e.Graphics;
 
-            g.FillRectangle(darkGrey, size / 6, size / 8, 95 * size / 24, 19 * size / 8);
-            g.DrawRectangle(lightInline, size / 6, size / 8, 95 * size / 24, 19 * size / 8);
+            g.FillRectangle(form.darkColor, size / 6, size / 8, 95 * size / 24, 19 * size / 8);
+            g.DrawRectangle(form.lightInline, size / 6, size / 8, 95 * size / 24, 19 * size / 8);
 
-            g.FillRectangle(medGrey, size / 6, size / 8, 95 * size / 24, 3 * size / 8);
-            g.DrawRectangle(lightInline, size / 6, size / 8, 95 * size / 24, 3 * size / 8);
+            g.FillRectangle(form.medColor, size / 6, size / 8, 95 * size / 24, 3 * size / 8);
+            g.DrawRectangle(form.lightInline, size / 6, size / 8, 95 * size / 24, 3 * size / 8);
 
-            g.FillEllipse(medGrey, 0, 0, size, size);
-            g.DrawEllipse(lightInline, 0, 0, size, size);
+            g.FillEllipse(form.medColor, 0, 0, size, size);
+            g.DrawEllipse(form.lightInline, 0, 0, size, size);
 
             foreach (Button button in buttons)
                 g.FillPolygon(button.inside, button.ClickLocation);
 
             StringFormat format = new StringFormat();
             format.Alignment = StringAlignment.Far;
-            g.DrawString("Blotto Beats - Login", font, darkGrey, 65 * size / 16, size / 8 + size / 18, format);
-            g.DrawString("Username:", font, lightGrey, size / 4, 9 * size / 8);
-            g.DrawString("Password:", font, lightGrey, size / 4, 13 * size / 8);
-            g.DrawString("Remember me:", smallFont, lightGrey, 15 * size  / 4, 69 * size / 32, format);
+            g.DrawString("Blotto Beats - Login", font, form.darkColor, 65 * size / 16, size / 8 + size / 18, format);
+            g.DrawString("Username:", font, form.lightColor, size / 4, 9 * size / 8);
+            g.DrawString("Password:", font, form.lightColor, size / 4, 13 * size / 8);
+            g.DrawString("Remember me:", smallFont, form.lightColor, 15 * size  / 4, 69 * size / 32, format);
             StringFormat format2 = new StringFormat();
             format2.Alignment = StringAlignment.Center;
-            g.DrawString("Login", smallFont, white, 11 * size / 16, 69 * size / 32, format2);
-            g.DrawString("Register", smallFont, white, 24 * size / 16, 69 * size / 32, format2);
+            g.DrawString("Login", smallFont, form.textColor, 11 * size / 16, 69 * size / 32, format2);
+            g.DrawString("Register", smallFont, form.textColor, 24 * size / 16, 69 * size / 32, format2);
         }
     }
 }

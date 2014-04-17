@@ -47,20 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccountCreation.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AccountCreation.Designer.cs">
-      <DependentUpon>AccountCreation.cs</DependentUpon>
-    </Compile>
     <Compile Include="AccountManagement.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="AdvancedSettings.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AdvancedSettings.Designer.cs">
-      <DependentUpon>AdvancedSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="Button.cs" />
     <Compile Include="DropDownSetting.cs" />
@@ -73,12 +64,6 @@
     <Compile Include="Setting.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="TextBoxSetting.cs" />
-    <EmbeddedResource Include="AccountCreation.resx">
-      <DependentUpon>AccountCreation.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AdvancedSettings.resx">
-      <DependentUpon>AdvancedSettings.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -89,6 +74,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="ClassDiagram1.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
