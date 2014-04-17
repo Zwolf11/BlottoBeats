@@ -231,9 +231,25 @@ namespace BlottoBeats.Library.Networking {
 		[SerializableAttribute]
 		public class RequestSongs : Request {
 			public int num { get; private set; }
+			public int? seed { get; private set; }
+			int? tempo { get; private set; }
+			string? genre { get; private set; }
+			int? userID { get; private set; }
 
 			public RequestSongs(int num) : base(null) {
 				this.num = num;
+				this.seed = null;
+				this.tempo = null;
+				this.genre = null;
+				this.userID = null;
+			}
+
+			public RequestSongs(int num, int? seed, int? tempo, string? genre, int? userID) : base(null) {
+				this.num = num;
+				this.seed = seed;
+				this.tempo = tempo;
+				this.genre = genre;
+				this.userID = userID;
 			}
 		}
 	}

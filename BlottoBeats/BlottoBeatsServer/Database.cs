@@ -90,14 +90,28 @@ namespace BlottoBeats.Server {
 		/// </summary>
 		/// <param name="id">The ID of the song to get</param>
 		/// <returns>A SongParamteres object that represents the song</returns>
-		internal SongParameters GetSong(int id) {
-			int vote = (int)returnItem(id, "voteScore", "uploadedsongs");
-			int seed = (int)returnItem(id, "songseed", "uploadedsongs");
-			int tempo = (int)returnItem(id, "tempo", "uploadedsongs");
-			string genre = (string)returnItem(id, "genre", "uploadedsongs");
-			int userID = -1; // TODO: ADD USER ID
+		internal SongParameters GetSong(int id) {			
+			object score = returnItem(id, "voteScore", "uploadedsongs");
+			if (score == null || !(score is int))
+				throw new DatabaseException("Database Error: Invalid data type returned");
 
-			return new SongParameters(id, vote, seed, tempo, genre, userID);
+			object seed = returnItem(id, "songseed", "uploadedsongs");
+			if (seed == null || !(seed is int))
+				throw new DatabaseException("Database Error: Invalid data type returned");
+
+			object tempo = returnItem(id, "tempo", "uploadedsongs");
+			if (tempo == null || !(tempo is int))
+				throw new DatabaseException("Database Error: Invalid data type returned");
+
+			object genre = returnItem(id, "genre", "uploadedsongs");
+			if (genre == null || !(genre is string))
+				throw new DatabaseException("Database Error: Invalid data type returned");
+
+			object userID = returnItem(id, "idusers", "uploadedsongs");
+			if (userID == null || !(userID is int))
+				throw new DatabaseException("Database Error: Invalid data type returned");
+
+			return new SongParameters((int)id, (int)score, (int)seed, (int)tempo, (string)genre, (int)userID);
 		}
 
 		/// <summary>
@@ -119,7 +133,7 @@ namespace BlottoBeats.Server {
 				else
 					throw new DatabaseException("Database Error: Invalid data type returned");
 
-				object userID = -1; // TODO: ADD USER ID
+				object userID = returnItem(song.ID, "idusers", "uploadedsongs");
 				if (userID != null && userID is int)
 					song.userID = (int)userID;
 				else
@@ -132,10 +146,13 @@ namespace BlottoBeats.Server {
 		/// <summary>
 		/// Gets a list of songs that match the given SongParameters object
 		/// </summary>
-		/// <param name="songParameters">The parameters to match</param>
-		/// <param name="numSongs">The maximum number of songs to return</param>
-		/// <returns>The list of songs</returns>
-		internal List<SongParameters> GetSongList(int numSongs) {
+		/// <param name="numSongs">The number of songs</param>
+		/// <param name="seed">(optional) the seed to filter by</param>
+		/// <param name="tempo">(optional) the tempo to filter by</param>
+		/// <param name="genre">(optional) the genre to filter by</param>
+		/// <param name="userID">(optional) the user ID to filter by</param>
+		/// <returns></returns>
+		internal List<SongParameters> GetSongList(int numSongs, int? seed, int? tempo, string? genre, int? userID) {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + numSongs;
@@ -165,7 +182,19 @@ namespace BlottoBeats.Server {
                 {
                     break;
                 }
+				
 				SongParameters song = GetSong(tempId);
+
+				// Filter parameters
+				if (seed.HasValue && song.seed != seed.Value)
+					continue;
+				if (tempo.HasValue && song.tempo != tempo.Value)
+					continue;
+				if (genre.HasValue && song.genre.CompareTo(genre.Value) != 0)
+					continue;
+				if (userID.HasValue && song.userID != userID.Value)
+					continue;
+
                 list.Add(song);
             }
 

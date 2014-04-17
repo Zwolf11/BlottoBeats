@@ -592,7 +592,7 @@ namespace BlottoBeats.Server {
 								// Request a list of songs
 								BBRequest.RequestSongs req = bbmessage.requestType as BBRequest.RequestSongs;
 
-								List<SongParameters> songList = database.GetSongList(req.num);
+								List<SongParameters> songList = database.GetSongList(req.num, req.seed, req.tempo, req.genre, req.userID);
 								Message.Send(networkStream, new BBResponse(songList));
 
 								Log("    Returned " + songList.Count + " songs", address, 2);
