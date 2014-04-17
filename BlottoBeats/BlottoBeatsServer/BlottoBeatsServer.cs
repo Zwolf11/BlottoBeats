@@ -15,6 +15,7 @@ namespace BlottoBeats.Server {
 	internal class Server {
 		private TcpListener tcpListener;
 		private Thread listenThread;
+		private bool listenAbort;
 		
 		private Database database;
 		private string logFileLocation;
@@ -317,6 +318,10 @@ namespace BlottoBeats.Server {
 						}
 						break;
 
+					// Shell commands
+					case "exit":
+						return;
+
 					case "help":
 					case "?":
 						Console.WriteLine("-------------------------");
@@ -389,6 +394,7 @@ namespace BlottoBeats.Server {
 			this.logLevel = logLevel;
 
 			this.tcpListener = new TcpListener(IPAddress.Any, port);
+			this.listenAbort = true;
 		}
 
 		/// <summary>
@@ -396,10 +402,7 @@ namespace BlottoBeats.Server {
 		/// </summary>
 		/// <returns>Returns true if the server is alive, false otherwise</returns>
 		internal bool IsAlive() {
-			if (listenThread == null)
-				return false;
-			else
-				return listenThread.IsAlive;
+			return !listenAbort;
 		}
 
 		/// <summary>
@@ -408,6 +411,7 @@ namespace BlottoBeats.Server {
 		internal void Start() {
 			Log("Server started", 0);
 
+			listenAbort = false;
 			listenThread = new Thread(new ThreadStart(ListenForClients));
 			listenThread.Start();
 		}
@@ -418,8 +422,7 @@ namespace BlottoBeats.Server {
 		internal void Stop() {
 			Log("Stopping Server", 0);
 
-			listenThread.Abort();
-			listenThread = null;
+			listenAbort = true;
 		}
 
 		/// <summary>
@@ -439,7 +442,7 @@ namespace BlottoBeats.Server {
 		private void ListenForClients() {
 			tcpListener.Start();
 			
-			while (true) {
+			while (!listenAbort) {
 				TcpClient client = tcpListener.AcceptTcpClient();
 				ThreadPool.QueueUserWorkItem(new WaitCallback(HandleConnectionWithClient), client);
 			}
