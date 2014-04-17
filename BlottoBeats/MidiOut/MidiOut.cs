@@ -63,7 +63,7 @@ namespace BlottoBeats.MidiOut
                         len = item.length; //in 16th notes
                         //Switch note on
                         builder.Command = ChannelCommand.ProgramChange;
-                        if (output.Genre == "Generic")
+                        if (output.Genre == "Generic" || output.Genre == "Jazz")
                         {
                             builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
                         }
@@ -83,6 +83,10 @@ namespace BlottoBeats.MidiOut
                         else if (output.Genre == "Classical")
                         {
                             builder.Data2 = 80;
+                        }
+                        else if (output.Genre == "Jazz")
+                        {
+                            builder.Data2 = 110;
                         }
                         builder.Build(); //Build the message
                         track[1].Insert(pos, builder.Result); //Insert into Track 1 at tick position 'pos'
@@ -138,6 +142,10 @@ namespace BlottoBeats.MidiOut
                         {
                             builder.Data1 = (int)GeneralMidiInstrument.AcousticGrandPiano;
 
+                        }
+                        else if (output.Genre == "Jazz")
+                        {
+                            builder.Data1 = (int)GeneralMidiInstrument.AltoSax;
                         }
                         builder.Data2 = 0;
                         builder.Build();
