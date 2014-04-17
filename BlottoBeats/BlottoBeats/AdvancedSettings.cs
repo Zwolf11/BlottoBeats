@@ -1,4 +1,5 @@
 ﻿using BlottoBeats.Library.Authentication;
+using BlottoBeats.Library.Networking;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -249,10 +250,24 @@ namespace BlottoBeats.Client
             form.accountForm.ShowDialog();
         }
 
+        private void testNewIP()
+        {
+            BBServerConnection newServer = new BBServerConnection(this.ip.Text, 3000);
+
+            if (newServer.Test())
+            {
+                form.server.ip = this.ip.Text;
+                Properties.Settings.Default.lastIP = form.server.ip;
+            }
+            else MessageBox.Show("Server is not connected. Try again later", "Change IP failed");
+        }
+
         private void OKClicked(object sender, MouseEventArgs e)
         {
-            Properties.Settings.Default.lastIP = ip.Text;
-            Properties.Settings.Default.maxSongs = int.Parse(maxBacklog.Text);
+            Thread iPThread = new Thread(new ThreadStart(testNewIP));
+            iPThread.Start();
+
+            try { Properties.Settings.Default.maxSongs = int.Parse(maxBacklog.Text); } catch (Exception) {}
             Properties.Settings.Default.alwaysOnTop = onTop.Checked;
             form.TopMost = Properties.Settings.Default.alwaysOnTop;
             Properties.Settings.Default.lightColor = buttons[0].inside.Color;
