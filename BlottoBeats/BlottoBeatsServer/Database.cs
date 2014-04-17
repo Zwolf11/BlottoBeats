@@ -152,7 +152,7 @@ namespace BlottoBeats.Server {
 		/// <param name="genre">(optional) the genre to filter by</param>
 		/// <param name="userID">(optional) the user ID to filter by</param>
 		/// <returns></returns>
-		internal List<SongParameters> GetSongList(int numSongs, int? seed, int? tempo, string? genre, int? userID) {
+		internal List<SongParameters> GetSongList(int numSongs, int? seed, int? tempo, string genre, int? userID) {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + numSongs;
@@ -190,7 +190,7 @@ namespace BlottoBeats.Server {
 					continue;
 				if (tempo.HasValue && song.tempo != tempo.Value)
 					continue;
-				if (genre.HasValue && song.genre.CompareTo(genre.Value) != 0)
+				if (genre != null && genre.CompareTo(song.genre) != 0)
 					continue;
 				if (userID.HasValue && song.userID != userID.Value)
 					continue;

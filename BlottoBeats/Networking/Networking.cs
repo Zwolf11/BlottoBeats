@@ -232,9 +232,9 @@ namespace BlottoBeats.Library.Networking {
 		public class RequestSongs : Request {
 			public int num { get; private set; }
 			public int? seed { get; private set; }
-			int? tempo { get; private set; }
-			string? genre { get; private set; }
-			int? userID { get; private set; }
+			public int? tempo { get; private set; }
+			public string genre { get; private set; }
+			public int? userID { get; private set; }
 
 			public RequestSongs(int num) : base(null) {
 				this.num = num;
@@ -244,7 +244,7 @@ namespace BlottoBeats.Library.Networking {
 				this.userID = null;
 			}
 
-			public RequestSongs(int num, int? seed, int? tempo, string? genre, int? userID) : base(null) {
+			public RequestSongs(int num, int? seed, int? tempo, string genre, int? userID) : base(null) {
 				this.num = num;
 				this.seed = seed;
 				this.tempo = tempo;
