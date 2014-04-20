@@ -2709,7 +2709,7 @@ namespace BlottoBeats.Client
                         prevWasHalf = true;
                     }
                 }
-                composeMelody(thisSection, randomizer, key, mode, timeSigPattern, timeSigQuant);
+                composeClassicalMelody(thisSection, randomizer, key, mode, timeSigPattern, timeSigQuant, paramets.tempo);
 
                 patterns.Add(thisSection);
             }
@@ -3984,7 +3984,7 @@ namespace BlottoBeats.Client
                         prevWasHalf = true;
                     }
                 }
-                composeMelody(thisSection, randomizer, key, mode, timeSigPattern, timeSigQuant);
+                composeJazzMelody(thisSection, randomizer, key, mode, timeSigPattern, timeSigQuant, paramets.tempo);
 
                 patterns.Add(thisSection);
             }
@@ -4757,8 +4757,1054 @@ namespace BlottoBeats.Client
                     prevNoteVal = noteVal;
                 }
             }
+        }
+
+        void composeClassicalMelody(Song.SongSegment thisSection, Random randomizer, String key, int mode, String timeSigPattern, int timeSigQuant, int tempo)
+        {
+            //TODO check for bad input
+            int chordLength;
+            int currentSum = 0;
+            String prevNoteVal = "";
+            String noteVal = "";
+            int noteRhythm = 0;
+            String[] notes = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+            String[] keySig = new String[7];
+            String[] notearray = new String[14];
+            int keynum = Array.IndexOf(notes, key);
+            thisSection.melodies.Add(new Song.Melody());
+
+            if (mode == 0)
+            {
+                keySig[0] = notes[keynum];
+                keySig[1] = notes[(keynum + 2) % 12];
+                keySig[2] = notes[(keynum + 4) % 12];
+                keySig[3] = notes[(keynum + 5) % 12];
+                keySig[4] = notes[(keynum + 7) % 12];
+                keySig[5] = notes[(keynum + 9) % 12];
+                keySig[6] = notes[(keynum + 11) % 12];
+
+            }
+            if (mode == 1)
+            {
+                keySig[0] = notes[keynum];
+                keySig[1] = notes[(keynum + 2) % 12];
+                keySig[2] = notes[(keynum + 3) % 12];
+                keySig[3] = notes[(keynum + 5) % 12];
+                keySig[4] = notes[(keynum + 7) % 12];
+                keySig[5] = notes[(keynum + 8) % 12];
+                keySig[6] = notes[(keynum + 10) % 12];
+
+            }
+
+            int octave = 3;
+            String lastNote = "";
+            String nextNote = "";
+            int thisChord = 0;
+            int nextChord = 0;
+            for (int i = 0; i < 14; i++)
+            {
+                nextNote = keySig[i % 7];
+                if (!lastNote.Equals("") && !nextNote.Equals("") && lastNote[0] < 'C' && nextNote[0] >= 'C')
+                {
+                    octave++;
+                }
+                notearray[i] = nextNote + octave.ToString();
+                lastNote = nextNote;
+            }
+            int totalSectionSum = 0;
+            int measureLen = 0;
+            if (timeSigPattern.Equals("Simple"))
+            {
+                measureLen += 4;
+            }
+            else
+                measureLen += 6;
+            measureLen *= timeSigQuant;
+            for (int i = 0; i < thisSection.chordPattern.Count; i++)
+            {
+                chordLength = thisSection.chordPattern[i].chordVoice.First().length;
+                currentSum = 0;
+                while (currentSum < chordLength)
+                {
+
+                    //Randomly pick a length within the current measure that doesn't overlap chords
+                    //int maxVal = Math.Min(measureLen - (totalSectionSum % measureLen), chordLength - currentSum);
+                    int maxVal = randomizer.Next(3, 20);
+                    //If a melody falls onto the last chord of a segment just make the rhythm of note #1 the length of the chord
+                    if (i == thisSection.chordPattern.Count - 1)
+                    {
+                        noteRhythm = chordLength;
+                    }
+                    else
+                    {
+                        int[] rhythmWeight = new int[maxVal];
+                        for (int j = 0; j < maxVal; j++)
+                        {
+                            int beatSize = measureLen / timeSigQuant;
+                            if (j > beatSize)
+                            {
+                                rhythmWeight[j] = 4;
+
+                            }
+                            else
+                            {
+                                rhythmWeight[j] = 1;
+
+                            }
+                            if (maxVal < beatSize)
+                            {
+                                rhythmWeight[maxVal - 1] = 10;
+
+                            }
+                            if (j + 1 % beatSize == 0)
+                            {
+                                rhythmWeight[j] *= 4;
+
+                            }
+                            if (j + 1 == beatSize)
+                            {
+                                rhythmWeight[j] *= 4;
+
+                            }
+
+                        }
+                        int sumRythWeights = 0;
+                        for (int k = 0; k < maxVal; k++)
+                        {
+                            sumRythWeights += rhythmWeight[k];
+                        }
+
+                        int randOutput = randomizer.Next(sumRythWeights);
+                        sumRythWeights = 0;
+                        for (int k = 0; k < maxVal; k++)
+                        {
+                            sumRythWeights += rhythmWeight[k];
+                            if (randOutput < sumRythWeights)
+                            {
+                                noteRhythm = k + 1;
+                                break;
+                            }
+
+                        }
+                    }
 
 
+
+                    //Define noteValue for each note
+                    int[] noteWeights = new int[14];
+                    if (prevNoteVal.Equals(""))
+                    {
+                        for (int j = 0; j < 14; j++)
+                        {
+                            noteWeights[j] = 1;
+
+                        }
+
+                    }
+                    else
+                    {
+                        int index = Array.IndexOf(notearray, prevNoteVal);
+                        int difference = 0;
+                        for (int j = 0; j < 14; j++)
+                        {
+                            difference = index - j;
+                            difference = Math.Abs(difference);
+                            switch (difference)
+                            {
+                                case 0:
+                                    noteWeights[j] = 16;
+                                    break;
+                                case 1:
+                                    noteWeights[j] = 14;
+                                    break;
+                                case 2:
+                                    noteWeights[j] = 10;
+                                    break;
+                                case 3:
+                                    noteWeights[j] = 3;
+                                    break;
+                                case 4:
+                                    noteWeights[j] = 4;
+                                    break;
+                                case 5:
+                                    noteWeights[j] = 3;
+                                    break;
+                                case 6:
+                                    noteWeights[j] = 2;
+                                    break;
+                                case 7:
+                                    noteWeights[j] = 4;
+                                    break;
+                                case 8:
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 9:
+                                    noteWeights[j] = 2;
+                                    break;
+                                case 10:
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 11:
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 12:
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 13:
+                                    noteWeights[j] = 1;
+                                    break;
+
+
+                            }
+
+
+                        }
+
+                    }
+
+                    //Defines the current chord and the upcoming chord for usage below
+                    thisChord = thisSection.chordPattern[i].chordVal;
+                    if (i < thisSection.chordPattern.Count - 1)
+                    {
+                        nextChord = thisSection.chordPattern[i + 1].chordVal;
+
+                    }
+                    else
+                    {
+                        nextChord = 0;
+
+                    }
+
+                    if (currentSum == 0)
+                    {
+                        //If first and last note of the chord
+                        if (currentSum + noteRhythm == chordLength)
+                        {
+                            //if chord is last chord weight towards chord
+                            if (nextChord == 0)
+                            {
+                                int indexerForChordVals = thisChord - 1;
+                                for (int j = 0; j < 6; j++)
+                                {
+                                    noteWeights[indexerForChordVals] *= 2;
+                                    if (j == 2)
+                                        indexerForChordVals += 3;
+                                    else
+                                        indexerForChordVals += 2;
+                                    indexerForChordVals %= 14;
+                                }
+
+                            }
+                            //Otherwise weight towards notes that lead into the next chord
+                            if (nextChord == 1)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[6] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[13] *= 3;
+                            }
+                            if (nextChord == 2)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[4] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[11] *= 3;
+                            }
+                            if (nextChord == 3)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[12] *= 3;
+                                noteWeights[0] *= 3;
+                                noteWeights[7] *= 3;
+                            }
+                            if (nextChord == 4)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[4] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[11] *= 3;
+                            }
+                            if (nextChord == 5)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[12] *= 3;
+                            }
+                            if (nextChord == 6)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[6] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[13] *= 3;
+                            }
+                            if (nextChord == 7)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[12] *= 3;
+                            }
+
+
+                        }
+                        if (thisChord == 1)
+                        {
+                            noteWeights[0] *= 3;
+                            noteWeights[2] *= 2;
+                            noteWeights[4] *= 1;
+                            noteWeights[7] *= 3;
+                            noteWeights[9] *= 2;
+                            noteWeights[11] *= 1;
+                        }
+                        if (thisChord == 2)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 1;
+                            noteWeights[5] *= 2;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 1;
+                            noteWeights[12] *= 2;
+                        }
+                        if (thisChord == 3)
+                        {
+                            noteWeights[2] *= 3;
+                            noteWeights[4] *= 2;
+                            noteWeights[6] *= 1;
+                            noteWeights[9] *= 3;
+                            noteWeights[11] *= 2;
+                            noteWeights[13] *= 1;
+                        }
+                        if (thisChord == 4)
+                        {
+                            noteWeights[3] *= 3;
+                            noteWeights[5] *= 1;
+                            noteWeights[7] *= 2;
+                            noteWeights[10] *= 3;
+                            noteWeights[12] *= 1;
+                            noteWeights[0] *= 2;
+                        }
+                        if (thisChord == 5)
+                        {
+                            noteWeights[4] *= 1;
+                            noteWeights[6] *= 2;
+                            noteWeights[8] *= 3;
+                            noteWeights[11] *= 1;
+                            noteWeights[13] *= 2;
+                            noteWeights[1] *= 3;
+                        }
+                        if (thisChord == 6)
+                        {
+                            noteWeights[5] *= 2;
+                            noteWeights[7] *= 1;
+                            noteWeights[9] *= 3;
+                            noteWeights[12] *= 2;
+                            noteWeights[0] *= 1;
+                            noteWeights[2] *= 3;
+                        }
+                        if (thisChord == 7)
+                        {
+                            noteWeights[6] *= 2;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 1;
+                            noteWeights[13] *= 2;
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 1;
+                        }
+                        //if the note is not a chord tone, set the weight to be 0
+                        for (int j = 0; j < 14; j++)
+                        {
+                            int thisChordIndex = thisChord - 1;
+                            if (j != thisChordIndex && j != thisChordIndex + 2 && j != thisChordIndex + 4 && j != thisChordIndex + 7 && j != (thisChordIndex + 9) % 13 && j != (thisChordIndex + 11) % 13)
+                            {
+                                noteWeights[j] = 0;
+                            }
+                        }
+
+
+                    }
+                    else if (currentSum + noteRhythm == chordLength)
+                    {
+
+                        //weight towards notes that lead into the next chord
+                        if (nextChord == 1)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 3;
+                            noteWeights[6] *= 3;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 3;
+                            noteWeights[13] *= 3;
+                        }
+                        if (nextChord == 2)
+                        {
+                            noteWeights[0] *= 3;
+                            noteWeights[2] *= 3;
+                            noteWeights[4] *= 3;
+                            noteWeights[7] *= 3;
+                            noteWeights[9] *= 3;
+                            noteWeights[11] *= 3;
+                        }
+                        if (nextChord == 3)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 3;
+                            noteWeights[5] *= 3;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 3;
+                            noteWeights[12] *= 3;
+                            noteWeights[0] *= 3;
+                            noteWeights[7] *= 3;
+                        }
+                        if (nextChord == 4)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[2] *= 3;
+                            noteWeights[4] *= 3;
+                            noteWeights[8] *= 3;
+                            noteWeights[9] *= 3;
+                            noteWeights[11] *= 3;
+                        }
+                        if (nextChord == 5)
+                        {
+                            noteWeights[0] *= 3;
+                            noteWeights[3] *= 3;
+                            noteWeights[5] *= 3;
+                            noteWeights[7] *= 3;
+                            noteWeights[10] *= 3;
+                            noteWeights[12] *= 3;
+                        }
+                        if (nextChord == 6)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 3;
+                            noteWeights[6] *= 3;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 3;
+                            noteWeights[13] *= 3;
+                        }
+                        if (nextChord == 7)
+                        {
+                            noteWeights[0] *= 3;
+                            noteWeights[2] *= 3;
+                            noteWeights[5] *= 3;
+                            noteWeights[7] *= 3;
+                            noteWeights[9] *= 3;
+                            noteWeights[12] *= 3;
+                        }
+                    }
+                    //If a note isn't first or last of a chord. Double it's weighting towards chord tones.
+                    else
+                    {
+                        int indexerForChordVals = thisChord - 1;
+                        for (int j = 0; j < 6; j++)
+                        {
+                            noteWeights[indexerForChordVals] *= 2;
+                            if (j == 2)
+                                indexerForChordVals += 3;
+                            else
+                                indexerForChordVals += 2;
+                            indexerForChordVals %= 14;
+                        }
+
+                    }
+                    //Selects a note randomly based upon weighting
+                    int sumWeights = 0;
+                    for (int j = 0; j < 14; j++)
+                    {
+                        sumWeights += noteWeights[j];
+                    }
+
+                    int randOut = randomizer.Next(sumWeights);
+                    sumWeights = 0;
+                    for (int j = 0; j < 14; j++)
+                    {
+                        sumWeights += noteWeights[j];
+                        if (randOut < sumWeights)
+                        {
+                            noteVal = notearray[j];
+                            break;
+                        }
+
+                    }
+                    //Raise and lower leading tones in dominant functions of minor modes in melodic lines
+                    if (mode == 1)
+                    {
+                        if (thisChord == 5 || thisChord == 7)
+                        {
+                            if (noteVal.Equals(notearray[6]) || noteVal.Equals(notearray[13]))
+                            {
+                                if (noteVal[1] == '#')
+                                {
+                                    octave = int.Parse(noteVal[2].ToString());
+                                    String sub = noteVal.Substring(0, 2);
+                                    int index = Array.IndexOf(notes, sub);
+                                    noteVal = notes[(index + 1) % 12] + octave.ToString();
+                                }
+                                else
+                                {
+                                    octave = int.Parse(noteVal[1].ToString());
+                                    String sub = noteVal.Substring(0, 1);
+                                    int index = Array.IndexOf(notes, sub);
+                                    if (sub.Equals("B"))
+                                    {
+                                        octave++;
+                                    }
+                                    noteVal = notes[(index + 1) % 12] + octave.ToString();
+                                }
+                            }
+                        }
+
+                    }
+                    thisSection.melodies[0].melodicLine.Add(new Song.Note(noteVal, noteRhythm));
+                    currentSum += noteRhythm;
+                    totalSectionSum += noteRhythm;
+                    prevNoteVal = noteVal;
+                }
+            }
+        }
+
+        void composeJazzMelody(Song.SongSegment thisSection, Random randomizer, String key, int mode, String timeSigPattern, int timeSigQuant, int tempo)
+        {
+            //TODO check for bad input
+            int chordLength;
+            int currentSum = 0;
+            String prevNoteVal = "";
+            String noteVal = "";
+            int noteRhythm = 0;
+            String[] notes = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+            String[] keySig = new String[7];
+            String[] notearray = new String[14];
+            int keynum = Array.IndexOf(notes, key);
+            thisSection.melodies.Add(new Song.Melody());
+
+            if (mode == 0)
+            {
+                keySig[0] = notes[keynum];
+                keySig[1] = notes[(keynum + 2) % 12];
+                keySig[2] = notes[(keynum + 4) % 12];
+                keySig[3] = notes[(keynum + 5) % 12];
+                keySig[4] = notes[(keynum + 7) % 12];
+                keySig[5] = notes[(keynum + 9) % 12];
+                keySig[6] = notes[(keynum + 11) % 12];
+
+            }
+            if (mode == 1)
+            {
+                keySig[0] = notes[keynum];
+                keySig[1] = notes[(keynum + 2) % 12];
+                keySig[2] = notes[(keynum + 3) % 12];
+                keySig[3] = notes[(keynum + 5) % 12];
+                keySig[4] = notes[(keynum + 7) % 12];
+                keySig[5] = notes[(keynum + 8) % 12];
+                keySig[6] = notes[(keynum + 10) % 12];
+
+            }
+
+            int octave = 3;
+            String lastNote = "";
+            String nextNote = "";
+            int thisChord = 0;
+            int nextChord = 0;
+            for (int i = 0; i < 14; i++)
+            {
+                nextNote = keySig[i % 7];
+                if (!lastNote.Equals("") && !nextNote.Equals("") && lastNote[0] < 'C' && nextNote[0] >= 'C')
+                {
+                    octave++;
+                }
+                notearray[i] = nextNote + octave.ToString();
+                lastNote = nextNote;
+            }
+            int totalSectionSum = 0;
+            int measureLen = 0;
+            if (timeSigPattern.Equals("Simple"))
+            {
+                measureLen += 4;
+            }
+            else
+                measureLen += 6;
+            measureLen *= timeSigQuant;
+            for (int i = 0; i < thisSection.chordPattern.Count; i++)
+            {
+                chordLength = thisSection.chordPattern[i].chordVoice.First().length;
+                currentSum = 0;
+                while (currentSum < chordLength)
+                {
+
+                    //Randomly pick a length within the current measure that doesn't overlap chords
+                    //int maxVal = Math.Min(measureLen - (totalSectionSum % measureLen), chordLength - currentSum);
+                    int maxVal;
+                    if (tempo >= 140)
+                    {
+                        maxVal = 1;
+                    }
+                    else
+                        maxVal = Math.Min(measureLen - (totalSectionSum % measureLen), chordLength - currentSum);
+                    //If a melody falls onto the last chord of a segment just make the rhythm of note #1 the length of the chord
+                    if (i == thisSection.chordPattern.Count - 1)
+                    {
+                        noteRhythm = randomizer.Next(chordLength/2, chordLength);
+                    }
+                    else
+                    {
+                        int[] rhythmWeight = new int[maxVal];
+                        for (int j = 0; j < maxVal; j++)
+                        {
+                            int beatSize = measureLen / timeSigQuant;
+                            if (j > beatSize)
+                            {
+                                rhythmWeight[j] = 4;
+
+                            }
+                            else
+                            {
+                                rhythmWeight[j] = 1;
+
+                            }
+                            if (maxVal < beatSize)
+                            {
+                                rhythmWeight[maxVal - 1] = 10;
+
+                            }
+                            if (j + 1 % beatSize == 0)
+                            {
+                                rhythmWeight[j] *= 4;
+
+                            }
+                            if (j + 1 == beatSize)
+                            {
+                                rhythmWeight[j] *= 4;
+
+                            }
+
+                        }
+                        int sumRythWeights = 0;
+                        for (int k = 0; k < maxVal; k++)
+                        {
+                            sumRythWeights += rhythmWeight[k];
+                        }
+
+                        int randOutput = randomizer.Next(sumRythWeights);
+                        sumRythWeights = 0;
+                        for (int k = 0; k < maxVal; k++)
+                        {
+                            sumRythWeights += rhythmWeight[k];
+                            if (randOutput < sumRythWeights)
+                            {
+                                noteRhythm = k + 1;
+                                break;
+                            }
+
+                        }
+                    }
+
+
+
+                    //Define noteValue for each note
+                    int[] noteWeights = new int[14];
+                    if (prevNoteVal.Equals(""))
+                    {
+                        for (int j = 0; j < 14; j++)
+                        {
+                            noteWeights[j] = 1;
+
+                        }
+
+                    }
+                    else
+                    {
+                        int index = Array.IndexOf(notearray, prevNoteVal);
+                        int difference = 0;
+                        for (int j = 0; j < 14; j++)
+                        {
+                            difference = index - j;
+                            difference = Math.Abs(difference);
+                            switch (difference)
+                            {
+                                case 0:
+                                    noteWeights[j] = 16;
+                                    break;
+                                case 1:
+                                    noteWeights[j] = 14;
+                                    break;
+                                case 2:
+                                    noteWeights[j] = 10;
+                                    break;
+                                case 3:
+                                    noteWeights[j] = 3;
+                                    break;
+                                case 4:
+                                    noteWeights[j] = 4;
+                                    break;
+                                case 5:
+                                    noteWeights[j] = 3;
+                                    break;
+                                case 6:
+                                    noteWeights[j] = 2;
+                                    break;
+                                case 7:
+                                    noteWeights[j] = 4;
+                                    break;
+                                case 8:
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 9:
+                                    noteWeights[j] = 2;
+                                    break;
+                                case 10:
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 11:
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 12:
+                                    noteWeights[j] = 1;
+                                    break;
+                                case 13:
+                                    noteWeights[j] = 1;
+                                    break;
+
+
+                            }
+
+
+                        }
+
+                    }
+
+                    //Defines the current chord and the upcoming chord for usage below
+                    thisChord = thisSection.chordPattern[i].chordVal;
+                    if (i < thisSection.chordPattern.Count - 1)
+                    {
+                        nextChord = thisSection.chordPattern[i + 1].chordVal;
+
+                    }
+                    else
+                    {
+                        nextChord = 0;
+
+                    }
+
+                    if (currentSum == 0)
+                    {
+                        //If first and last note of the chord
+                        if (currentSum + noteRhythm == chordLength)
+                        {
+                            //if chord is last chord weight towards chord
+                            if (nextChord == 0)
+                            {
+                                int indexerForChordVals = thisChord - 1;
+                                for (int j = 0; j < 6; j++)
+                                {
+                                    noteWeights[indexerForChordVals] *= 2;
+                                    if (j == 2)
+                                        indexerForChordVals += 3;
+                                    else
+                                        indexerForChordVals += 2;
+                                    indexerForChordVals %= 14;
+                                }
+
+                            }
+                            //Otherwise weight towards notes that lead into the next chord
+                            if (nextChord == 1)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[6] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[13] *= 3;
+                            }
+                            if (nextChord == 2)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[4] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[11] *= 3;
+                            }
+                            if (nextChord == 3)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[12] *= 3;
+                                noteWeights[0] *= 3;
+                                noteWeights[7] *= 3;
+                            }
+                            if (nextChord == 4)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[4] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[11] *= 3;
+                            }
+                            if (nextChord == 5)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[12] *= 3;
+                            }
+                            if (nextChord == 6)
+                            {
+                                noteWeights[1] *= 3;
+                                noteWeights[3] *= 3;
+                                noteWeights[6] *= 3;
+                                noteWeights[8] *= 3;
+                                noteWeights[10] *= 3;
+                                noteWeights[13] *= 3;
+                            }
+                            if (nextChord == 7)
+                            {
+                                noteWeights[0] *= 3;
+                                noteWeights[2] *= 3;
+                                noteWeights[5] *= 3;
+                                noteWeights[7] *= 3;
+                                noteWeights[9] *= 3;
+                                noteWeights[12] *= 3;
+                            }
+
+
+                        }
+                        if (thisChord == 1)
+                        {
+                            noteWeights[0] *= 3;
+                            noteWeights[2] *= 2;
+                            noteWeights[4] *= 1;
+                            noteWeights[7] *= 3;
+                            noteWeights[9] *= 2;
+                            noteWeights[11] *= 1;
+                        }
+                        if (thisChord == 2)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 1;
+                            noteWeights[5] *= 2;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 1;
+                            noteWeights[12] *= 2;
+                        }
+                        if (thisChord == 3)
+                        {
+                            noteWeights[2] *= 3;
+                            noteWeights[4] *= 2;
+                            noteWeights[6] *= 1;
+                            noteWeights[9] *= 3;
+                            noteWeights[11] *= 2;
+                            noteWeights[13] *= 1;
+                        }
+                        if (thisChord == 4)
+                        {
+                            noteWeights[3] *= 3;
+                            noteWeights[5] *= 1;
+                            noteWeights[7] *= 2;
+                            noteWeights[10] *= 3;
+                            noteWeights[12] *= 1;
+                            noteWeights[0] *= 2;
+                        }
+                        if (thisChord == 5)
+                        {
+                            noteWeights[4] *= 1;
+                            noteWeights[6] *= 2;
+                            noteWeights[8] *= 3;
+                            noteWeights[11] *= 1;
+                            noteWeights[13] *= 2;
+                            noteWeights[1] *= 3;
+                        }
+                        if (thisChord == 6)
+                        {
+                            noteWeights[5] *= 2;
+                            noteWeights[7] *= 1;
+                            noteWeights[9] *= 3;
+                            noteWeights[12] *= 2;
+                            noteWeights[0] *= 1;
+                            noteWeights[2] *= 3;
+                        }
+                        if (thisChord == 7)
+                        {
+                            noteWeights[6] *= 2;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 1;
+                            noteWeights[13] *= 2;
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 1;
+                        }
+                        //if the note is not a chord tone, set the weight to be 0
+                        for (int j = 0; j < 14; j++)
+                        {
+                            int thisChordIndex = thisChord - 1;
+                            if (j != thisChordIndex && j != thisChordIndex + 2 && j != thisChordIndex + 4 && j != thisChordIndex + 7 && j != (thisChordIndex + 9) % 13 && j != (thisChordIndex + 11) % 13)
+                            {
+                                noteWeights[j] = 0;
+                            }
+                        }
+
+
+                    }
+                    else if (currentSum + noteRhythm == chordLength)
+                    {
+
+                        //weight towards notes that lead into the next chord
+                        if (nextChord == 1)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 3;
+                            noteWeights[6] *= 3;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 3;
+                            noteWeights[13] *= 3;
+                        }
+                        if (nextChord == 2)
+                        {
+                            noteWeights[0] *= 3;
+                            noteWeights[2] *= 3;
+                            noteWeights[4] *= 3;
+                            noteWeights[7] *= 3;
+                            noteWeights[9] *= 3;
+                            noteWeights[11] *= 3;
+                        }
+                        if (nextChord == 3)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 3;
+                            noteWeights[5] *= 3;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 3;
+                            noteWeights[12] *= 3;
+                            noteWeights[0] *= 3;
+                            noteWeights[7] *= 3;
+                        }
+                        if (nextChord == 4)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[2] *= 3;
+                            noteWeights[4] *= 3;
+                            noteWeights[8] *= 3;
+                            noteWeights[9] *= 3;
+                            noteWeights[11] *= 3;
+                        }
+                        if (nextChord == 5)
+                        {
+                            noteWeights[0] *= 3;
+                            noteWeights[3] *= 3;
+                            noteWeights[5] *= 3;
+                            noteWeights[7] *= 3;
+                            noteWeights[10] *= 3;
+                            noteWeights[12] *= 3;
+                        }
+                        if (nextChord == 6)
+                        {
+                            noteWeights[1] *= 3;
+                            noteWeights[3] *= 3;
+                            noteWeights[6] *= 3;
+                            noteWeights[8] *= 3;
+                            noteWeights[10] *= 3;
+                            noteWeights[13] *= 3;
+                        }
+                        if (nextChord == 7)
+                        {
+                            noteWeights[0] *= 3;
+                            noteWeights[2] *= 3;
+                            noteWeights[5] *= 3;
+                            noteWeights[7] *= 3;
+                            noteWeights[9] *= 3;
+                            noteWeights[12] *= 3;
+                        }
+                    }
+                    //If a note isn't first or last of a chord. Double it's weighting towards chord tones.
+                    else
+                    {
+                        int indexerForChordVals = thisChord - 1;
+                        for (int j = 0; j < 6; j++)
+                        {
+                            noteWeights[indexerForChordVals] *= 2;
+                            if (j == 2)
+                                indexerForChordVals += 3;
+                            else
+                                indexerForChordVals += 2;
+                            indexerForChordVals %= 14;
+                        }
+
+                    }
+                    //Selects a note randomly based upon weighting
+                    int sumWeights = 0;
+                    for (int j = 0; j < 14; j++)
+                    {
+                        sumWeights += noteWeights[j];
+                    }
+
+                    int randOut = randomizer.Next(sumWeights);
+                    sumWeights = 0;
+                    for (int j = 0; j < 14; j++)
+                    {
+                        sumWeights += noteWeights[j];
+                        if (randOut < sumWeights)
+                        {
+                            noteVal = notearray[j];
+                            break;
+                        }
+
+                    }
+                    //Raise and lower leading tones in dominant functions of minor modes in melodic lines
+                    if (mode == 1)
+                    {
+                        if (thisChord == 5 || thisChord == 7)
+                        {
+                            if (noteVal.Equals(notearray[6]) || noteVal.Equals(notearray[13]))
+                            {
+                                if (noteVal[1] == '#')
+                                {
+                                    octave = int.Parse(noteVal[2].ToString());
+                                    String sub = noteVal.Substring(0, 2);
+                                    int index = Array.IndexOf(notes, sub);
+                                    noteVal = notes[(index + 1)%12] + octave.ToString();
+                                }
+                                else
+                                {
+                                    octave = int.Parse(noteVal[1].ToString());
+                                    String sub = noteVal.Substring(0, 1);
+                                    int index = Array.IndexOf(notes, sub);
+                                    if (sub.Equals("B"))
+                                    {
+                                        octave++;
+                                    }
+                                    noteVal = notes[(index + 1) % 12] + octave.ToString();
+                                }
+                            }
+                        }
+
+                    }
+                    thisSection.melodies[0].melodicLine.Add(new Song.Note(noteVal, noteRhythm));
+                    currentSum += noteRhythm;
+                    totalSectionSum += noteRhythm;
+                    prevNoteVal = noteVal;
+                }
+            }
         }
     }
 }
