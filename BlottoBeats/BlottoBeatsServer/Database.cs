@@ -30,18 +30,31 @@ namespace BlottoBeats.Server {
 		/// <summary>
 		/// Tests the connection to the database
 		/// </summary>
-		/// <returns>True if the connection is valid, false otherwise.</returns>
-		internal bool TestConnection() {
-			MySqlConnection conn = new MySqlConnection(connString);
+		/// <returns>1 if connected, 0 if invalid connection string, -1 if cannot connect to host, -2 if access denied</returns>
+		internal int TestConnection() {
+			int isConn = 0;
+			MySqlConnection conn = null;
 			try {
+				conn = new MySqlConnection(connString);
 				conn.Open();
-			} catch {
-				return false;
+				isConn = 1;
+			} catch (ArgumentException) {
+				throw new DatabaseException("Invalid connection string");
+			} catch (MySqlException ex) {
+				switch (ex.Number) {
+					case 1042: // Unable to connect to any of the specified MySQL hosts (Check Server,Port)
+						isConn = -1;
+						break;
+					case 0: // Access denied (Check DB name,username,password)
+						isConn = -2;
+						break;
+					default:
+						break;
+				}
 			} finally {
 				conn.Close();
 			}
-
-			return true;
+			return isConn;
 		}
 
 		/// <summary>

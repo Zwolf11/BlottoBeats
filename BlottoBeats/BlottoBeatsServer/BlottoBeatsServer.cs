@@ -319,6 +319,7 @@ namespace BlottoBeats.Server {
 						break;
 
 					// Shell commands
+					case "quit":
 					case "exit":
 						return;
 
@@ -408,21 +409,37 @@ namespace BlottoBeats.Server {
 		/// <summary>
 		/// Starts the server thread.
 		/// </summary>
-		internal void Start() {
-			Log("Server started", 0);
+		internal int Start() {
+			int dbStatus = database.TestConnection();
+			if (dbStatus == 1) {
+				listenAbort = false;
+				listenThread = new Thread(new ThreadStart(ListenForClients));
+				listenThread.Start();
+				Log("Server started", 0);
+			} else {
+				switch (dbStatus) {
+					case -1:
+						Log("DATABASE ERROR: Can't connect to specified host", 0);
+						break;
+					case -2:
+						Log("DATABASE ERROR: Access Denied", 0);
+						break;
+					default:
+						Log("DATABASE ERROR: Can't connect to database", 0);
+						break;
+				}
+				Log("Server not started", 0);
+			}
 
-			listenAbort = false;
-			listenThread = new Thread(new ThreadStart(ListenForClients));
-			listenThread.Start();
+			return dbStatus;
 		}
 
 		/// <summary>
 		/// Stops the server thread
 		/// </summary>
 		internal void Stop() {
-			Log("Stopping Server", 0);
-
 			listenAbort = true;
+			Log("Server stopped", 0);
 		}
 
 		/// <summary>
@@ -443,9 +460,14 @@ namespace BlottoBeats.Server {
 			tcpListener.Start();
 			
 			while (!listenAbort) {
-				TcpClient client = tcpListener.AcceptTcpClient();
-				ThreadPool.QueueUserWorkItem(new WaitCallback(HandleConnectionWithClient), client);
+				if (tcpListener.Pending()) {
+					TcpClient client = tcpListener.AcceptTcpClient();
+					ThreadPool.QueueUserWorkItem(new WaitCallback(HandleConnectionWithClient), client);
+				}
+				Thread.Sleep(1000);
 			}
+
+			tcpListener.Stop();
 		}
 		
 		/// <summary>
