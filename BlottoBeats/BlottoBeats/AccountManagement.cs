@@ -111,13 +111,13 @@ namespace BlottoBeats.Client
                     Properties.Settings.Default.token = form.currentUser.token;
                     Properties.Settings.Default.Save();
 
-                    this.Close();
+                    //this.Close();
                 }
             }
             else
             {
                 MessageBox.Show("Server is not connected. Try again later", "Login failed");
-                this.Close();
+                //this.Close();
             }
         }
 
