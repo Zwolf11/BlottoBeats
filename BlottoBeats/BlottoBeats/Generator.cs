@@ -4167,10 +4167,10 @@ namespace BlottoBeats.Client
                 keySig[0] = notes[keynum];
                 keySig[1] = notes[(keynum + 2) % 12];
                 keySig[2] = notes[(keynum + 4) % 12];
-                keySig[3] = notes[(keynum + 6) % 12];
-                keySig[4] = notes[(keynum + 8) % 12];
-                keySig[5] = notes[(keynum + 10) % 12];
-                keySig[6] = notes[(keynum + 12) % 12];
+                keySig[3] = notes[(keynum + 5) % 12];
+                keySig[4] = notes[(keynum + 7) % 12];
+                keySig[5] = notes[(keynum + 9) % 12];
+                keySig[6] = notes[(keynum + 11) % 12];
 
                 noteNames[0] = keySig[chordNumIndex] + "2";
                 noteNames[1] = keySig[chordNumIndex] + "4";
@@ -4187,11 +4187,11 @@ namespace BlottoBeats.Client
                 //TEST THESE
                 keySig[0] = notes[keynum];
                 keySig[1] = notes[(keynum + 2) % 12];
-                keySig[2] = notes[(keynum + 4) % 12];
-                keySig[3] = notes[(keynum + 6) % 12];
-                keySig[4] = notes[(keynum + 8) % 12];
-                keySig[5] = notes[(keynum + 10) % 12];
-                keySig[6] = notes[(keynum + 12) % 12];
+                keySig[2] = notes[(keynum + 3) % 12];
+                keySig[3] = notes[(keynum + 5) % 12];
+                keySig[4] = notes[(keynum + 7) % 12];
+                keySig[5] = notes[(keynum + 8) % 12];
+                keySig[6] = notes[(keynum + 10) % 12];
 
                 //if not a dominant function
                 if (chordNumIndex != 4 && chordNumIndex != 6)
@@ -5353,14 +5353,14 @@ namespace BlottoBeats.Client
                     int maxVal;
                     if (tempo >= 140)
                     {
-                        maxVal = 1;
+                        maxVal = randomizer.Next(1, 5);
                     }
                     else
                         maxVal = Math.Min(measureLen - (totalSectionSum % measureLen), chordLength - currentSum);
                     //If a melody falls onto the last chord of a segment just make the rhythm of note #1 the length of the chord
                     if (i == thisSection.chordPattern.Count - 1)
                     {
-                        noteRhythm = randomizer.Next(chordLength/2, chordLength);
+                        noteRhythm = randomizer.Next(0, chordLength);
                     }
                     else
                     {
