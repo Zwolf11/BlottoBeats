@@ -42,6 +42,7 @@ namespace BlottoBeats.Library.Networking {
 		/// <param name="ipAddress">IP address of the server</param>
 		/// <param name="port">Port to connect to the server with</param>
 		public BBServerConnection(string ipAddress, int port) {
+			Console.WriteLine("DEBUG: " + ipAddress);
 			serverEndPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
 		}
 

@@ -101,7 +101,7 @@ namespace BlottoBeats.Client
 
                 if (token == null)
                 {
-                    MessageBox.Show("Username/Password was incorrect. Please try again");
+					MessageBox.Show("Username/Password was incorrect. Please try again", "Login failed");
                 }
                 else
                 {
@@ -111,6 +111,7 @@ namespace BlottoBeats.Client
                     Properties.Settings.Default.token = form.currentUser.token;
                     Properties.Settings.Default.Save();
 
+					MessageBox.Show("Successfully logged in as user '" + token.username + "'", "Login Successful");
                     //this.Close();
                 }
             }

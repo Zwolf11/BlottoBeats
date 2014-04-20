@@ -394,8 +394,10 @@ namespace BlottoBeats.Client
 
         private void sendScore()
         {
-            if (score > 0 && server.Test()) server.SendRequest(new BBRequest(backlog[songPos], true, currentUser));
-            else if (score < 0 && server.Test()) server.SendRequest(new BBRequest(backlog[songPos], false, currentUser));
+			if (server.Test()) {
+				if (score > 0) server.SendRequest(new BBRequest(backlog[songPos], true, currentUser));
+				else if (score < 0) server.SendRequest(new BBRequest(backlog[songPos], false, currentUser));
+			}
         }
 
         private void refreshReddit()

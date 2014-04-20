@@ -76,7 +76,7 @@ namespace BlottoBeats.Server {
 				if (score != null && score is int)
 					song.score = (int)score;
 				else
-					throw new DatabaseException("Database Error: Invalid data type returned");
+					throw new DatabaseException("DATABASE ERROR: Invalid data type returned");
 			}
 
 			return song;
@@ -106,23 +106,23 @@ namespace BlottoBeats.Server {
 		internal SongParameters GetSong(int id) {			
 			object score = returnItem(id, "voteScore", "uploadedsongs");
 			if (score == null || !(score is int))
-				throw new DatabaseException("Database Error: Invalid data type returned");
+				throw new DatabaseException("DATABASE ERROR: Invalid data type for score returned.  Expected 'int' but got '" + score.GetType() + "'");
 
 			object seed = returnItem(id, "songseed", "uploadedsongs");
 			if (seed == null || !(seed is int))
-				throw new DatabaseException("Database Error: Invalid data type returned");
+				throw new DatabaseException("DATABASE ERROR: Invalid data type for seed returned.  Expected 'int' but got '" + seed.GetType() + "'");
 
 			object tempo = returnItem(id, "tempo", "uploadedsongs");
 			if (tempo == null || !(tempo is int))
-				throw new DatabaseException("Database Error: Invalid data type returned");
+				throw new DatabaseException("DATABASE ERROR: Invalid data type for tempo returned.  Expected 'int' but got '" + tempo.GetType() + "'");
 
 			object genre = returnItem(id, "genre", "uploadedsongs");
 			if (genre == null || !(genre is string))
-				throw new DatabaseException("Database Error: Invalid data type returned");
+				throw new DatabaseException("DATABASE ERROR: Invalid data type for genre returned.  Expected 'string' but got '" + genre.GetType() + "'");
 
 			object userID = returnItem(id, "idusers", "uploadedsongs");
 			if (userID == null || !(userID is int))
-				throw new DatabaseException("Database Error: Invalid data type returned");
+				throw new DatabaseException("DATABASE ERROR: Invalid data type for user ID returned.  Expected 'int' but got '" + userID.GetType() + "'");
 
 			return new SongParameters((int)id, (int)score, (int)seed, (int)tempo, (string)genre, (int)userID);
 		}
@@ -144,13 +144,13 @@ namespace BlottoBeats.Server {
 				if (score != null && score is int)
 					song.score = (int)score;
 				else
-					throw new DatabaseException("Database Error: Invalid data type returned");
+					throw new DatabaseException("DATABASE ERROR: Invalid data type returned");
 
 				object userID = returnItem(song.ID, "idusers", "uploadedsongs");
 				if (userID != null && userID is int)
 					song.userID = (int)userID;
 				else
-					throw new DatabaseException("Database Error: Invalid data type returned");
+					throw new DatabaseException("DATABASE ERROR: Invalid data type returned");
 			}
 
 			return song;
