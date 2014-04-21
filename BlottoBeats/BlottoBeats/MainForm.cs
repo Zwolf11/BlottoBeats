@@ -82,7 +82,6 @@ namespace BlottoBeats.Client
             backlog = new List<SongParameters>();
             redditSongs = new List<SongParameters>();
             generator = new Generator();
-            Console.WriteLine("Ip is: " + Properties.Settings.Default.lastIP);
             server = new BBServerConnection(Properties.Settings.Default.lastIP, 3000);
             player = new MediaPlayer.MediaPlayer();
 
@@ -117,22 +116,10 @@ namespace BlottoBeats.Client
             settingsForm = new AdvancedSettings(this);
             accountForm = new AccountManagement(this);
 
-            Thread refreshRed = new Thread(new ThreadStart(refreshReddit));
-            refreshRed.Start();
-            //refreshReddit();
+            new Thread(() => refreshReddit()).Start();
 
-            if (Properties.Settings.Default.username == "null")
-            {
-                accountForm.ShowDialog();
-            }
-            else
-            {
-                Thread startThread = new Thread(new ThreadStart(startUp));
-                startThread.Start();
-                //startThread.Join();
-                
-            }
-            //refreshRed.Join();
+            if (Properties.Settings.Default.username == "null") accountForm.ShowDialog();
+            else new Thread(() => startUp()).Start();
         }
 
         private void startUp()
@@ -140,8 +127,7 @@ namespace BlottoBeats.Client
             UserToken tempToken = new UserToken(Properties.Settings.Default.username, Properties.Settings.Default.expires, Properties.Settings.Default.token);
             if (server.Test())
             {
-
-                if (server.VerifyToken(tempToken) == true)
+                if (server.VerifyToken(tempToken))
                 {
                     currentUser = tempToken;
                     accountForm.user.Text = currentUser.username;
@@ -340,9 +326,7 @@ namespace BlottoBeats.Client
         private void loadSong(bool nextSong)
         {
             stopSong();
-            Thread sendSc = new Thread(new ThreadStart(sendScore));
-            sendSc.Start();
-            //sendScore();
+            if(songPos >= 0) new Thread(() => sendScore()).Start();
             resetPlayBar();
 
             if (nextSong) songPos++;
@@ -375,7 +359,6 @@ namespace BlottoBeats.Client
             songLen = generator.generate(backlog[songPos]);
             player.Open(@"C:\BlottoBeats\temp.mid");
             playSong();
-            //sendSc.Join();
         }
 
         private void stopSong()
@@ -395,9 +378,14 @@ namespace BlottoBeats.Client
 
         private void sendScore()
         {
-			if (server.Test()) {
-				if (score > 0) server.SendRequest(new BBRequest(backlog[songPos], true, currentUser));
-				else if (score < 0) server.SendRequest(new BBRequest(backlog[songPos], false, currentUser));
+            int tempScore = score;
+            SongParameters tempSong = backlog[songPos];
+            UserToken tempUser = currentUser;
+
+			if (server.Test())
+            {
+				if (tempScore > 0) server.SendRequest(new BBRequest(tempSong, true, tempUser));
+				else if (tempScore < 0) server.SendRequest(new BBRequest(tempSong, false, tempUser));
 			}
         }
 
@@ -414,7 +402,7 @@ namespace BlottoBeats.Client
                 }
             }
 
-            Invalidate();
+            this.Invoke((MethodInvoker) delegate { this.Invalidate(); });
         }
 
         private void playClicked(object sender, MouseEventArgs e)
@@ -507,10 +495,7 @@ namespace BlottoBeats.Client
 
         private void refreshRedditClicked(object sender, MouseEventArgs e)
         {
-            Thread refreshRed = new Thread(new ThreadStart(refreshReddit));
-            refreshRed.Start();
-            //refreshReddit();
-            Invalidate();
+            new Thread(() => refreshReddit()).Start();
         }
 
         private void minimizeClicked(object sender, MouseEventArgs e)
@@ -520,7 +505,7 @@ namespace BlottoBeats.Client
 
         private void exitClicked(object sender, MouseEventArgs e)
         {
-            sendScore();
+            //new Thread(() => sendScore()).Start();
             this.Close();
         }
 

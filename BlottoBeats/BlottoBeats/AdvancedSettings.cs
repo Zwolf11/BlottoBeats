@@ -252,7 +252,6 @@ namespace BlottoBeats.Client
 
         private void testNewIP()
         {
-            Console.WriteLine(this.ip.Text); //for some reason adding this makes it work. idk a senior told me this happens sometimes
             BBServerConnection newServer = new BBServerConnection(this.ip.Text, 3000);
 
             if (newServer.Test())
@@ -265,8 +264,7 @@ namespace BlottoBeats.Client
 
         private void OKClicked(object sender, MouseEventArgs e)
         {
-            Thread iPThread = new Thread(new ThreadStart(testNewIP));
-            iPThread.Start();
+            new Thread(() => testNewIP()).Start();
 
             try { Properties.Settings.Default.maxSongs = int.Parse(maxBacklog.Text); } catch (Exception) {}
             Properties.Settings.Default.alwaysOnTop = onTop.Checked;

@@ -115,15 +115,15 @@ namespace BlottoBeats.Client
                     }
 
 					MessageBox.Show("Successfully logged in as user '" + token.username + "'", "Login Successful");
-                    
-                    //this.Close();
+
+                    this.Invoke((MethodInvoker)delegate { this.Close(); });
                 }
             }
             else
             {
                 MessageBox.Show("Server is not connected. Try again later", "Login failed");
-                
-                //this.Close();
+
+                this.Invoke((MethodInvoker)delegate { this.Close(); });
             }
         }
 
@@ -148,33 +148,25 @@ namespace BlottoBeats.Client
                     Properties.Settings.Default.token = form.currentUser.token;
                     Properties.Settings.Default.Save();
 
-                    
-                    //this.Close();
+                    this.Invoke((MethodInvoker)delegate { this.Close(); });
                 }
             }
             else
             {
                 MessageBox.Show("Server is not connected. Try again later", "Registration failed");
-                
-                //this.Close();
+
+                this.Invoke((MethodInvoker)delegate { this.Close(); });
             }
         }
 
         private void loginClicked(object sender, MouseEventArgs e)
         {
-            Thread loginThread = new Thread(new ThreadStart(login));
-            loginThread.Start();
-            loginThread.Join();
-            this.Close();
-      
+            login();
         }
 
         private void registerClicked(object sender, MouseEventArgs e)
         {
-            Thread registerThread = new Thread(new ThreadStart(register));
-            registerThread.Start();
-            registerThread.Join();
-            this.Close();
+            register();
         }
 
         private void minimizeClicked(object sender, MouseEventArgs e)
