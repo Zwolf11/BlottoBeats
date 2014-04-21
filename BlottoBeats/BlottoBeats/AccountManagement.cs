@@ -106,18 +106,23 @@ namespace BlottoBeats.Client
                 else
                 {
                     form.currentUser = token;
-                    Properties.Settings.Default.username = form.currentUser.username;
-                    Properties.Settings.Default.expires = form.currentUser.expires;
-                    Properties.Settings.Default.token = form.currentUser.token;
-                    Properties.Settings.Default.Save();
+                    if (this.remember.Checked == true)
+                    {
+                        Properties.Settings.Default.username = form.currentUser.username;
+                        Properties.Settings.Default.expires = form.currentUser.expires;
+                        Properties.Settings.Default.token = form.currentUser.token;
+                        Properties.Settings.Default.Save();
+                    }
 
 					MessageBox.Show("Successfully logged in as user '" + token.username + "'", "Login Successful");
+                    
                     //this.Close();
                 }
             }
             else
             {
                 MessageBox.Show("Server is not connected. Try again later", "Login failed");
+                
                 //this.Close();
             }
         }
@@ -143,13 +148,15 @@ namespace BlottoBeats.Client
                     Properties.Settings.Default.token = form.currentUser.token;
                     Properties.Settings.Default.Save();
 
-                    this.Close();
+                    
+                    //this.Close();
                 }
             }
             else
             {
                 MessageBox.Show("Server is not connected. Try again later", "Registration failed");
-                this.Close();
+                
+                //this.Close();
             }
         }
 
@@ -157,12 +164,17 @@ namespace BlottoBeats.Client
         {
             Thread loginThread = new Thread(new ThreadStart(login));
             loginThread.Start();
+            loginThread.Join();
+            this.Close();
+      
         }
 
         private void registerClicked(object sender, MouseEventArgs e)
         {
             Thread registerThread = new Thread(new ThreadStart(register));
             registerThread.Start();
+            registerThread.Join();
+            this.Close();
         }
 
         private void minimizeClicked(object sender, MouseEventArgs e)

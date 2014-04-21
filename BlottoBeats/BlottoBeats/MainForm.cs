@@ -82,6 +82,7 @@ namespace BlottoBeats.Client
             backlog = new List<SongParameters>();
             redditSongs = new List<SongParameters>();
             generator = new Generator();
+            Console.WriteLine("Ip is: " + Properties.Settings.Default.lastIP);
             server = new BBServerConnection(Properties.Settings.Default.lastIP, 3000);
             player = new MediaPlayer.MediaPlayer();
 

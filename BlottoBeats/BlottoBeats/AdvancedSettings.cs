@@ -252,6 +252,7 @@ namespace BlottoBeats.Client
 
         private void testNewIP()
         {
+            Console.WriteLine(this.ip.Text); //for some reason adding this makes it work. idk a senior told me this happens sometimes
             BBServerConnection newServer = new BBServerConnection(this.ip.Text, 3000);
 
             if (newServer.Test())
@@ -277,6 +278,7 @@ namespace BlottoBeats.Client
             Properties.Settings.Default.downvoteColor = buttons[4].inside.Color;
             Properties.Settings.Default.sliderColor = buttons[5].inside.Color;
             Properties.Settings.Default.textColor = buttons[6].inside.Color;
+            Properties.Settings.Default.Save();
             this.Close();
         }
 
