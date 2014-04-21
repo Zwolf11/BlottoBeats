@@ -26,7 +26,7 @@ namespace BlottoBeats.Library.Authentication {
 		/// <param name="token">Token to compare</param>
 		/// <returns>Whether the tokens match and are valid</returns>
 		public bool Verify(UserToken token) {
-			bool equal = (this.username == token.username);
+			bool equal = (this.username.ToLower() == token.username.ToLower());
 			equal &= (this.expires == token.expires);
 			equal &= (this.expires.CompareTo(DateTime.Now) > 0);
 			equal &= PasswordHash.PasswordHash.SlowEquals(Convert.FromBase64String(this.token), Convert.FromBase64String(token.token));

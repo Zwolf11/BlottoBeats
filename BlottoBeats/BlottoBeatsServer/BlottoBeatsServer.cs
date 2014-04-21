@@ -233,7 +233,7 @@ namespace BlottoBeats.Server {
 								if (int.TryParse(line.args[0], out id)) {
 									string name = database.GetUsername(id);
 									if (name != null)
-										CommandLine.WriteLine("Username of user " + id + "is '" + name + "'");
+										CommandLine.WriteLine("Username of user " + id + " is '" + name + "'");
 									else
 										CommandLine.WriteLine("User " + id + " does not exist");
 								} else {
