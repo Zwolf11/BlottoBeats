@@ -114,16 +114,14 @@ namespace BlottoBeats.Client
                         Properties.Settings.Default.Save();
                     }
 
-					MessageBox.Show("Successfully logged in as user '" + token.username + "'", "Login Successful");
-
-                    this.Invoke((MethodInvoker)delegate { this.Close(); });
+                    this.Close();
                 }
             }
             else
             {
                 MessageBox.Show("Server is not connected. Try again later", "Login failed");
 
-                this.Invoke((MethodInvoker)delegate { this.Close(); });
+                this.Close();
             }
         }
 
@@ -148,14 +146,14 @@ namespace BlottoBeats.Client
                     Properties.Settings.Default.token = form.currentUser.token;
                     Properties.Settings.Default.Save();
 
-                    this.Invoke((MethodInvoker)delegate { this.Close(); });
+                    this.Close();
                 }
             }
             else
             {
                 MessageBox.Show("Server is not connected. Try again later", "Registration failed");
 
-                this.Invoke((MethodInvoker)delegate { this.Close(); });
+                this.Close();
             }
         }
 

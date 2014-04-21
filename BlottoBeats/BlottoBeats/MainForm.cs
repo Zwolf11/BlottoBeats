@@ -43,6 +43,7 @@ namespace BlottoBeats.Client
         public AdvancedSettings settingsForm;
         public AccountManagement accountForm;
         public UserToken currentUser;
+        public Thread redditThread;
 
         public Font font;
         public Font smallFont;
@@ -84,6 +85,7 @@ namespace BlottoBeats.Client
             generator = new Generator();
             server = new BBServerConnection(Properties.Settings.Default.lastIP, 3000);
             player = new MediaPlayer.MediaPlayer();
+            redditThread = new Thread(() => refreshReddit());
 
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 10;
@@ -116,8 +118,6 @@ namespace BlottoBeats.Client
             settingsForm = new AdvancedSettings(this);
             accountForm = new AccountManagement(this);
 
-            new Thread(() => refreshReddit()).Start();
-
             if (Properties.Settings.Default.username == "null") accountForm.ShowDialog();
             else new Thread(() => startUp()).Start();
         }
@@ -131,13 +131,14 @@ namespace BlottoBeats.Client
                 {
                     currentUser = tempToken;
                     accountForm.user.Text = currentUser.username;
-                    MessageBox.Show("You have successfully logged in!", "Login Success");
                 }
                 else
                 {
                     MessageBox.Show("Login has expired. Please log in again");
                     accountForm.ShowDialog();
                 }
+                redditThread = new Thread(() => refreshReddit());
+                redditThread.Start();
             }
             else
             {
@@ -326,7 +327,18 @@ namespace BlottoBeats.Client
         private void loadSong(bool nextSong)
         {
             stopSong();
-            if(songPos >= 0) new Thread(() => sendScore()).Start();
+            if (songPos >= 0)
+            {
+                int tempScore = score;
+                SongParameters tempSong = backlog[songPos];
+                UserToken tempUser = currentUser;
+                new Thread(() => sendScore(tempScore, tempSong, tempUser)).Start();
+            }
+            if (!(redditThread.ThreadState == ThreadState.Running))
+            {
+                redditThread = new Thread(() => refreshReddit());
+                redditThread.Start();
+            }
             resetPlayBar();
 
             if (nextSong) songPos++;
@@ -376,17 +388,13 @@ namespace BlottoBeats.Client
             score = 0;
         }
 
-        private void sendScore()
+        private void sendScore(int tempScore, SongParameters tempSong, UserToken tempUser)
         {
-            int tempScore = score;
-            SongParameters tempSong = backlog[songPos];
-            UserToken tempUser = currentUser;
-
-			if (server.Test())
+            if (server.Test())
             {
-				if (tempScore > 0) server.SendRequest(new BBRequest(tempSong, true, tempUser));
-				else if (tempScore < 0) server.SendRequest(new BBRequest(tempSong, false, tempUser));
-			}
+                if (tempScore > 0) server.SendRequest(new BBRequest(tempSong, true, tempUser));
+                else if (tempScore < 0) server.SendRequest(new BBRequest(tempSong, false, tempUser));
+            }
         }
 
         private void refreshReddit()
@@ -402,7 +410,7 @@ namespace BlottoBeats.Client
                 }
             }
 
-            this.Invoke((MethodInvoker) delegate { this.Invalidate(); });
+            if(!this.IsDisposed) this.Invoke((MethodInvoker) delegate { this.Invalidate(); });
         }
 
         private void playClicked(object sender, MouseEventArgs e)
@@ -495,7 +503,11 @@ namespace BlottoBeats.Client
 
         private void refreshRedditClicked(object sender, MouseEventArgs e)
         {
-            new Thread(() => refreshReddit()).Start();
+            if (!(redditThread.ThreadState == ThreadState.Running))
+            {
+                redditThread = new Thread(() => refreshReddit());
+                redditThread.Start();
+            }
         }
 
         private void minimizeClicked(object sender, MouseEventArgs e)
@@ -505,7 +517,9 @@ namespace BlottoBeats.Client
 
         private void exitClicked(object sender, MouseEventArgs e)
         {
-            //new Thread(() => sendScore()).Start();
+            stopSong();
+            redditThread.Abort();
+            if(songPos >= 0) sendScore(score, backlog[songPos], currentUser);
             this.Close();
         }
 
