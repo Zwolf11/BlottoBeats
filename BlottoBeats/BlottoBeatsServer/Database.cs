@@ -89,13 +89,14 @@ namespace BlottoBeats.Server {
 		/// <returns>True if the song exists, false otherwise</returns>
 		internal bool SongExists(int id) {
 			// TODO: We can probably do this better
+			object obj = null;
 			try {
-				returnItem(id, "voteScore", "uploadedsongs");
+				obj = returnItem(id, "voteScore", "uploadedsongs");
 			} catch (DatabaseException) {
 				return false;
 			}
 
-			return true;
+			return (obj != null);
 		}
 
 		/// <summary>
@@ -103,28 +104,32 @@ namespace BlottoBeats.Server {
 		/// </summary>
 		/// <param name="id">The ID of the song to get</param>
 		/// <returns>A SongParamteres object that represents the song</returns>
-		internal SongParameters GetSong(int id) {			
-			object score = returnItem(id, "voteScore", "uploadedsongs");
-			if (score == null || !(score is int))
-				throw new DatabaseException("DATABASE ERROR: Invalid data type for score returned.  Expected 'int' but got '" + score.GetType() + "'");
+		internal SongParameters GetSong(int id) {
+			if (SongExists(id)) {
+				object score = returnItem(id, "voteScore", "uploadedsongs");
+				if (score == null || !(score is int))
+					throw new DatabaseException("DATABASE ERROR: Invalid data type for score returned.  Expected 'int' but got '" + score.GetType() + "'");
 
-			object seed = returnItem(id, "songseed", "uploadedsongs");
-			if (seed == null || !(seed is int))
-				throw new DatabaseException("DATABASE ERROR: Invalid data type for seed returned.  Expected 'int' but got '" + seed.GetType() + "'");
+				object seed = returnItem(id, "songseed", "uploadedsongs");
+				if (seed == null || !(seed is int))
+					throw new DatabaseException("DATABASE ERROR: Invalid data type for seed returned.  Expected 'int' but got '" + seed.GetType() + "'");
 
-			object tempo = returnItem(id, "tempo", "uploadedsongs");
-			if (tempo == null || !(tempo is int))
-				throw new DatabaseException("DATABASE ERROR: Invalid data type for tempo returned.  Expected 'int' but got '" + tempo.GetType() + "'");
+				object tempo = returnItem(id, "tempo", "uploadedsongs");
+				if (tempo == null || !(tempo is int))
+					throw new DatabaseException("DATABASE ERROR: Invalid data type for tempo returned.  Expected 'int' but got '" + tempo.GetType() + "'");
 
-			object genre = returnItem(id, "genre", "uploadedsongs");
-			if (genre == null || !(genre is string))
-				throw new DatabaseException("DATABASE ERROR: Invalid data type for genre returned.  Expected 'string' but got '" + genre.GetType() + "'");
+				object genre = returnItem(id, "genre", "uploadedsongs");
+				if (genre == null || !(genre is string))
+					throw new DatabaseException("DATABASE ERROR: Invalid data type for genre returned.  Expected 'string' but got '" + genre.GetType() + "'");
 
-			object userID = returnItem(id, "idusers", "uploadedsongs");
-			if (userID == null || !(userID is int))
-				throw new DatabaseException("DATABASE ERROR: Invalid data type for user ID returned.  Expected 'int' but got '" + userID.GetType() + "'");
+				object userID = returnItem(id, "idusers", "uploadedsongs");
+				if (userID == null || !(userID is int))
+					throw new DatabaseException("DATABASE ERROR: Invalid data type for user ID returned.  Expected 'int' but got '" + userID.GetType() + "'");
 
-			return new SongParameters((int)id, (int)score, (int)seed, (int)tempo, (string)genre, (int)userID);
+				return new SongParameters((int)id, (int)score, (int)seed, (int)tempo, (string)genre, (int)userID);
+			} else {
+				return null;
+			}
 		}
 
 		/// <summary>
@@ -291,7 +296,7 @@ namespace BlottoBeats.Server {
 		/// </summary>
 		/// <param name="song">Song to search the database for</param>
 		/// <returns>ID of the song on the server</returns>
-		private int GetID(SongParameters song) {
+		internal int GetID(SongParameters song) {
 			MySqlConnection conn = new MySqlConnection(connString);
 			MySqlCommand command = conn.CreateCommand();
 			command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + song.genre + "%' and songseed like '%" + song.seed + "%' and tempo like '%" + song.tempo + "%'";
@@ -317,7 +322,7 @@ namespace BlottoBeats.Server {
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        private int GetID(string username)
+        internal int GetID(string username)
         {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
@@ -437,32 +442,32 @@ namespace BlottoBeats.Server {
 			return new UserToken(username, expires, token);
 		}
 
-        private void deleteUser(int userID)
+        internal void deleteUser(int userID)
         {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             SQLNonQuery(conn, "Delete from users where idusers = " + userID);
         }
 
-        private void deleteSong(int songID)
+        internal void deleteSong(int songID)
         {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             SQLNonQuery(conn, "Delete from uploadedsongs where iduploadedsongs = " + songID);
         }
 
-        private void changePassword(int userID, string hash)
+        internal void changePassword(int userID, string hash)
         {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             SQLNonQuery(conn, "Update users set passwordHash = '" + hash + "' where idusers = " + userID);
         }
 
-        private void changeVoteScore(int songID, int newScore)
+        internal void changeVoteScore(int songID, int newScore)
         {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            SQLNonQuery(conn, "Update uploadedsongs set voteScore = " + newScore + " where idusers = " + songID);
+            SQLNonQuery(conn, "Update uploadedsongs set voteScore = " + newScore + " where iduploadedsongs = " + songID);
         }
 
 		/// <summary>
@@ -470,7 +475,7 @@ namespace BlottoBeats.Server {
 		/// </summary>
 		/// <param name="conn">the connection SQL connection</param>
 		/// <param name="comString">the command string</param>
-		private void SQLNonQuery(MySqlConnection conn, string comString) {
+		internal void SQLNonQuery(MySqlConnection conn, string comString) {
             MySqlCommand command = conn.CreateCommand();
             command.CommandText = comString;
 			try {

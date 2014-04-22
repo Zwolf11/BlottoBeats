@@ -158,6 +158,7 @@ namespace BlottoBeats.Server {
 						}
 						break;
 
+					case "info":
 					case "dbinfo":
 						string health = "Stopped";
 						if (server != null && server.IsAlive()) health = "Running";
@@ -178,6 +179,8 @@ namespace BlottoBeats.Server {
 					case "newaccount":
 						if (line.numArgs < 2) {
 							CommandLine.WriteLine("ERROR: The command '" + line.command + "' requires two arguments");
+						} else if (server == null || !server.IsAlive()) {
+							CommandLine.WriteLine("ERROR: The server is offline");
 						} else {
 							try {
 								UserToken token = database.Authenticate(new Credentials(line.args[0], line.args[1]), true);
@@ -195,22 +198,51 @@ namespace BlottoBeats.Server {
 					case "deleteaccount":
 						if (line.numArgs < 1) {
 							CommandLine.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else if (server == null || !server.IsAlive()) {
+							CommandLine.WriteLine("ERROR: The server is offline");
 						} else {
-							CommandLine.WriteLine(line.command + " not yet implimented");
+							try {
+								int id = database.GetID(line.args[0]);
+								if (id != 0) {
+									database.deleteUser(id);
+									CommandLine.WriteLine("User '" + line.args[0] + "' deleted.");
+								} else {
+									CommandLine.WriteLine("ERROR:User '" + line.args[0] + "' does not exist");
+								}
+							} catch (DatabaseException ex) {
+								CommandLine.WriteLine("DATABASE ERROR: User could not be deleted");
+								CommandLine.WriteLine(ex.Message);
+							}
 						}
 						break;
 
 					case "resetpassword":
 						if (line.numArgs < 2) {
 							CommandLine.WriteLine("ERROR: The command '" + line.command + "' requires two arguments");
+						} else if (server == null || !server.IsAlive()) {
+							CommandLine.WriteLine("ERROR: The server is offline");
 						} else {
-							CommandLine.WriteLine(line.command + " not yet implimented");
+							try {
+								Credentials credentials = new Credentials(line.args[0], line.args[1]);
+								int id = database.GetID(credentials.username);
+								if (id != 0) {
+									database.changePassword(id, credentials.GenerateHash());
+									CommandLine.WriteLine("Password Change Successful");
+								} else {
+									CommandLine.WriteLine("ERROR:User '" + credentials.username + "' does not exist");
+								}
+							} catch (DatabaseException ex){
+								CommandLine.WriteLine("DATABASE ERROR: Password could not be changed");
+								CommandLine.WriteLine(ex.Message);
+							}
 						}
 						break;
 
 					case "refreshtoken":
 						if (line.numArgs < 1) {
 							CommandLine.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else if (server == null || !server.IsAlive()) {
+							CommandLine.WriteLine("ERROR: The server is offline");
 						} else {
 							try {
 								if (database.RefreshToken(line.args[0]))
@@ -227,6 +259,8 @@ namespace BlottoBeats.Server {
 					case "whois":
 						if (line.numArgs < 1) {
 							CommandLine.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else if (server == null || !server.IsAlive()) {
+							CommandLine.WriteLine("ERROR: The server is offline");
 						} else {
 							try {
 								int id;
@@ -250,6 +284,8 @@ namespace BlottoBeats.Server {
 					case "newsong":
 						if (line.numArgs < 3) {
 							CommandLine.WriteLine("ERROR: The command '" + line.command + "' requires three arguments");
+						} else if (server == null || !server.IsAlive()) {
+							CommandLine.WriteLine("ERROR: The server is offline");
 						} else {
 							try {
 								int seed, tempo;
@@ -283,28 +319,64 @@ namespace BlottoBeats.Server {
 					case "deletesong":
 						if (line.numArgs < 1) {
 							CommandLine.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else if (server == null || !server.IsAlive()) {
+							CommandLine.WriteLine("ERROR: The server is offline");
 						} else {
-							CommandLine.WriteLine(line.command + " not yet implimented");
+							try {
+								int id;
+								if (int.TryParse(line.args[0], out id) && database.SongExists(id)) {
+									database.deleteSong(id);
+									CommandLine.WriteLine("Song '" + id + "' deleted.");
+								} else {
+									CommandLine.WriteLine("ERROR:Song '" + id + "' does not exist");
+								}
+							} catch (DatabaseException ex) {
+								CommandLine.WriteLine("DATABASE ERROR: Song could not be deleted");
+								CommandLine.WriteLine(ex.Message);
+							}
 						}
 						break;
 
 					case "setscore":
-						if (line.numArgs < 1) {
-							CommandLine.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						if (line.numArgs < 2) {
+							CommandLine.WriteLine("ERROR: The command '" + line.command + "' requires two arguments");
+						} else if (server == null || !server.IsAlive()) {
+							CommandLine.WriteLine("ERROR: The server is offline");
 						} else {
-							CommandLine.WriteLine(line.command + " not yet implimented");
+							try {
+								int id, score;
+								if (int.TryParse(line.args[0], out id) && int.TryParse(line.args[1], out score) && database.SongExists(id)) {
+									database.changeVoteScore(id, score);
+									CommandLine.WriteLine("Song " + id + " score set to " + score);
+								} else {
+									CommandLine.WriteLine("ERROR:Song " + id + " does not exist");
+								}
+							} catch (DatabaseException ex) {
+								CommandLine.WriteLine("DATABASE ERROR: Score could not be changed");
+								CommandLine.WriteLine(ex.Message);
+							}
 						}
 						break;
 
 					case "songinfo":
 						if (line.numArgs < 1) {
 							CommandLine.WriteLine("ERROR: The command '" + line.command + "' requires an argument");
+						} else if (server == null || !server.IsAlive()) {
+							CommandLine.WriteLine("ERROR: The server is offline");
 						} else {
 							try {
 								int id;
 								if (int.TryParse(line.args[0], out id)) {
 									if (database.SongExists(id)) {
 										SongParameters song = database.GetSong(id);
+										CommandLine.WriteLine("Song " + song.ID);
+										CommandLine.WriteLine();
+										CommandLine.WriteLine("Seed:  " + song.seed);
+										CommandLine.WriteLine("Tempo: " + song.tempo);
+										CommandLine.WriteLine("Genre: " + song.genre);
+										CommandLine.WriteLine();
+										CommandLine.WriteLine("Score: " + song.score);
+										CommandLine.WriteLine("User:  " + song.userID);
 									} else {
 										CommandLine.WriteLine("Song " + id + " does not exist");
 									}
@@ -321,6 +393,7 @@ namespace BlottoBeats.Server {
 					// Shell commands
 					case "quit":
 					case "exit":
+						if (server != null && server.IsAlive()) server.Stop();
 						return;
 
 					case "help":
