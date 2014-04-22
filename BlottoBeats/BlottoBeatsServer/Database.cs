@@ -437,6 +437,34 @@ namespace BlottoBeats.Server {
 			return new UserToken(username, expires, token);
 		}
 
+        private void deleteUser(int userID)
+        {
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            SQLNonQuery(conn, "Delete from users where idusers = " + userID);
+        }
+
+        private void deleteSong(int songID)
+        {
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            SQLNonQuery(conn, "Delete from uploadedsongs where iduploadedsongs = " + songID);
+        }
+
+        private void changePassword(int userID, string hash)
+        {
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            SQLNonQuery(conn, "Update users set passwordHash = '" + hash + "' where idusers = " + userID);
+        }
+
+        private void changeVoteScore(int songID, int newScore)
+        {
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            SQLNonQuery(conn, "Update uploadedsongs set voteScore = " + newScore + " where idusers = " + songID);
+        }
+
 		/// <summary>
 		/// Performs an SQL NonQuery to the database
 		/// </summary>
