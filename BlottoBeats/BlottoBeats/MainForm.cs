@@ -17,8 +17,8 @@ namespace BlottoBeats.Client
         private List<Setting> settings;
         private Button sliderButton;
         private Button playButton;
-        private List<Point> playImg;
-        private List<Point> pauseImg;
+        private Bitmap playImg;
+        private Bitmap pauseImg;
         private Button playBarButton;
         private Button advSettingButton;
         private Button exportButton;
@@ -49,6 +49,17 @@ namespace BlottoBeats.Client
         private Thread redditThread;
         private String[] genres;
         private int curGenre;
+
+        private Bitmap origPlayImg;
+        private Bitmap origPauseImg;
+        private Bitmap origBackImg;
+        private Bitmap origNextImg;
+        private Bitmap origUpvoteImg;
+        private Bitmap origDownvoteImg;
+        private Bitmap origRedditImg;
+        private Bitmap origSettingsImg;
+        private Bitmap origAdvSettingsImg;
+        private Bitmap origExportImg;
 
         public Font font;
         public Font smallFont;
@@ -97,6 +108,17 @@ namespace BlottoBeats.Client
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 10;
             timer.Tick += this.tick;
+
+            origPlayImg = new Bitmap("images/play.png");
+            origPauseImg = new Bitmap("images/pause.png");
+            origBackImg = new Bitmap("images/back.png");
+            origNextImg = new Bitmap("images/next.png");
+            origUpvoteImg = new Bitmap("images/upvote.png");
+            origDownvoteImg = new Bitmap("images/downvote.png");
+            origRedditImg = new Bitmap("images/reddit.png");
+            origSettingsImg = new Bitmap("images/settings.png");
+            origAdvSettingsImg = new Bitmap("images/advsettings.png");
+            origExportImg = new Bitmap("images/export.png");
 
             lightColor = new SolidBrush(Properties.Settings.Default.lightColor);
             medColor = new SolidBrush(Properties.Settings.Default.medColor);
@@ -153,6 +175,37 @@ namespace BlottoBeats.Client
             }
         }
 
+        private Bitmap colorOverlay(Bitmap img, Color color)
+        {
+            var bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, img.PixelFormat);
+            byte[] imageBytes = new byte[bitmapData.Stride * img.Height];
+            System.Runtime.InteropServices.Marshal.Copy(bitmapData.Scan0, imageBytes, 0, imageBytes.Length);
+            img.UnlockBits(bitmapData);
+            int pixelSize = Image.GetPixelFormatSize(img.PixelFormat);
+
+            int x = 0;
+            int y = 0;
+            var bitmap = new Bitmap(img.Width, img.Height);
+
+            for (int i = 0; i < imageBytes.Length; i += pixelSize / 8)
+            {
+                var pixelData = new byte[4];
+                Array.Copy(imageBytes, i, pixelData, 0, 4);
+                var pxColor = Color.FromArgb(pixelData[0], pixelData[1], pixelData[2]);
+                if (pixelData[3] != 0) bitmap.SetPixel(x, y, color);
+                else bitmap.SetPixel(x, y, Color.Transparent);
+
+                x++;
+                if (x >= bitmap.Width)
+                {
+                    x = 0;
+                    y++;
+                }
+            }
+
+            return bitmap;
+        }
+
         public void initButtons()
         {
             buttons.Clear();
@@ -169,7 +222,7 @@ namespace BlottoBeats.Client
             playBar.Add(new Point(13 * size / 4, 0));
             playBar.Add(new Point(13 * size / 4, 3 * size / 8));
             playBar.Add(new Point(0, 3 * size / 8));
-            playBarButton = new Button(playBar, new Point(3 * size / 4, size / 8), darkColor, null, null);
+            playBarButton = new Button(playBar, new Point(3 * size / 4, size / 8), darkColor, null, null, null);
             playBarButton.Clicked += playBarClicked;
             buttons.Add(playBarButton);
 
@@ -179,80 +232,33 @@ namespace BlottoBeats.Client
             bottomButton.Add(new Point(3 * size / 4, 0));
             bottomButton.Add(new Point(size / 2, 3 * size / 8));
 
-            List<Point> backImg = new List<Point>();
-            backImg.Add(new Point(9 * size / 32 + size / 16, size / 16));
-            backImg.Add(new Point(10 * size / 32 + size / 16, size / 16));
-            backImg.Add(new Point(10 * size / 32 + size / 16, 3 * size / 16));
-            backImg.Add(new Point(12 * size / 32 + size / 16, size / 16));
-            backImg.Add(new Point(12 * size / 32 + size / 16, 5 * size / 16));
-            backImg.Add(new Point(10 * size / 32 + size / 16, 3 * size / 16));
-            backImg.Add(new Point(10 * size / 32 + size / 16, 5 * size / 16));
-            backImg.Add(new Point(9 * size / 32 + size / 16, 5 * size / 16));
-            Button backButton = new Button(bottomButton, new Point(3 * size / 4, size / 2), darkColor, lightOutline, backImg);
+            Bitmap backImg = new Bitmap(origBackImg, new Size(size / 5, size / 5));
+            Button backButton = new Button(bottomButton, new Point(3 * size / 4, size / 2), darkColor, lightOutline, colorOverlay(backImg, lightColor.Color), new Point(9 * size / 32, 3 * size / 32));
             backButton.Clicked += backClicked;
             buttons.Add(backButton);
 
-            List<Point> nextImg = new List<Point>();
-            nextImg.Add(new Point(11 * size / 32, size / 16));
-            nextImg.Add(new Point(13 * size / 32, 3 * size / 16));
-            nextImg.Add(new Point(13 * size / 32, size / 16));
-            nextImg.Add(new Point(14 * size / 32, size / 16));
-            nextImg.Add(new Point(14 * size / 32, 5 * size / 16));
-            nextImg.Add(new Point(13 * size / 32, 5 * size / 16));
-            nextImg.Add(new Point(13 * size / 32, 3 * size / 16));
-            nextImg.Add(new Point(11 * size / 32, 5 * size / 16));
-            Button nextButton = new Button(bottomButton, new Point(size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, nextImg);
+            Bitmap nextImg = new Bitmap(origNextImg, new Size(size / 5, size / 5));
+            Button nextButton = new Button(bottomButton, new Point(size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, colorOverlay(nextImg, lightColor.Color), new Point(9 * size / 32, 3 * size / 32));
             nextButton.Clicked += nextClicked;
             buttons.Add(nextButton);
 
-            List<Point> upvoteImg = new List<Point>();
-            upvoteImg.Add(new Point(9 * size / 32, 5 * size / 32));
-            upvoteImg.Add(new Point(9 * size / 32, 9 * size / 32));
-            upvoteImg.Add(new Point(7 * size / 32, 9 * size / 32));
-            upvoteImg.Add(new Point(7 * size / 32, 5 * size / 32));
-            upvoteImg.Add(new Point(10 * size / 32, 5 * size / 32));
-            upvoteImg.Add(new Point(11 * size / 32, 3 * size / 32));
-            upvoteImg.Add(new Point(11 * size / 32, 2 * size / 32));
-            upvoteImg.Add(new Point(12 * size / 32, 2 * size / 32));
-            upvoteImg.Add(new Point(12 * size / 32, 5 * size / 32));
-            upvoteImg.Add(new Point(15 * size / 32, 5 * size / 32));
-            upvoteImg.Add(new Point(15 * size / 32, 8 * size / 32));
-            upvoteImg.Add(new Point(13 * size / 32, 10 * size / 32));
-            upvoteImg.Add(new Point(10 * size / 32, 10 * size / 32));
-            upvoteImg.Add(new Point(9 * size / 32, 9 * size / 32));
-            Button upvoteButton = new Button(bottomButton, new Point(2 * size / 2 + 3 * size / 4, size / 2), upvoteColor, lightOutline, upvoteImg);
+            Bitmap upvoteImg = new Bitmap(origUpvoteImg, new Size(size / 4, size / 4));
+            Button upvoteButton = new Button(bottomButton, new Point(size + 3 * size / 4, size / 2), upvoteColor, lightOutline, colorOverlay(upvoteImg, lightColor.Color), new Point(7 * size / 32, size / 16));
             upvoteButton.Clicked += upvoteClicked;
             buttons.Add(upvoteButton);
 
-            List<Point> downvoteImg = new List<Point>();
-            downvoteImg.Add(new Point(15 * size / 32, 7 * size / 32));
-            downvoteImg.Add(new Point(15 * size / 32, 3 * size / 32));
-            downvoteImg.Add(new Point(17 * size / 32, 3 * size / 32));
-            downvoteImg.Add(new Point(17 * size / 32, 7 * size / 32));
-            downvoteImg.Add(new Point(14 * size / 32, 7 * size / 32));
-            downvoteImg.Add(new Point(13 * size / 32, 9 * size / 32));
-            downvoteImg.Add(new Point(13 * size / 32, 10 * size / 32));
-            downvoteImg.Add(new Point(12 * size / 32, 10 * size / 32));
-            downvoteImg.Add(new Point(12 * size / 32, 7 * size / 32));
-            downvoteImg.Add(new Point(9 * size / 32, 7 * size / 32));
-            downvoteImg.Add(new Point(9 * size / 32, 4 * size / 32));
-            downvoteImg.Add(new Point(11 * size / 32, 2 * size / 32));
-            downvoteImg.Add(new Point(14 * size / 32, 2 * size / 32));
-            downvoteImg.Add(new Point(15 * size / 32, 3 * size / 32));
-            Button downvoteButton = new Button(bottomButton, new Point(3 * size / 2 + 3 * size / 4, size / 2), downvoteColor, lightOutline, downvoteImg);
+            Bitmap downvoteImg = new Bitmap(origDownvoteImg, new Size(size / 4, size / 4));
+            Button downvoteButton = new Button(bottomButton, new Point(3 * size / 2 + 3 * size / 4, size / 2), downvoteColor, lightOutline, colorOverlay(downvoteImg, lightColor.Color), new Point(9 * size / 32, size / 16));
             downvoteButton.Clicked += downvoteClicked;
             buttons.Add(downvoteButton);
 
-            List<Point> redditImg = new List<Point>();
-            Button redditButton = new Button(bottomButton, new Point(4 * size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, redditImg);
+            Bitmap redditImg = new Bitmap(origRedditImg, new Size(size / 4, size / 4));
+            Button redditButton = new Button(bottomButton, new Point(4 * size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, colorOverlay(redditImg, lightColor.Color), new Point(size / 4, size / 16));
             redditButton.Clicked += redditClicked;
             buttons.Add(redditButton);
 
-            List<Point> settingsImg = new List<Point>();
-            settingsImg.Add(new Point(size / 4, size / 8));
-            settingsImg.Add(new Point(size / 2, size / 8));
-            settingsImg.Add(new Point((int)(3 * size / 8), 5 * size / 16));
-            Button settingsButton = new Button(bottomButton, new Point(5 * size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, settingsImg);
+            Bitmap settingsImg = new Bitmap(origSettingsImg, new Size(size / 4, size / 4));
+            Button settingsButton = new Button(bottomButton, new Point(5 * size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, colorOverlay(settingsImg, lightColor.Color), new Point(size / 4, 3 * size / 32));
             settingsButton.Clicked += settingsClicked;
             buttons.Add(settingsButton);
 
@@ -261,30 +267,23 @@ namespace BlottoBeats.Client
             slider.Add(new Point(size / 8, 3 * size / 16));
             slider.Add(new Point(0, 3 * size / 8));
             slider.Add(new Point(-size / 8, 3 * size / 16));
-            sliderButton = new Button(slider, new Point((int)(progress * (193 * size / 64) + size), size / 8), sliderColor, lightInline, null);
+            sliderButton = new Button(slider, new Point((int)(progress * (193 * size / 64) + size), size / 8), sliderColor, lightInline, null, null);
             sliderButton.Clicked += sliderClicked;
             buttons.Add(sliderButton);
 
             List<Point> play = new List<Point>();
             for (int i = 0; i < 128; i++)
                 play.Add(new Point((int)(size / 2 + Math.Cos((1.0 * i / 128) * (2 * Math.PI)) * (size / 2)), (int)(size / 2 + Math.Sin((1.0 * i / 128) * (2 * Math.PI)) * (size / 2))));
-            playImg = new List<Point>();
-            playImg.Add(new Point(6 * size / 16, size / 4));
-            playImg.Add(new Point(3 * size / 4, size / 2));
-            playImg.Add(new Point(6 * size / 16, 3 * size / 4));
-            pauseImg = new List<Point>();
-            pauseImg.Add(new Point(3 * size / 4, 3 * size / 4));
-            pauseImg.Add(new Point(size / 4, 3 * size / 4));
-            pauseImg.Add(new Point(size / 4, size / 4));
-            pauseImg.Add(new Point(7 * size / 16, size / 4));
-            pauseImg.Add(new Point(7 * size / 16, 3 * size / 4));
-            pauseImg.Add(new Point(9 * size / 16, 3 * size / 4));
-            pauseImg.Add(new Point(9 * size / 16, size / 4));
-            pauseImg.Add(new Point(3 * size / 4, size / 4));
-            List<Point> playButtonImg = playImg;
-            if (playing) playButtonImg = pauseImg;
-            else playButtonImg = playImg;
-            playButton = new Button(play, new Point(0, 0), medColor, lightInline, playButtonImg);
+            playImg = colorOverlay(new Bitmap(origPlayImg, new Size(size / 2, size / 2)), lightColor.Color);
+            pauseImg = colorOverlay(new Bitmap(origPauseImg, new Size(size / 2, size / 2)), lightColor.Color);
+            Bitmap playButtonImg = playImg;
+            Point imgLoc = new Point(size / 3, size / 4);
+            if (playing)
+            {
+                playButtonImg = pauseImg;
+                imgLoc = new Point(size / 4, size / 4);
+            }
+            playButton = new Button(play, new Point(0, 0), medColor, lightInline, playButtonImg, imgLoc);
             playButton.Clicked += this.playClicked;
             buttons.Add(playButton);
 
@@ -294,11 +293,11 @@ namespace BlottoBeats.Client
             menuButton.Add(new Point(size / 4, size / 8));
             menuButton.Add(new Point(0, size / 8));
 
-            Button minimizeButton = new Button(menuButton, new Point(7 * size / 2, 0), medColor, null, null);
+            Button minimizeButton = new Button(menuButton, new Point(7 * size / 2, 0), medColor, null, null, null);
             minimizeButton.Clicked += minimizeClicked;
             buttons.Add(minimizeButton);
 
-            Button exitButton = new Button(menuButton, new Point(15 * size / 4, 0), downvoteColor, null, null);
+            Button exitButton = new Button(menuButton, new Point(15 * size / 4, 0), downvoteColor, null, null, null);
             exitButton.Clicked += exitClicked;
             buttons.Add(exitButton);
 
@@ -308,10 +307,12 @@ namespace BlottoBeats.Client
             buttonShape.Add(new Point(size / 4, size / 4));
             buttonShape.Add(new Point(0, size / 4));
 
-            advSettingButton = new Button(buttonShape, new Point(13 * size / 16, 30 * size / 32), darkColor, null, null);
+            Bitmap advSettingsImg = new Bitmap(origAdvSettingsImg, new Size(size / 4, size / 4));
+            advSettingButton = new Button(buttonShape, new Point(13 * size / 16, 30 * size / 32), darkColor, null, colorOverlay(advSettingsImg, lightColor.Color), new Point(0, 0));
             advSettingButton.Clicked += advSettingClicked;
 
-            exportButton = new Button(buttonShape, new Point(18 * size / 16, 30 * size / 32), darkColor, null, null);
+            Bitmap exportImg = new Bitmap(origExportImg, new Size(size / 4, size / 4));
+            exportButton = new Button(buttonShape, new Point(18 * size / 16, 30 * size / 32), darkColor, null, colorOverlay(exportImg, lightColor.Color), new Point(0, 0));
             exportButton.Clicked += exportClicked;
 
             List<Point> smallButtonShape = new List<Point>();
@@ -320,10 +321,10 @@ namespace BlottoBeats.Client
             smallButtonShape.Add(new Point(size / 8, size / 8));
             smallButtonShape.Add(new Point(0, size / 8));
             
-            prevGenreButton = new Button(smallButtonShape, new Point(13 * size / 16, 15 * size / 16), darkColor, null, null);
+            prevGenreButton = new Button(smallButtonShape, new Point(13 * size / 16, 15 * size / 16), darkColor, null, null, null);
             prevGenreButton.Clicked += prevGenreClicked;
 
-            nextGenreButton = new Button(smallButtonShape, new Point(57 * size / 16, 15 * size / 16), darkColor, null, null);
+            nextGenreButton = new Button(smallButtonShape, new Point(57 * size / 16, 15 * size / 16), darkColor, null, null, null);
             nextGenreButton.Clicked += nextGenreClicked;
 
             foreach (Setting setting in settings)
@@ -333,6 +334,7 @@ namespace BlottoBeats.Client
         private void playSong()
         {
             playButton.img = pauseImg;
+            playButton.imgLoc = new Point(size / 4, size / 4);
             playing = true;
             player.CurrentPosition = progress * songLen;
             player.Play();
@@ -391,6 +393,7 @@ namespace BlottoBeats.Client
         private void stopSong()
         {
             playButton.img = playImg;
+            playButton.imgLoc = new Point(size / 3, size / 4);
             playing = false;
             player.Stop();
             timer.Stop();
@@ -742,7 +745,9 @@ namespace BlottoBeats.Client
                 format.Alignment = StringAlignment.Far;
                 g.DrawString("Randomized?", font, textColor, 119 * size / 32, 15 * size / 16, format);
                 g.FillPolygon(advSettingButton.inside, advSettingButton.ClickLocation);
+                g.DrawImage(advSettingButton.img, advSettingButton.ImgLocation.Value);
                 g.FillPolygon(exportButton.inside, exportButton.ClickLocation);
+                g.DrawImage(exportButton.img, exportButton.ImgLocation.Value);
             }
             else if(redditDropped)
             {
@@ -781,8 +786,8 @@ namespace BlottoBeats.Client
                 g.FillPolygon(button.inside, button.ClickLocation);
                 if(button.stroke != null)
                     g.DrawPolygon(button.stroke, button.ClickLocation);
-                if(button.ImgLocation != null)
-                    g.FillPolygon(lightColor, button.ImgLocation);
+                if (button.img != null)
+                    g.DrawImage(button.img, button.ImgLocation.Value);
 
                 if(button == playBarButton)
                 {

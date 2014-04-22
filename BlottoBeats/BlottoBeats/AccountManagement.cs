@@ -71,15 +71,15 @@ namespace BlottoBeats.Client
             button.Add(new Point(3 * size / 4, size / 4));
             button.Add(new Point(0, size / 4));
 
-            Button loginButton = new Button(button, new Point(5 * size / 16, 17 * size / 8), form.medColor, null, null);
+            Button loginButton = new Button(button, new Point(5 * size / 16, 17 * size / 8), form.medColor, null, null, null);
             loginButton.Clicked += loginClicked;
             buttons.Add(loginButton);
 
-            Button registerButton = new Button(button, new Point(9 * size / 8, 17 * size / 8), form.medColor, null, null);
+            Button registerButton = new Button(button, new Point(9 * size / 8, 17 * size / 8), form.medColor, null, null, null);
             registerButton.Clicked += registerClicked;
             buttons.Add(registerButton);
 
-            Button logoutButton = new Button(button, new Point(31 * size / 16, 17 * size / 8), form.medColor, null, null);
+            Button logoutButton = new Button(button, new Point(31 * size / 16, 17 * size / 8), form.medColor, null, null, null);
             logoutButton.Clicked += logoutClicked;
             buttons.Add(logoutButton);
 
@@ -89,11 +89,11 @@ namespace BlottoBeats.Client
             menuButton.Add(new Point(size / 4, size / 8));
             menuButton.Add(new Point(0, size / 8));
 
-            Button minimizeButton = new Button(menuButton, new Point(7 * size / 2, 0), form.medColor, null, null);
+            Button minimizeButton = new Button(menuButton, new Point(7 * size / 2, 0), form.medColor, null, null, null);
             minimizeButton.Clicked += minimizeClicked;
             buttons.Add(minimizeButton);
 
-            Button exitButton = new Button(menuButton, new Point(15 * size / 4, 0), form.downvoteColor, null, null);
+            Button exitButton = new Button(menuButton, new Point(15 * size / 4, 0), form.downvoteColor, null, null, null);
             exitButton.Clicked += exitClicked;
             buttons.Add(exitButton);
         }
