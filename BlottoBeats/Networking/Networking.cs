@@ -188,6 +188,11 @@ namespace BlottoBeats.Library.Networking {
 			requestType = new RequestSongs(numberOfSongs);
 		}
 
+        public BBRequest(int numberOfSongs, int? seed, int? tempo, string genre, int? userID)
+        {
+            requestType = new RequestSongs(numberOfSongs, seed, tempo, genre, userID);
+        }
+
 		/// <summary>
 		/// Generic request object
 		/// </summary>

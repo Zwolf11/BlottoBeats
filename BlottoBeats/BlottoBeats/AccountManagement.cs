@@ -31,6 +31,7 @@ namespace BlottoBeats.Client
             this.DoubleBuffered = true;
             this.BackColor = Color.Turquoise;
             this.TransparencyKey = Color.Turquoise;
+            this.TopMost = Properties.Settings.Default.alwaysOnTop;
 
             size = 80;
             buttons = new List<Button>();
@@ -40,6 +41,7 @@ namespace BlottoBeats.Client
             user.Width = 2 * size + size / 4;
             user.Font = new Font("Arial", 12);
             user.Location = new Point(2 * size - size / 4, 9 * size / 8);
+            user.Text = Properties.Settings.Default.username;
             this.Controls.Add(user);
             pass = new TextBox();
             pass.PasswordChar = '*';
@@ -50,6 +52,7 @@ namespace BlottoBeats.Client
             remember = new CheckBox();
             remember.BackColor = Color.Transparent;
             remember.Location = new Point(15 * size / 4 + 3, 69 * size / 32 - 3);
+            remember.Checked = Properties.Settings.Default.username != null;
             this.Controls.Add(remember);
 
             font = new Font("Arial", 16, FontStyle.Bold);
@@ -76,6 +79,10 @@ namespace BlottoBeats.Client
             registerButton.Clicked += registerClicked;
             buttons.Add(registerButton);
 
+            Button logoutButton = new Button(button, new Point(31 * size / 16, 17 * size / 8), form.medColor, null, null);
+            logoutButton.Clicked += logoutClicked;
+            buttons.Add(logoutButton);
+
             List<Point> menuButton = new List<Point>();
             menuButton.Add(new Point(0, 0));
             menuButton.Add(new Point(size / 4, 0));
@@ -91,7 +98,7 @@ namespace BlottoBeats.Client
             buttons.Add(exitButton);
         }
 
-        private void login()
+        private void loginClicked(object sender, MouseEventArgs e)
         {
             UserToken token;
 
@@ -101,7 +108,7 @@ namespace BlottoBeats.Client
 
                 if (token == null)
                 {
-					MessageBox.Show("Username/Password was incorrect. Please try again", "Login failed");
+                    MessageBox.Show("Username/Password was incorrect. Please try again", "Login failed");
                 }
                 else
                 {
@@ -111,6 +118,12 @@ namespace BlottoBeats.Client
                         Properties.Settings.Default.username = form.currentUser.username;
                         Properties.Settings.Default.expires = form.currentUser.expires;
                         Properties.Settings.Default.token = form.currentUser.token;
+                        Properties.Settings.Default.Save();
+                    }
+                    else
+                    {
+                        Properties.Settings.Default.username = null;
+                        Properties.Settings.Default.token = null;
                         Properties.Settings.Default.Save();
                     }
 
@@ -125,7 +138,7 @@ namespace BlottoBeats.Client
             }
         }
 
-        private void register()
+        private void registerClicked(object sender, MouseEventArgs e)
         {
             UserToken token;
 
@@ -157,14 +170,9 @@ namespace BlottoBeats.Client
             }
         }
 
-        private void loginClicked(object sender, MouseEventArgs e)
+        private void logoutClicked(object sender, MouseEventArgs e)
         {
-            login();
-        }
-
-        private void registerClicked(object sender, MouseEventArgs e)
-        {
-            register();
+            
         }
 
         private void minimizeClicked(object sender, MouseEventArgs e)
@@ -262,11 +270,12 @@ namespace BlottoBeats.Client
             g.DrawString("Blotto Beats - Login", font, form.darkColor, 65 * size / 16, size / 8 + size / 18, format);
             g.DrawString("Username:", font, form.lightColor, size / 4, 9 * size / 8);
             g.DrawString("Password:", font, form.lightColor, size / 4, 13 * size / 8);
-            g.DrawString("Remember me:", smallFont, form.lightColor, 15 * size  / 4, 69 * size / 32, format);
+            g.DrawString("Remember:", smallFont, form.lightColor, 15 * size  / 4, 69 * size / 32, format);
             StringFormat format2 = new StringFormat();
             format2.Alignment = StringAlignment.Center;
             g.DrawString("Login", smallFont, form.textColor, 11 * size / 16, 69 * size / 32, format2);
             g.DrawString("Register", smallFont, form.textColor, 24 * size / 16, 69 * size / 32, format2);
+            g.DrawString("Logout", smallFont, form.textColor, 37 * size / 16, 69 * size / 32, format2);
         }
     }
 }

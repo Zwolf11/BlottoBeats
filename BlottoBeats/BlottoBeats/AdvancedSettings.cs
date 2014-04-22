@@ -33,6 +33,7 @@ namespace BlottoBeats.Client
             this.DoubleBuffered = true;
             this.BackColor = Color.Turquoise;
             this.TransparencyKey = Color.Turquoise;
+            this.TopMost = Properties.Settings.Default.alwaysOnTop;
 
             size = 80;
             buttons = new List<Button>();
@@ -427,7 +428,7 @@ namespace BlottoBeats.Client
             format2.Alignment = StringAlignment.Center;
             g.DrawString("OK", smallFont, form.textColor, 11 * size / 16, 69 * size / 32, format2);
             g.DrawString("Cancel", smallFont, form.textColor, 24 * size / 16, 69 * size / 32, format2);
-            g.DrawString("Login", smallFont, form.textColor, 37 * size / 16, 69 * size / 32, format2);
+            g.DrawString("Account", smallFont, form.textColor, 37 * size / 16, 69 * size / 32, format2);
         }
     }
 }

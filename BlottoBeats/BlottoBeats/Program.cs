@@ -1,9 +1,11 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
 
 namespace BlottoBeats.Client
 {
     public static class Program
     {
+        [STAThread]
         public static void Main()
         {
             //Generator Debug Code
