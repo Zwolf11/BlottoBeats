@@ -94,7 +94,7 @@ namespace BlottoBeats.MidiOut
                         }
                         else if (output.Genre == "4-Chord Pop/Rock")
                         {
-                            builder.Data2 = 100;
+                            builder.Data2 = 120;
                         }
                         
                         builder.Build(); //Build the message
