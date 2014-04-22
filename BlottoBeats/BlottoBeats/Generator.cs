@@ -3979,10 +3979,10 @@ namespace BlottoBeats.Client
                         thisSection.chordPattern.Add(generateJazzChord(mode, key, chord[count], 2 * rhythm));
                         sumRhythm += rhythm;
                     }
-                    if (chord[chord.Length - 1] == '5')
+                    /*if (chord[chord.Length - 1] == '5')
                     {
                         prevWasHalf = true;
-                    }
+                    }*/
                 }
                 composeJazzMelody(thisSection, randomizer, key, mode, timeSigPattern, timeSigQuant, paramets.tempo);
 
@@ -4175,7 +4175,7 @@ namespace BlottoBeats.Client
                 noteNames[0] = keySig[chordNumIndex] + "2";
                 noteNames[1] = keySig[chordNumIndex] + "4";
                 noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
-                noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
+                noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
                 Console.Out.WriteLine(chordNumIndex + 1 + " " + length);
                 return new Song.Chord(noteNames, length, chordNumIndex + 1);
             }
@@ -4199,15 +4199,16 @@ namespace BlottoBeats.Client
                     noteNames[0] = keySig[chordNumIndex] + "2";
                     noteNames[1] = keySig[chordNumIndex] + "4";
                     noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
-                    noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
+                    noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
                 }
                 //if dominant
                 if (chordNumIndex == 4)
                 {
                     noteNames[0] = keySig[chordNumIndex] + "2";
                     noteNames[1] = keySig[chordNumIndex] + "4";
-                    noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
+                    noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
                     //2nd note of the triad is raised a half step
+                    //noteNames[2] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex + 2) % 7]) + 1) % 12] + "4";
                     noteNames[2] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex + 2) % 7]) + 1) % 12] + "4";
 
                 }
@@ -4218,7 +4219,7 @@ namespace BlottoBeats.Client
                     noteNames[0] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "2";
                     noteNames[1] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "4";
                     noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
-                    noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
+                    noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
 
                 }
 
@@ -5349,7 +5350,14 @@ namespace BlottoBeats.Client
                 {
 
                     //Randomly pick a length within the current measure that doesn't overlap chords
-                    int maxVal = Math.Min(measureLen - (totalSectionSum % measureLen), chordLength - currentSum);
+                    //int maxVal = Math.Min(measureLen - (totalSectionSum % measureLen), chordLength - currentSum);
+                    int maxVal;
+                    if (tempo >= 130)
+                    {
+                        maxVal = Math.Min((measureLen - (totalSectionSum % measureLen)) / 2, (chordLength - currentSum) / 2);
+                    }
+                    else
+                        maxVal = Math.Min(measureLen - (totalSectionSum % measureLen), chordLength - currentSum);
                     //If a melody falls onto the last chord of a segment just make the rhythm of note #1 the length of the chord
                     if (i == thisSection.chordPattern.Count - 1)
                     {
