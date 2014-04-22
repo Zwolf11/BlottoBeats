@@ -74,31 +74,31 @@ namespace BlottoBeats.Client
             colorButton.Add(new Point(3 * size / 16, 3 * size / 16));
             colorButton.Add(new Point(0, 3 * size / 16));
 
-            Button lightButton = new Button(colorButton, new Point(14 * size / 8, 5 * size / 8), form.lightColor, new Pen(Color.White), null);
+            Button lightButton = new Button(colorButton, new Point(14 * size / 8, 5 * size / 8), form.lightColor, new Pen(Color.White), null, null);
             lightButton.Clicked += lightClicked;
             buttons.Add(lightButton);
 
-            Button medButton = new Button(colorButton, new Point(16 * size / 8, 5 * size / 8), form.medColor, new Pen(Color.White), null);
+            Button medButton = new Button(colorButton, new Point(16 * size / 8, 5 * size / 8), form.medColor, new Pen(Color.White), null, null);
             medButton.Clicked += medClicked;
             buttons.Add(medButton);
 
-            Button darkButton = new Button(colorButton, new Point(18 * size / 8, 5 * size / 8), form.darkColor, new Pen(Color.White), null);
+            Button darkButton = new Button(colorButton, new Point(18 * size / 8, 5 * size / 8), form.darkColor, new Pen(Color.White), null, null);
             darkButton.Clicked += darkClicked;
             buttons.Add(darkButton);
 
-            Button upvoteButton = new Button(colorButton, new Point(20 * size / 8, 5 * size / 8), form.upvoteColor, new Pen(Color.White), null);
+            Button upvoteButton = new Button(colorButton, new Point(20 * size / 8, 5 * size / 8), form.upvoteColor, new Pen(Color.White), null, null);
             upvoteButton.Clicked += upvoteClicked;
             buttons.Add(upvoteButton);
 
-            Button downvoteButton = new Button(colorButton, new Point(22 * size / 8, 5 * size / 8), form.downvoteColor, new Pen(Color.White), null);
+            Button downvoteButton = new Button(colorButton, new Point(22 * size / 8, 5 * size / 8), form.downvoteColor, new Pen(Color.White), null, null);
             downvoteButton.Clicked += downvoteClicked;
             buttons.Add(downvoteButton);
 
-            Button sliderButton = new Button(colorButton, new Point(24 * size / 8, 5 * size / 8), form.sliderColor, new Pen(Color.White), null);
+            Button sliderButton = new Button(colorButton, new Point(24 * size / 8, 5 * size / 8), form.sliderColor, new Pen(Color.White), null, null);
             sliderButton.Clicked += sliderClicked;
             buttons.Add(sliderButton);
 
-            Button textButton = new Button(colorButton, new Point(26 * size / 8, 5 * size / 8), form.textColor, new Pen(Color.White), null);
+            Button textButton = new Button(colorButton, new Point(26 * size / 8, 5 * size / 8), form.textColor, new Pen(Color.White), null, null);
             textButton.Clicked += textClicked;
             buttons.Add(textButton);
 
@@ -108,7 +108,7 @@ namespace BlottoBeats.Client
             defButton.Add(new Point(8 * size / 16, 3 * size / 16 + 1));
             defButton.Add(new Point(0, 3 * size / 16 + 1));
 
-            Button defaultButton = new Button(defButton, new Point(28 * size / 8, 5 * size / 8), form.medColor, null, null);
+            Button defaultButton = new Button(defButton, new Point(28 * size / 8, 5 * size / 8), form.medColor, null, null, null);
             defaultButton.Clicked += defaultClicked;
             buttons.Add(defaultButton);
 
@@ -118,15 +118,15 @@ namespace BlottoBeats.Client
             button.Add(new Point(3 * size / 4, size / 4));
             button.Add(new Point(0, size / 4));
 
-            Button OKButton = new Button(button, new Point(5 * size / 16, 17 * size / 8), form.medColor, null, null);
+            Button OKButton = new Button(button, new Point(5 * size / 16, 17 * size / 8), form.medColor, null, null, null);
             OKButton.Clicked += OKClicked;
             buttons.Add(OKButton);
 
-            Button cancelButton = new Button(button, new Point(9 * size / 8, 17 * size / 8), form.medColor, null, null);
+            Button cancelButton = new Button(button, new Point(9 * size / 8, 17 * size / 8), form.medColor, null, null, null);
             cancelButton.Clicked += cancelClicked;
             buttons.Add(cancelButton);
 
-            Button loginButton = new Button(button, new Point(31 * size / 16, 17 * size / 8), form.medColor, null, null);
+            Button loginButton = new Button(button, new Point(31 * size / 16, 17 * size / 8), form.medColor, null, null, null);
             loginButton.Clicked += loginClicked;
             buttons.Add(loginButton);
 
@@ -136,11 +136,11 @@ namespace BlottoBeats.Client
             menuButton.Add(new Point(size / 4, size / 8));
             menuButton.Add(new Point(0, size / 8));
 
-            Button minimizeButton = new Button(menuButton, new Point(7 * size / 2, 0), form.medColor, null, null);
+            Button minimizeButton = new Button(menuButton, new Point(7 * size / 2, 0), form.medColor, null, null, null);
             minimizeButton.Clicked += minimizeClicked;
             buttons.Add(minimizeButton);
 
-            Button exitButton = new Button(menuButton, new Point(15 * size / 4, 0), form.downvoteColor, null, null);
+            Button exitButton = new Button(menuButton, new Point(15 * size / 4, 0), form.downvoteColor, null, null, null);
             exitButton.Clicked += exitClicked;
             buttons.Add(exitButton);
         }
@@ -263,9 +263,9 @@ namespace BlottoBeats.Client
             form.accountForm.ShowDialog();
         }
 
-        private void testNewIP()
+        private void testNewIP(string newIP)
         {
-            BBServerConnection newServer = new BBServerConnection(this.ip.Text, 3000);
+            BBServerConnection newServer = new BBServerConnection(newIP, 3000);
 
             if (newServer.Test())
             {
@@ -277,7 +277,8 @@ namespace BlottoBeats.Client
 
         private void OKClicked(object sender, MouseEventArgs e)
         {
-            new Thread(() => testNewIP()).Start();
+            string newIP = ip.Text;
+            new Thread(() => testNewIP(newIP)).Start();
 
             try { Properties.Settings.Default.maxSongs = int.Parse(maxBacklog.Text); } catch (Exception) {}
             Properties.Settings.Default.alwaysOnTop = onTop.Checked;
