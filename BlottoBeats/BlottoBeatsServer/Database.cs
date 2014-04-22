@@ -421,6 +421,7 @@ namespace BlottoBeats.Server {
                 string token = null;
                 String date = "1000-01-01 00:00:00";
                 SQLNonQuery(conn, "Insert into users (idusers,username,passwordHash,tokenExpire,tokenStr) values('" + nextId + "','" + username + "','" + hash + "','" + date + "','" + token + "')");
+                createUserTable(nextId);
                 return true;
             }
 
