@@ -456,6 +456,7 @@ namespace BlottoBeats.Server {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             SQLNonQuery(conn, "Update users set passwordHash = '" + hash + "' where idusers = " + userID);
+            SQLNonQuery(conn, "Update users set tokenStr = ' ' where idusers = " + userID);
         }
 
         private void changeVoteScore(int songID, int newScore)
