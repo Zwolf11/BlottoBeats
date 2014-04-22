@@ -63,15 +63,20 @@ namespace BlottoBeats.Server {
 		/// </summary>
 		/// <param name="song">The song object to vote on</param>
 		/// <param name="vote">The vote. True if upvote, false if downvote.</param>
-		internal SongParameters VoteOnSong(SongParameters song, bool vote) {
+		/// <param name="userID">The ID of the user who voted</param>
+		internal SongParameters VoteOnSong(SongParameters song, bool vote, int userID) {
 			if (song.ID == -1) song.ID = GetID(song);	// Song has no ID.  Search the server
 			if (song.ID == -1) {
 				// Song is not in the database.  Insert it into the database.
 				song.ID = GetNextAvailableID("uploadedsongs");
 				song.score = (vote) ? 1 : -1;
+				song.userID = userID;
 				insertData(song);
+				//Add 'user has voted on song' function here
 			} else {
 				updateScore(song.ID, vote);
+				//Add 'user has voted on song' function here
+
 				object score = returnItem(song.ID, "voteScore", "uploadedsongs");
 				if (score != null && score is int)
 					song.score = (int)score;

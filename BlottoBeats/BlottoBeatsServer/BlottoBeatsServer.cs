@@ -292,7 +292,7 @@ namespace BlottoBeats.Server {
 								if (line.numArgs < 4) {
 									if (int.TryParse(line.args[0], out seed) && int.TryParse(line.args[1], out tempo)) {
 										SongParameters song = new SongParameters(seed, tempo, line.args[2]);
-										song = database.VoteOnSong(song, true);
+										song = database.VoteOnSong(song, true, -1);
 
 										CommandLine.WriteLine("Created new song with ID '" + song.ID + "' as anonymous");
 									} else {
@@ -302,7 +302,7 @@ namespace BlottoBeats.Server {
 									int userID;
 									if (int.TryParse(line.args[0], out seed) && int.TryParse(line.args[1], out tempo) && int.TryParse(line.args[3], out userID)) {
 										SongParameters song = new SongParameters(seed, tempo, line.args[2], userID);
-										song = database.VoteOnSong(song, true);
+										song = database.VoteOnSong(song, true, -1);
 
 										CommandLine.WriteLine("Created new song with ID '" + song.ID + "' belonging to user " + userID);
 									} else {
@@ -665,7 +665,7 @@ namespace BlottoBeats.Server {
 								Log("     Tempo: " + req.song.tempo, address, 3);
 								Log("      Seed: " + req.song.seed, address, 3);
 
-								SongParameters song = database.VoteOnSong(req.song, req.vote);
+								SongParameters song = database.VoteOnSong(req.song, req.vote, userID);
 								Message.Send(networkStream, new BBResponse(song));
 
 								Log("    Response has ID of " + song.ID + " and score of " + song.score, address, 2);
