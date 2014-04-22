@@ -452,6 +452,7 @@ namespace BlottoBeats.Server {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             SQLNonQuery(conn, "Delete from users where idusers = " + userID);
+            SQLNonQuery(conn, "Drop table user" + userID);
         }
 
         internal void deleteSong(int songID)
@@ -466,6 +467,7 @@ namespace BlottoBeats.Server {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             SQLNonQuery(conn, "Update users set passwordHash = '" + hash + "' where idusers = " + userID);
+            SQLNonQuery(conn, "Update users set tokenStr = ' ' where idusers = " + userID);
         }
 
         internal void changeVoteScore(int songID, int newScore)
@@ -473,6 +475,17 @@ namespace BlottoBeats.Server {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             SQLNonQuery(conn, "Update uploadedsongs set voteScore = " + newScore + " where iduploadedsongs = " + songID);
+        }
+
+        private void createUserTable(int userID)
+        {
+            string tableName = "user" + userID;
+           
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            SQLNonQuery(conn, "Create table " + tableName +  " (idIndex INT, voteUpOrDown INT, songID INT)");
+            
+       
         }
 
 		/// <summary>

@@ -20,7 +20,6 @@ namespace BlottoBeats.Client
         private List<Point> pauseImg;
         private Button playBarButton;
         private Button advSettingButton;
-        private Button refreshRedditButton;
         private Point dragPos;
         private bool dragging;
         private bool playing;
@@ -151,8 +150,8 @@ namespace BlottoBeats.Client
             buttons.Clear();
             if (settingsDropped || redditDropped) this.Size = new Size(33 * size / 8, 23 * size / 8);
             else this.Size = new Size(33 * size / 8, size);
-            font = new Font("Arial", 3 * size / 20);
-            smallFont = new Font("Arial", 3 * size / 35);
+            font = new Font("Arial", (float)(3.0 * size / 20));
+            smallFont = new Font("Arial", (float)(3.0 * size / 35));
             lightInline.Width = size / 40;
             lightOutline.Width = size / 40;
 
@@ -165,11 +164,11 @@ namespace BlottoBeats.Client
             playBarButton.Clicked += playBarClicked;
             buttons.Add(playBarButton);
 
-            List<Point> menuButton = new List<Point>();
-            menuButton.Add(new Point(0, 3 * size / 8));
-            menuButton.Add(new Point(size / 4, 0));
-            menuButton.Add(new Point(3 * size / 4, 0));
-            menuButton.Add(new Point(size / 2, 3 * size / 8));
+            List<Point> bottomButton = new List<Point>();
+            bottomButton.Add(new Point(0, 3 * size / 8));
+            bottomButton.Add(new Point(size / 4, 0));
+            bottomButton.Add(new Point(3 * size / 4, 0));
+            bottomButton.Add(new Point(size / 2, 3 * size / 8));
 
             List<Point> backImg = new List<Point>();
             backImg.Add(new Point(9 * size / 32 + size / 16, size / 16));
@@ -180,7 +179,7 @@ namespace BlottoBeats.Client
             backImg.Add(new Point(10 * size / 32 + size / 16, 3 * size / 16));
             backImg.Add(new Point(10 * size / 32 + size / 16, 5 * size / 16));
             backImg.Add(new Point(9 * size / 32 + size / 16, 5 * size / 16));
-            Button backButton = new Button(menuButton, new Point(3 * size / 4, size / 2), darkColor, lightOutline, backImg);
+            Button backButton = new Button(bottomButton, new Point(3 * size / 4, size / 2), darkColor, lightOutline, backImg);
             backButton.Clicked += backClicked;
             buttons.Add(backButton);
 
@@ -193,7 +192,7 @@ namespace BlottoBeats.Client
             nextImg.Add(new Point(13 * size / 32, 5 * size / 16));
             nextImg.Add(new Point(13 * size / 32, 3 * size / 16));
             nextImg.Add(new Point(11 * size / 32, 5 * size / 16));
-            Button nextButton = new Button(menuButton, new Point(size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, nextImg);
+            Button nextButton = new Button(bottomButton, new Point(size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, nextImg);
             nextButton.Clicked += nextClicked;
             buttons.Add(nextButton);
 
@@ -212,7 +211,7 @@ namespace BlottoBeats.Client
             upvoteImg.Add(new Point(13 * size / 32, 10 * size / 32));
             upvoteImg.Add(new Point(10 * size / 32, 10 * size / 32));
             upvoteImg.Add(new Point(9 * size / 32, 9 * size / 32));
-            Button upvoteButton = new Button(menuButton, new Point(2 * size / 2 + 3 * size / 4, size / 2), upvoteColor, lightOutline, upvoteImg);
+            Button upvoteButton = new Button(bottomButton, new Point(2 * size / 2 + 3 * size / 4, size / 2), upvoteColor, lightOutline, upvoteImg);
             upvoteButton.Clicked += upvoteClicked;
             buttons.Add(upvoteButton);
 
@@ -231,12 +230,12 @@ namespace BlottoBeats.Client
             downvoteImg.Add(new Point(11 * size / 32, 2 * size / 32));
             downvoteImg.Add(new Point(14 * size / 32, 2 * size / 32));
             downvoteImg.Add(new Point(15 * size / 32, 3 * size / 32));
-            Button downvoteButton = new Button(menuButton, new Point(3 * size / 2 + 3 * size / 4, size / 2), downvoteColor, lightOutline, downvoteImg);
+            Button downvoteButton = new Button(bottomButton, new Point(3 * size / 2 + 3 * size / 4, size / 2), downvoteColor, lightOutline, downvoteImg);
             downvoteButton.Clicked += downvoteClicked;
             buttons.Add(downvoteButton);
 
             List<Point> redditImg = new List<Point>();
-            Button redditButton = new Button(menuButton, new Point(4 * size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, redditImg);
+            Button redditButton = new Button(bottomButton, new Point(4 * size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, redditImg);
             redditButton.Clicked += redditClicked;
             buttons.Add(redditButton);
 
@@ -244,7 +243,7 @@ namespace BlottoBeats.Client
             settingsImg.Add(new Point(size / 4, size / 8));
             settingsImg.Add(new Point(size / 2, size / 8));
             settingsImg.Add(new Point((int)(3 * size / 8), 5 * size / 16));
-            Button settingsButton = new Button(menuButton, new Point(5 * size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, settingsImg);
+            Button settingsButton = new Button(bottomButton, new Point(5 * size / 2 + 3 * size / 4, size / 2), darkColor, lightOutline, settingsImg);
             settingsButton.Clicked += settingsClicked;
             buttons.Add(settingsButton);
 
@@ -280,23 +279,17 @@ namespace BlottoBeats.Client
             playButton.Clicked += this.playClicked;
             buttons.Add(playButton);
 
-            List<Point> minimize = new List<Point>();
-            minimize.Add(new Point(0, 0));
-            minimize.Add(new Point(size / 4, 0));
-            minimize.Add(new Point(size / 4, size / 8));
-            minimize.Add(new Point(0, size / 8));
-            List<Point> minimizeImg = new List<Point>();
-            Button minimizeButton = new Button(minimize, new Point(7 * size / 2, 0), medColor, null, minimizeImg);
+            List<Point> menuButton = new List<Point>();
+            menuButton.Add(new Point(0, 0));
+            menuButton.Add(new Point(size / 4, 0));
+            menuButton.Add(new Point(size / 4, size / 8));
+            menuButton.Add(new Point(0, size / 8));
+
+            Button minimizeButton = new Button(menuButton, new Point(7 * size / 2, 0), medColor, null, null);
             minimizeButton.Clicked += minimizeClicked;
             buttons.Add(minimizeButton);
 
-            List<Point> exit = new List<Point>();
-            exit.Add(new Point(0, 0));
-            exit.Add(new Point(size / 4, 0));
-            exit.Add(new Point(size / 4, size / 8));
-            exit.Add(new Point(0, size / 8));
-            List<Point> exitImg = new List<Point>();
-            Button exitButton = new Button(exit, new Point(15 * size / 4, 0), downvoteColor, null, exitImg);
+            Button exitButton = new Button(menuButton, new Point(15 * size / 4, 0), downvoteColor, null, null);
             exitButton.Clicked += exitClicked;
             buttons.Add(exitButton);
 
@@ -305,11 +298,9 @@ namespace BlottoBeats.Client
             buttonShape.Add(new Point(size / 4, 0));
             buttonShape.Add(new Point(size / 4, size / 4));
             buttonShape.Add(new Point(0, size / 4));
+
             advSettingButton = new Button(buttonShape, new Point(27 * size / 8, 20 * size / 8), darkColor, lightOutline, null);
             advSettingButton.Clicked += advSettingClicked;
-
-            refreshRedditButton = new Button(buttonShape, new Point(27 * size / 8, 20 * size / 8), darkColor, lightOutline, null);
-            refreshRedditButton.Clicked += refreshRedditClicked;
 
             foreach (Setting setting in settings)
                 setting.init(size);
@@ -401,7 +392,7 @@ namespace BlottoBeats.Client
         {
             if (server.Test())
             {
-                BBResponse response = server.SendRequest(new BBRequest(12));
+                BBResponse response = server.SendRequest(new BBRequest(11));
 
                 if (response.responseType is BBResponse.SongList)
                 {
@@ -576,32 +567,27 @@ namespace BlottoBeats.Client
 
                 if(redditDropped)
                 {
-                    if (pointInPolygon(e.Location, refreshRedditButton.ClickLocation))
-                        refreshRedditButton.onClicked(e);
-                    else
-                    {
-                        for (int i = 0; i < redditSongs.Count; i++)
-                            if (e.Location.X >= 3 * size / 4 && e.Location.X < 3 * size / 4 + 3 * size && e.Location.Y >= 15 * size / 16 + i * smallFont.Size * 2 && e.Location.Y < 15 * size / 16 + (i + 1) * smallFont.Size * 2)
+                    for (int i = 0; i < redditSongs.Count; i++)
+                        if (e.Location.X >= 3 * size / 4 && e.Location.X < 3 * size / 4 + 3 * size && e.Location.Y >= 15 * size / 16 + i * smallFont.Size * 2 && e.Location.Y < 15 * size / 16 + (i + 1) * smallFont.Size * 2)
+                        {
+                            bool[] checks = new bool[settings.Count];
+                            for (int j = 0; j < settings.Count; j++)
                             {
-                                bool[] checks = new bool[settings.Count];
-                                for (int j = 0; j < settings.Count; j++)
-                                {
-                                    checks[j] = settings[j].isChecked();
-                                    settings[j].setChecked(false);
-                                }
-
-                                genre.setValue(redditSongs[i].genre);
-                                tempo.setValue(redditSongs[i].tempo + "");
-                                seed.setValue(redditSongs[i].seed + "");
-
-                                loadSong(true);
-
-                                for (int j = 0; j < settings.Count; j++)
-                                    settings[j].setChecked(checks[j]);
-
-                                break;
+                                checks[j] = settings[j].isChecked();
+                                settings[j].setChecked(false);
                             }
-                    }
+
+                            genre.setValue(redditSongs[i].genre);
+                            tempo.setValue(redditSongs[i].tempo + "");
+                            seed.setValue(redditSongs[i].seed + "");
+
+                            loadSong(true);
+
+                            for (int j = 0; j < settings.Count; j++)
+                                settings[j].setChecked(checks[j]);
+
+                            break;
+                        }
                 }
             }
 
@@ -713,11 +699,10 @@ namespace BlottoBeats.Client
                         if (redditSongs[i].score >= 0) preString = "+";
                         g.DrawString(preString + redditSongs[i].score + " | Genre: " + redditSongs[i].genre + " | Tempo: " + redditSongs[i].tempo + " | Seed: " + redditSongs[i].seed, smallFont, lightColor, 13 * size / 16, 15 * size / 16 + i * smallFont.Size * 2);
                     }
+                else if(redditSongs.Count <= 0 && redditThread.ThreadState == ThreadState.Running)
+                    g.DrawString("Song list loading", font, lightColor, 13 * size / 16, 15 * size / 16);
                 else
                     g.DrawString("Could not connect to server.", font, lightColor, 13 * size / 16, 15 * size / 16);
-
-                g.FillPolygon(refreshRedditButton.inside, refreshRedditButton.ClickLocation);
-                g.DrawPolygon(refreshRedditButton.stroke, refreshRedditButton.ClickLocation);
             }
 
             foreach(Button button in buttons)
