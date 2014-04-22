@@ -442,6 +442,7 @@ namespace BlottoBeats.Server {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             SQLNonQuery(conn, "Delete from users where idusers = " + userID);
+            SQLNonQuery(conn, "Drop table user" + userID);
         }
 
         private void deleteSong(int songID)
