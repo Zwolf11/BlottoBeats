@@ -21,6 +21,7 @@ namespace BlottoBeats.Client
 
         private Font font;
         private Font smallFont;
+        private Font smallestFont;
 
         public AdvancedSettings(MainForm form)
         {
@@ -57,6 +58,7 @@ namespace BlottoBeats.Client
 
             font = new Font("Arial", 16, FontStyle.Bold);
             smallFont = new Font("Arial", 10, FontStyle.Bold);
+            smallestFont = new Font("Arial", 7, FontStyle.Bold);
 
             initButtons();
         }
@@ -98,6 +100,16 @@ namespace BlottoBeats.Client
             Button textButton = new Button(colorButton, new Point(26 * size / 8, 5 * size / 8), form.textColor, new Pen(Color.White), null);
             textButton.Clicked += textClicked;
             buttons.Add(textButton);
+
+            List<Point> defButton = new List<Point>();
+            defButton.Add(new Point(0, 0));
+            defButton.Add(new Point(8 * size / 16, 0));
+            defButton.Add(new Point(8 * size / 16, 3 * size / 16 + 1));
+            defButton.Add(new Point(0, 3 * size / 16 + 1));
+
+            Button defaultButton = new Button(defButton, new Point(28 * size / 8, 5 * size / 8), form.medColor, null, null);
+            defaultButton.Clicked += defaultClicked;
+            buttons.Add(defaultButton);
 
             List<Point> button = new List<Point>();
             button.Add(new Point(0, 0));
@@ -290,6 +302,20 @@ namespace BlottoBeats.Client
             this.WindowState = FormWindowState.Minimized;
         }
 
+        private void defaultClicked(object sender, MouseEventArgs e)
+        {
+            form.lightColor = new SolidBrush(Color.FromArgb(130, 130, 130));
+            form.medColor = new SolidBrush(Color.FromArgb(90, 90, 90));
+            form.darkColor = new SolidBrush(Color.FromArgb(50, 50, 50));
+            form.upvoteColor = new SolidBrush(Color.FromArgb(77, 125, 74));
+            form.downvoteColor = new SolidBrush(Color.FromArgb(107, 49, 50));
+            form.sliderColor = new SolidBrush(Color.FromArgb(75, 108, 124));
+            form.textColor = new SolidBrush(Color.FromArgb(255, 255, 255));
+            form.lightInline.Brush = new SolidBrush(Color.FromArgb(130, 130, 130));
+            form.lightOutline.Brush = new SolidBrush(Color.FromArgb(130, 130, 130));
+            updateAllButtons();
+        }
+
         private void exitClicked(object sender, MouseEventArgs e)
         {
             form.lightColor = new SolidBrush(Properties.Settings.Default.lightColor);
@@ -396,6 +422,7 @@ namespace BlottoBeats.Client
             g.DrawString("Max Backlog:", font, form.lightColor, size / 4, 13 * size / 8);
             g.DrawString("Topmost:", smallFont, form.lightColor, 15 * size / 4, 69 * size / 32, format);
             g.DrawString("Theme:", smallFont, form.lightColor, size + 5, 5 * size / 8);
+            g.DrawString("Default", smallestFont, form.textColor, 28 * size / 8 + 2, 5 * size / 8 + 2);
             StringFormat format2 = new StringFormat();
             format2.Alignment = StringAlignment.Center;
             g.DrawString("OK", smallFont, form.textColor, 11 * size / 16, 69 * size / 32, format2);
