@@ -91,7 +91,7 @@ namespace BlottoBeats.Client
             server = new BBServerConnection(Properties.Settings.Default.lastIP, 3000);
             player = new MediaPlayer.MediaPlayer();
             redditThread = new Thread(() => refreshReddit(curGenre));
-            genres = new String[] { null, "Generic", "Classical", "Twelve-tone", "Jazz" };
+            genres = new String[] { null, "Generic", "Classical", "Twelve-tone", "Jazz", "4-Chord Pop/Rock" };
             curGenre = 0;
 
             timer = new System.Windows.Forms.Timer();
@@ -110,7 +110,7 @@ namespace BlottoBeats.Client
             lightOutline = new Pen(lightColor);
             lightOutline.Alignment = System.Drawing.Drawing2D.PenAlignment.Outset;
 
-            genre = new DropDownSetting(0, "Genre", this, new string[]{"Generic", "Classical", "Twelve-tone", "Jazz"}, size);
+            genre = new DropDownSetting(0, "Genre", this, new string[] { "Generic", "Classical", "Twelve-tone", "Jazz", "4-Chord Pop/Rock" }, size);
             tempo = new TextBoxSetting(1, "Tempo", this, 60, 200, size);
             seed = new TextBoxSetting(2, "Seed", this, int.MinValue, int.MaxValue, size);
             settings.Add(genre);

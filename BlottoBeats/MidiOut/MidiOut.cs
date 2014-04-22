@@ -71,6 +71,10 @@ namespace BlottoBeats.MidiOut
                         {
                             builder.Data1 = (int)GeneralMidiInstrument.Violin;
                         }
+                        else if (output.Genre == "4-Chord Pop/Rock")
+                        {
+                            builder.Data1 = (int)GeneralMidiInstrument.ElectricGuitarMuted;
+                        }
                         builder.Data2 = 0;
                         builder.Build();
                         track[1].Insert(pos, builder.Result);
@@ -88,6 +92,11 @@ namespace BlottoBeats.MidiOut
                         {
                             builder.Data2 = 110;
                         }
+                        else if (output.Genre == "4-Chord Pop/Rock")
+                        {
+                            builder.Data2 = 100;
+                        }
+                        
                         builder.Build(); //Build the message
                         track[1].Insert(pos, builder.Result); //Insert into Track 1 at tick position 'pos'
                         //Increment MIDI channel by 1
@@ -146,6 +155,14 @@ namespace BlottoBeats.MidiOut
                         else if (output.Genre == "Jazz")
                         {
                             builder.Data1 = (int)GeneralMidiInstrument.AltoSax;
+                        }
+                        else if (output.Genre == "4-Chord Pop/Rock" && q==0)
+                        {
+                            builder.Data1 = (int)GeneralMidiInstrument.ChoirAahs;
+                        }
+                        else if (output.Genre == "4-Chord Pop/Rock" && q==1)
+                        {
+                            builder.Data1 = (int)GeneralMidiInstrument.ElectricBassPick;
                         }
                         builder.Data2 = 0;
                         builder.Build();

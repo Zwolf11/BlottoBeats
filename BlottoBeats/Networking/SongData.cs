@@ -79,6 +79,13 @@ namespace BlottoBeats.Library.SongData {
                 chordPattern = new List<Chord>();
                 melodies = new List<Melody>();
             }
+
+            public SongSegment(List<Chord> chordPattern, List<Melody> melodies, Melody dontInclude)
+            {
+                this.chordPattern = chordPattern;
+                this.melodies = melodies;
+                this.melodies.Remove(dontInclude);
+            }
         }
 
         public int Tempo

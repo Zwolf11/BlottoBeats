@@ -26,7 +26,159 @@ namespace BlottoBeats.Client
         {
 
         }
+        public double generate_4Chord(SongParameters paramets)
+        {
+            Random randomizer = new Random(paramets.seed);
+            int mode = 0; // 0 = Major 1 = Minor
+            String key;
+            String gen;
+            Song.SongSegment[] thisSection = new Song.SongSegment[3];
+            String timeSigPattern = ""; //Simple or Compound Meter
+            int timeSigQuant = 0; // 2 = Duple, 3 = Triple, etc
 
+            String[] notes = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+            
+
+            //Select Key
+            key = notes[randomizer.Next(12)];
+
+            //Now also sets the genre
+            Song output = new Song(paramets.tempo, key, paramets.genre);
+            Console.Out.WriteLine(paramets.genre);
+
+            int randOutput = randomizer.Next(2);
+            switch (randOutput)
+            {
+                case 0:
+                    timeSigPattern = "Simple";
+                    break;
+                case 1:
+                    timeSigPattern = "Compound";
+                    break;
+            }
+
+            timeSigQuant = randomizer.Next(3) + 2;
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (i != 2)
+                    thisSection[i] = new Song.SongSegment();
+                else
+                    thisSection[i] = new Song.SongSegment(thisSection[0].chordPattern, thisSection[0].melodies, thisSection[0].melodies[0]);
+
+                String chordProg="";
+
+                int subdiv=0;
+
+                int measureLen = 0;
+                if (timeSigPattern.Equals("Simple"))
+                {
+                    measureLen += 4;
+                }
+                else
+                    measureLen += 6;
+                measureLen *= timeSigQuant;
+
+                if (timeSigQuant == 2)
+                {
+                    randOutput = randomizer.Next(2) + 1;
+                    subdiv = measureLen / randOutput;
+                }
+                else if (timeSigQuant == 3)
+                {
+                    randOutput = randomizer.Next(2) + 1;
+                    if (randOutput == 2)
+                        randOutput = 3;
+                    subdiv = measureLen / randOutput;
+                }
+                else
+                {
+                    randOutput = randomizer.Next(3) + 1;
+                    if (randOutput == 3)
+                        randOutput = 4;
+                    subdiv = measureLen / randOutput;
+                }
+                int repPerMeasure = measureLen / subdiv;
+
+                int randout = randomizer.Next(5);
+                switch (randout)
+                {
+                    case 0: 
+                        chordProg = "6415";
+                        break;
+                    case 1:
+                        chordProg = "1564";
+                        break;
+                    case 2:
+                        chordProg = "1264";
+                        break;
+                    case 3:
+                        chordProg = "1254";
+                        break;
+                    case 4:
+                        chordProg = "4156";
+                        break;
+
+                }
+                //Write chord progression
+                if (i != 2)
+                {
+
+                    for (int j = 0; j < 4; j++)
+                    {
+                        for (int k = 0; k < 4; k++)
+                        {
+                            for (int l = 0; l < repPerMeasure; l++)
+                            {
+                                thisSection[i].chordPattern.Add(generateChord(mode, key, chordProg[k], subdiv));
+                            }
+                                
+                        }
+                    }
+                }
+                //Write voice line
+                composeMelody(thisSection[i], randomizer, key, mode, timeSigPattern, timeSigQuant);
+
+                //Write bass line
+                if (i != 2)
+                {
+                    Song.Melody thisMelody = new Song.Melody();
+                    for (int j = 0; j < 4; j++)
+                    {
+                        for (int k = 0; k < 4; k++)
+                        {
+                            for (int l = 0; l < repPerMeasure; l++)
+                            {
+                               thisMelody.melodicLine.Add(thisSection[i].chordPattern[(j*4*repPerMeasure)+(k*repPerMeasure)+l].chordVoice.First());
+                            }
+
+                        }
+                    }
+                    thisSection[i].melodies.Add(thisMelody);
+
+                }
+
+                //Fix ordering of voice and bass line after insertion in bridge
+                if (i == 2)
+                {
+                    Song.Melody tmp = thisSection[i].melodies[0];
+                    thisSection[i].melodies[0] = thisSection[i].melodies[1];
+                    thisSection[i].melodies[1] = tmp;
+                }
+            }
+
+            output.addSegment(thisSection[0]);
+            output.addSegment(thisSection[1]);
+            output.addSegment(thisSection[0]);
+            output.addSegment(thisSection[1]);
+            output.addSegment(thisSection[2]);
+            output.addSegment(thisSection[1]);
+
+            BlottoBeats.MidiOut.MidiOut outgoing = new BlottoBeats.MidiOut.MidiOut();
+            double songLen = outgoing.outputToMidi(output);
+
+            return songLen;
+        }
         public double generate_TwelveTone(SongParameters paramets)
         {
             const int NUMTONEROWS = 2;
@@ -236,6 +388,9 @@ namespace BlottoBeats.Client
                 return generate_TwelveTone(paramets);
             if (gen == "Jazz")
                 return generate_Jazz(paramets);
+            if (gen == "4-Chord Pop/Rock")
+                return generate_4Chord(paramets);
+
             //Now also sets the genre
             Song output = new Song(paramets.tempo, key, paramets.genre);
             Console.Out.WriteLine(key);
@@ -4172,7 +4327,7 @@ namespace BlottoBeats.Client
                 keySig[5] = notes[(keynum + 9) % 12];
                 keySig[6] = notes[(keynum + 11) % 12];
 
-                noteNames[0] = keySig[chordNumIndex] + "2";
+                noteNames[0] = keySig[chordNumIndex] + "3";
                 noteNames[1] = keySig[chordNumIndex] + "4";
                 noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
                 noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
@@ -4196,7 +4351,7 @@ namespace BlottoBeats.Client
                 //if not a dominant function
                 if (chordNumIndex != 4 && chordNumIndex != 6)
                 {
-                    noteNames[0] = keySig[chordNumIndex] + "2";
+                    noteNames[0] = keySig[chordNumIndex] + "3";
                     noteNames[1] = keySig[chordNumIndex] + "4";
                     noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
                     noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
@@ -4204,7 +4359,7 @@ namespace BlottoBeats.Client
                 //if dominant
                 if (chordNumIndex == 4)
                 {
-                    noteNames[0] = keySig[chordNumIndex] + "2";
+                    noteNames[0] = keySig[chordNumIndex] + "3";
                     noteNames[1] = keySig[chordNumIndex] + "4";
                     noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
                     //2nd note of the triad is raised a half step
@@ -4216,7 +4371,7 @@ namespace BlottoBeats.Client
                 if (chordNumIndex == 6)
                 {
                     //root of the triad is raised a half step
-                    noteNames[0] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "2";
+                    noteNames[0] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "3";
                     noteNames[1] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "4";
                     noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
                     noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
@@ -4243,6 +4398,7 @@ namespace BlottoBeats.Client
         void composeMelody(Song.SongSegment thisSection, Random randomizer, String key, int mode, String timeSigPattern, int timeSigQuant)
         {
             //TODO check for bad input
+            int indexer = thisSection.melodies.Count;
             int chordLength;
             int currentSum = 0;
             String prevNoteVal = "";
@@ -4277,7 +4433,7 @@ namespace BlottoBeats.Client
 
             }
 
-            int octave = 3;
+            int octave = 4;
             String lastNote = "";
             String nextNote = "";
             int thisChord = 0;
@@ -4752,7 +4908,7 @@ namespace BlottoBeats.Client
                         }
 
                     }
-                    thisSection.melodies[0].melodicLine.Add(new Song.Note(noteVal, noteRhythm));
+                    thisSection.melodies[indexer].melodicLine.Add(new Song.Note(noteVal, noteRhythm));
                     currentSum += noteRhythm;
                     totalSectionSum += noteRhythm;
                     prevNoteVal = noteVal;
@@ -4762,7 +4918,8 @@ namespace BlottoBeats.Client
 
         void composeClassicalMelody(Song.SongSegment thisSection, Random randomizer, String key, int mode, String timeSigPattern, int timeSigQuant, int tempo)
         {
-            //TODO check for bad input
+
+            
             int chordLength;
             int currentSum = 0;
             String prevNoteVal = "";
