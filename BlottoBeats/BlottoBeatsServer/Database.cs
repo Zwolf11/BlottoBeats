@@ -466,6 +466,17 @@ namespace BlottoBeats.Server {
             SQLNonQuery(conn, "Update uploadedsongs set voteScore = " + newScore + " where idusers = " + songID);
         }
 
+        private void createUserTable(int userID)
+        {
+            string tableName = "user" + userID;
+           
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            SQLNonQuery(conn, "Create table " + tableName +  " (idIndex INT, voteUpOrDown INT, songID INT)");
+            
+       
+        }
+
 		/// <summary>
 		/// Performs an SQL NonQuery to the database
 		/// </summary>
