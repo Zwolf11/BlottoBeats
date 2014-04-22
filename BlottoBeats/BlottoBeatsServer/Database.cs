@@ -72,10 +72,12 @@ namespace BlottoBeats.Server {
 				song.score = (vote) ? 1 : -1;
 				song.userID = userID;
 				insertData(song);
-				//Add 'user has voted on song' function here
+                addVoteToUserTable(userID, song.ID, vote);
+				
 			} else {
 				updateScore(song.ID, vote);
-				//Add 'user has voted on song' function here
+                //needs to return a dialog box saying that user already voted this if this returns false
+                //checkAndChangeVote(userID, song.ID, vote);
 
 				object score = returnItem(song.ID, "voteScore", "uploadedsongs");
 				if (score != null && score is int)
@@ -371,6 +373,59 @@ namespace BlottoBeats.Server {
 			SQLNonQuery(conn, "Insert into uploadedsongs (iduploadedsongs,genre,songseed,tempo,voteScore, idusers) values('" + song.ID + "','" + song.genre + "','" + song.seed + "','" + song.tempo + "','" + song.score + "','" + song.userID + "')");
 		}
 
+        private void addVoteToUserTable(int userID, int songID, bool vote)
+        {
+            string userTable = "user" + userID;
+            int voteNum;
+            if (vote == true)
+            {
+                voteNum = 1;
+            }
+            else
+            {
+                voteNum = -1;
+            }
+
+            MySqlConnection conn = new MySqlConnection(connString);
+            MySqlCommand command = conn.CreateCommand();
+            SQLNonQuery(conn, "Insert into user" + userID + " (songID,voteUpOrDown) values('" + songID + "','" + voteNum + "')");
+
+        }
+
+        private bool checkAndChangeVote(int userID, int songID, bool vote)
+        {
+            string userTable = "user" + userID;
+            int currentVote = (int)returnItem(songID, "voteUpOrDown", userTable);
+
+            if ((currentVote == 1) && (vote == true)) {
+                return false;       //user already upvoted
+            }
+            else if ((currentVote == 1) && (vote == false))     //user changes upvote to downvote, returns true to show that vote was changed
+            {
+                MySqlConnection conn = new MySqlConnection(connString);
+                MySqlCommand command = conn.CreateCommand();
+                SQLNonQuery(conn, "Update " + userTable + " SET voteUpOrDown= '-1' WHERE songID='" + songID + "'");
+                return true;
+            }
+            else if ((currentVote == -1) && (vote == false))
+            {
+                return false;      //user already downvoted
+            }
+            else if ((currentVote == -1) && (vote == true))     //user changes downvote to upvote, returns true to show that vote was changed
+            {
+                MySqlConnection conn = new MySqlConnection(connString);
+                MySqlCommand command = conn.CreateCommand();
+                SQLNonQuery(conn, "Update " + userTable + " SET voteUpOrDown= '1' WHERE songID='" + songID + "'");
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+            
+        }
+
 		private void updateScore(int id, bool vote) {
 			MySqlConnection conn = new MySqlConnection(connString);
 			MySqlCommand command = conn.CreateCommand();
@@ -484,7 +539,7 @@ namespace BlottoBeats.Server {
            
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            SQLNonQuery(conn, "Create table " + tableName +  " (idIndex INT, voteUpOrDown INT, songID INT)");
+            SQLNonQuery(conn, "Create table " + tableName +  " (songID INT, voteUpOrDown INT)");
             
        
         }
