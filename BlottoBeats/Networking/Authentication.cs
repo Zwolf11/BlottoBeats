@@ -27,7 +27,8 @@ namespace BlottoBeats.Library.Authentication {
 		/// <returns>Whether the tokens match and are valid</returns>
 		public bool Verify(UserToken token) {
 			bool equal = (this.username.ToLower() == token.username.ToLower());
-			equal &= (this.expires == token.expires);
+
+			equal &= (TrimMilliseconds(this.expires) == TrimMilliseconds(token.expires));
 			equal &= (this.expires.CompareTo(DateTime.Now) > 0);
 			equal &= PasswordHash.PasswordHash.SlowEquals(Convert.FromBase64String(this.token), Convert.FromBase64String(token.token));
 
@@ -52,6 +53,15 @@ namespace BlottoBeats.Library.Authentication {
 		/// <returns>DateTime object</returns>
 		public static DateTime GetExpiration() {
 			return DateTime.Now.Add(offset);
+		}
+
+		/// <summary>
+		/// Because dateTimes are stupid
+		/// </summary>
+		/// <param name="dt"></param>
+		/// <returns></returns>
+		public static DateTime TrimMilliseconds(DateTime dt) {
+			return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, 0);
 		}
 	}
 
@@ -83,7 +93,6 @@ namespace BlottoBeats.Library.Authentication {
 		/// <returns>A new hash for the password</returns>
 		public string GenerateHash() {
 			return PasswordHash.PasswordHash.CreateHash(this.password);
-
 		}
 	}
 }
