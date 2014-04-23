@@ -178,9 +178,12 @@ namespace BlottoBeats.Server {
 		internal List<SongParameters> GetSongList(int numSongs, int? seed, int? tempo, string genre, int? userID) {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + numSongs;
+            int totalSongs = GetNextAvailableID("uploadedsongs");
+            
+            command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + totalSongs;
             int score = 0;
-            int[] idArray = new int[numSongs];
+            int count = 0;
+            int[] idArray = new int[totalSongs];
             int i = -1;
 			try {
 				conn.Open();
@@ -189,6 +192,7 @@ namespace BlottoBeats.Server {
 					i++;
 					score = (int)reader["iduploadedsongs"];
 					idArray[i] = score;
+                    Console.WriteLine(idArray[i]);
 				}
 			} catch (MySqlException ex) {
 				throw new DatabaseException("SQL Exception: " + ex.Message, ex);	// Propagate the exception upwards after handling the finally block
@@ -198,7 +202,7 @@ namespace BlottoBeats.Server {
 
             List<SongParameters> list = new List<SongParameters>();
             
-            for (int j = 0; j<numSongs; j++) {
+            for (int j = 0; j<totalSongs; j++) {
                 
                 int tempId = idArray[j];
                 if (tempId == 0)
@@ -209,16 +213,24 @@ namespace BlottoBeats.Server {
 				SongParameters song = GetSong(tempId);
 
 				// Filter parameters
-				if (seed.HasValue && song.seed != seed.Value)
-					continue;
-				if (tempo.HasValue && song.tempo != tempo.Value)
-					continue;
+				//if (seed.HasValue && song.seed != seed.Value)
+					//continue;
+				//if (tempo.HasValue && song.tempo != tempo.Value)
+					//continue;
 				if (genre != null && genre.CompareTo(song.genre) != 0)
 					continue;
-				if (userID.HasValue && song.userID != userID.Value)
-					continue;
+				//if (userID.HasValue && song.userID != userID.Value)
+					//continue;
 
                 list.Add(song);
+                count += 1;
+
+                if (count == 10)
+                {
+                    break;
+                }
+                
+                Console.WriteLine(count);
             }
 
             return list;
@@ -385,7 +397,7 @@ namespace BlottoBeats.Server {
 
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            SQLNonQuery(conn, "Insert into user" + userID + " (songID,voteUpOrDown) values('" + songID + "','" + voteNum + "')");
+            SQLNonQuery(conn, "Insert into user" + userID + " (iduser"+userID+",songID,voteUpOrDown) values('" + GetNextAvailableID(userTable) + "','" + songID + "','" + voteNum + "')");
 
         }
 
