@@ -403,8 +403,26 @@ namespace BlottoBeats.Server {
 
         private int checkAndChangeVote(int userID, int songID, bool vote)
         {
+            int currentVote;
+
             string userTable = "user" + userID;
-            int currentVote = (int)returnItem(songID, "voteUpOrDown", userTable);
+            if (returnItem(songID, "voteUpOrDown", userTable) == null)
+            {
+                addVoteToUserTable(userID, songID, vote);
+                if (vote == true)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+            else
+            {
+               currentVote = (int)returnItem(songID, "voteUpOrDown", userTable);
+            }
+            
 
             if ((currentVote == 1) && (vote == true)) {
                 return 0;       //user already upvoted
