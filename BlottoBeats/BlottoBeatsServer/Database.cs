@@ -225,7 +225,7 @@ namespace BlottoBeats.Server {
                 list.Add(song);
                 count += 1;
 
-                if (count == 10)
+                if (count == numSongs)
                 {
                     break;
                 }
