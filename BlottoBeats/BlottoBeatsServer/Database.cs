@@ -192,7 +192,7 @@ namespace BlottoBeats.Server {
 					i++;
 					score = (int)reader["iduploadedsongs"];
 					idArray[i] = score;
-                    Console.WriteLine(idArray[i]);
+                    
 				}
 			} catch (MySqlException ex) {
 				throw new DatabaseException("SQL Exception: " + ex.Message, ex);	// Propagate the exception upwards after handling the finally block
@@ -228,9 +228,9 @@ namespace BlottoBeats.Server {
                 if (count == numSongs)
                 {
                     break;
-                }
+                } 
                 
-                Console.WriteLine(count);
+                
             }
 
             return list;
