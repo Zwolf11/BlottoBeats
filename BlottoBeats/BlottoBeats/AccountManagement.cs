@@ -41,7 +41,10 @@ namespace BlottoBeats.Client
             user.Width = 2 * size + size / 4;
             user.Font = new Font("Arial", 12);
             user.Location = new Point(2 * size - size / 4, 9 * size / 8);
-            user.Text = Properties.Settings.Default.username;
+            if (Properties.Settings.Default.username != "null")
+            {
+                user.Text = Properties.Settings.Default.username;
+            }
             this.Controls.Add(user);
             pass = new TextBox();
             pass.PasswordChar = '*';
@@ -122,8 +125,8 @@ namespace BlottoBeats.Client
                     }
                     else
                     {
-                        Properties.Settings.Default.username = null;
-                        Properties.Settings.Default.token = null;
+                        Properties.Settings.Default.username = "null";
+                        Properties.Settings.Default.token = "null";
                         Properties.Settings.Default.Save();
                     }
 
@@ -154,10 +157,19 @@ namespace BlottoBeats.Client
                 else
                 {
                     form.currentUser = token;
-                    Properties.Settings.Default.username = form.currentUser.username;
-                    Properties.Settings.Default.expires = form.currentUser.expires;
-                    Properties.Settings.Default.token = form.currentUser.token;
-                    Properties.Settings.Default.Save();
+                    if (this.remember.Checked == true)
+                    {
+                        Properties.Settings.Default.username = form.currentUser.username;
+                        Properties.Settings.Default.expires = form.currentUser.expires;
+                        Properties.Settings.Default.token = form.currentUser.token;
+                        Properties.Settings.Default.Save();
+                    }
+                    else
+                    {
+                        Properties.Settings.Default.username = "null";
+                        Properties.Settings.Default.token = "null";
+                        Properties.Settings.Default.Save();
+                    }
 
                     this.Close();
                 }
@@ -172,6 +184,12 @@ namespace BlottoBeats.Client
 
         private void logoutClicked(object sender, MouseEventArgs e)
         {
+            form.currentUser = null;
+            Properties.Settings.Default.username = "null";
+            Properties.Settings.Default.token = "null";
+            Properties.Settings.Default.Save();
+            this.user.Clear();
+            this.Close();
             
         }
 
