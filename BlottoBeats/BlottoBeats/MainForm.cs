@@ -767,7 +767,10 @@ namespace BlottoBeats.Client
                     {
                         String preString = "";
                         if (redditSongs[i].score >= 0) preString = "+";
-                        g.DrawString(preString + redditSongs[i].score + " | Genre: " + redditSongs[i].genre + " | Tempo: " + redditSongs[i].tempo + " | Seed: " + redditSongs[i].seed, smallFont, textColor, 13 * size / 16, 15 * size / 16 + (i + 1) * smallFont.Size * 2);
+                        String wholeString = preString + redditSongs[i].score + " | Genre: " + redditSongs[i].genre + " | Tempo: " + redditSongs[i].tempo + " | Seed: " + redditSongs[i].seed;
+                        if (wholeString.Length > 50)
+                            wholeString = wholeString.Substring(0, 50) + "...";
+                        g.DrawString(wholeString, smallFont, textColor, 13 * size / 16, 15 * size / 16 + (i + 1) * smallFont.Size * 2);
                     }
 
                     g.FillPolygon(prevGenreButton.inside, prevGenreButton.ClickLocation);
