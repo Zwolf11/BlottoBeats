@@ -4252,7 +4252,7 @@ namespace BlottoBeats.Client
                 keySig[5] = notes[(keynum + 9) % 12];
                 keySig[6] = notes[(keynum + 11) % 12];
 
-                noteNames[0] = keySig[chordNumIndex] + "2";
+                noteNames[0] = keySig[chordNumIndex] + "3";
                 noteNames[1] = keySig[chordNumIndex] + "4";
                 noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
                 noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
@@ -4275,7 +4275,7 @@ namespace BlottoBeats.Client
                 //if not a dominant function
                 if (chordNumIndex != 4 && chordNumIndex != 6)
                 {
-                    noteNames[0] = keySig[chordNumIndex] + "2";
+                    noteNames[0] = keySig[chordNumIndex] + "3";
                     noteNames[1] = keySig[chordNumIndex] + "4";
                     noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
                     noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
@@ -4283,7 +4283,7 @@ namespace BlottoBeats.Client
                 //if dominant
                 if (chordNumIndex == 4)
                 {
-                    noteNames[0] = keySig[chordNumIndex] + "2";
+                    noteNames[0] = keySig[chordNumIndex] + "3";
                     noteNames[1] = keySig[chordNumIndex] + "4";
                     noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
                     //2nd note of the triad is raised a half step
@@ -4294,7 +4294,7 @@ namespace BlottoBeats.Client
                 if (chordNumIndex == 6)
                 {
                     //root of the triad is raised a half step
-                    noteNames[0] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "2";
+                    noteNames[0] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "3";
                     noteNames[1] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "4";
                     noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
                     noteNames[3] = keySig[(chordNumIndex + 4) % 7] + "4";
@@ -4327,7 +4327,7 @@ namespace BlottoBeats.Client
                 keySig[5] = notes[(keynum + 9) % 12];
                 keySig[6] = notes[(keynum + 11) % 12];
 
-                noteNames[0] = keySig[chordNumIndex] + "3";
+                noteNames[0] = keySig[chordNumIndex] + "2";
                 noteNames[1] = keySig[chordNumIndex] + "4";
                 noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
                 noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
@@ -4351,7 +4351,7 @@ namespace BlottoBeats.Client
                 //if not a dominant function
                 if (chordNumIndex != 4 && chordNumIndex != 6)
                 {
-                    noteNames[0] = keySig[chordNumIndex] + "3";
+                    noteNames[0] = keySig[chordNumIndex] + "2";
                     noteNames[1] = keySig[chordNumIndex] + "4";
                     noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
                     noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
@@ -4359,7 +4359,7 @@ namespace BlottoBeats.Client
                 //if dominant
                 if (chordNumIndex == 4)
                 {
-                    noteNames[0] = keySig[chordNumIndex] + "3";
+                    noteNames[0] = keySig[chordNumIndex] + "2";
                     noteNames[1] = keySig[chordNumIndex] + "4";
                     noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
                     //2nd note of the triad is raised a half step
@@ -4371,7 +4371,7 @@ namespace BlottoBeats.Client
                 if (chordNumIndex == 6)
                 {
                     //root of the triad is raised a half step
-                    noteNames[0] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "3";
+                    noteNames[0] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "2";
                     noteNames[1] = notes[(Array.IndexOf(notes, keySig[(chordNumIndex)]) + 1) % 12] + "4";
                     noteNames[2] = keySig[(chordNumIndex + 2) % 7] + "4";
                     noteNames[3] = keySig[(chordNumIndex + 6) % 7] + "4";
