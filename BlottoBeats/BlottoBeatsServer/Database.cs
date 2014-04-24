@@ -143,7 +143,7 @@ namespace BlottoBeats.Server {
                 MySqlConnection conn = new MySqlConnection(connString);
                 MySqlCommand command = conn.CreateCommand();
 
-                command.CommandText = "Select genre,songseed,tempo,voteScore,idusers from uploadedsongs where iduploadedsongs like '%" + id + "%'";
+                command.CommandText = "Select genre,songseed,tempo,voteScore,idusers from uploadedsongs where iduploadedsongs = " + id;
                 try
                 {
                     conn.Open();
@@ -152,7 +152,6 @@ namespace BlottoBeats.Server {
                     {
                         
                         genre = (string)reader["genre"];
-                        //Console.WriteLine(genre);
                         seed = (int)reader["songseed"];
                         tempo = (int)reader["tempo"];
                         score = (int)reader["voteScore"];
@@ -220,8 +219,17 @@ namespace BlottoBeats.Server {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
             int totalSongs = GetNextAvailableID("uploadedsongs");
+
+            if (genre == null)
+            {
+                command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + numSongs;
+            }
+            else
+            {
+                command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + genre + "%' order by voteScore desc limit " + numSongs;
+            }
             
-            command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + genre + "%' order by voteScore desc limit " + numSongs;
+            
             int score = 0;
             //int count = 0;
             int[] idArray = new int[numSongs];
@@ -233,7 +241,7 @@ namespace BlottoBeats.Server {
 					i++;
 					score = (int)reader["iduploadedsongs"];
 					idArray[i] = score;
-                    Console.WriteLine(idArray[i]);
+                    
                     
 				}
 			} catch (MySqlException ex) {
@@ -253,7 +261,8 @@ namespace BlottoBeats.Server {
                 }
 				
 				SongParameters song = GetSong(tempId);
-                Console.WriteLine(song.genre);
+                Console.WriteLine(tempId);
+                
 
 				// Filter parameters
 				//if (seed.HasValue && song.seed != seed.Value)
