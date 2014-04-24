@@ -404,9 +404,33 @@ namespace BlottoBeats.Server {
         private int checkAndChangeVote(int userID, int songID, bool vote)
         {
             int currentVote;
+           
+
+            MySqlConnection connect = new MySqlConnection(connString);
+            MySqlCommand command = connect.CreateCommand();
+            command.CommandText = "Select iduser" + userID + " from user" + userID + " where songID like '%" + songID + "%'";
+            int returnId = 0;
+
+            try
+            {
+                connect.Open();
+                MySqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    returnId = (int)reader["iduser"+userID];
+                }
+            }
+            catch (MySqlException ex)
+            {
+                throw new DatabaseException("SQL Exception: " + ex.Message, ex);	// Propagate the exception upwards after handling the finally block
+            }
+            finally
+            {
+                connect.Close();
+            }
 
             string userTable = "user" + userID;
-            if (returnItem(songID, "voteUpOrDown", userTable) == null)
+            if (returnItem(returnId, "voteUpOrDown", userTable) == null)
             {
                 addVoteToUserTable(userID, songID, vote);
                 if (vote == true)
@@ -420,7 +444,7 @@ namespace BlottoBeats.Server {
             }
             else
             {
-               currentVote = (int)returnItem(songID, "voteUpOrDown", userTable);
+               currentVote = (int)returnItem(returnId, "voteUpOrDown", userTable);
             }
             
 
