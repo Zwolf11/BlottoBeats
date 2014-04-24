@@ -39,14 +39,14 @@ namespace BlottoBeats.Client
         private System.Windows.Forms.Timer timer;
         private int songPos;
         public List<SongParameters> backlog;
-        private List<SongParameters> redditSongs;
+        private List<SongParameters>[] redditSongs;
+        private Thread[] redditThreads;
         private Generator generator;
         public BBServerConnection server;
         private MediaPlayer.MediaPlayer player;
         public AdvancedSettings settingsForm;
         public AccountManagement accountForm;
         public UserToken currentUser;
-        private Thread redditThread;
         private String[] genres;
         private int curGenre;
 
@@ -97,12 +97,17 @@ namespace BlottoBeats.Client
             songLen = 0;
             songPos = -1;
             backlog = new List<SongParameters>();
-            redditSongs = new List<SongParameters>();
+            genres = new String[] { null, "Generic", "Classical", "Twelve-tone", "Jazz", "4-Chord Pop/Rock" };
+            redditSongs = new List<SongParameters>[genres.Length];
+            redditThreads = new Thread[genres.Length];
+            for (int i = 0; i < redditSongs.Length; i++)
+            {
+                redditSongs[i] = new List<SongParameters>();
+                redditThreads[i] = new Thread(() => refreshReddit(i));
+            }
             generator = new Generator();
             server = new BBServerConnection(Properties.Settings.Default.lastIP, 3000);
             player = new MediaPlayer.MediaPlayer();
-            redditThread = new Thread(() => refreshReddit(curGenre));
-            genres = new String[] { null, "Generic", "Classical", "Twelve-tone", "Jazz", "4-Chord Pop/Rock" };
             curGenre = 0;
 
             timer = new System.Windows.Forms.Timer();
@@ -166,8 +171,12 @@ namespace BlottoBeats.Client
                     MessageBox.Show("Login has expired. Please log in again");
                     accountForm.ShowDialog();
                 }
-                redditThread = new Thread(() => refreshReddit(curGenre));
-                redditThread.Start();
+                for (int i = 0; i < redditThreads.Length; i++)
+                {
+                    int tempGenre = i;
+                    redditThreads[i] = new Thread(() => refreshReddit(tempGenre));
+                    redditThreads[i].Start();
+                }
             }
             else
             {
@@ -349,12 +358,8 @@ namespace BlottoBeats.Client
                 int tempScore = score;
                 SongParameters tempSong = backlog[songPos];
                 UserToken tempUser = currentUser;
-                new Thread(() => sendScore(tempScore, tempSong, tempUser)).Start();
-            }
-            if (!(redditThread.ThreadState == ThreadState.Running))
-            {
-                redditThread = new Thread(() => refreshReddit(curGenre));
-                redditThread.Start();
+                int tempGenre = curGenre;
+                new Thread(() => sendScore(tempScore, tempSong, tempUser, tempGenre)).Start();
             }
             resetPlayBar();
 
@@ -406,12 +411,20 @@ namespace BlottoBeats.Client
             score = 0;
         }
 
-        private void sendScore(int tempScore, SongParameters tempSong, UserToken tempUser)
+        private void sendScore(int tempScore, SongParameters tempSong, UserToken tempUser, int tempGenre)
         {
             if (server.Test())
             {
                 if (tempScore > 0) server.SendRequest(new BBRequest(tempSong, true, tempUser));
                 else if (tempScore < 0) server.SendRequest(new BBRequest(tempSong, false, tempUser));
+
+                if (!(redditThreads[tempGenre].ThreadState == ThreadState.Running))
+                {
+                    redditThreads[tempGenre] = new Thread(() => refreshReddit(tempGenre));
+                    redditThreads[tempGenre].Start();
+                }
+
+                if (!this.IsDisposed) this.Invoke((MethodInvoker)delegate { this.Invalidate(); });
             }
         }
 
@@ -421,12 +434,16 @@ namespace BlottoBeats.Client
 
             if (server.Test())
             {
-                BBResponse response = server.SendRequest(new BBRequest(10, null, null, genres[tempGenre], null));
+                BBResponse response;
+                //if(tempGenre < genres.Length - 1)
+                    response = server.SendRequest(new BBRequest(10, null, null, genres[tempGenre], null));
+                //else
+                    //response = server.SendRequest(new BBRequest(10, null, null, null, currentUser.));
 
                 if (response.responseType is BBResponse.SongList)
                 {
                     BBResponse.SongList songList = (BBResponse.SongList)response.responseType;
-                    redditSongs = songList.songs;
+                    redditSongs[tempGenre] = songList.songs;
                 }
             }
 
@@ -534,23 +551,13 @@ namespace BlottoBeats.Client
         private void prevGenreClicked(object sender, MouseEventArgs e)
         {
             if (--curGenre < 0) curGenre = genres.Length - 1;
-            redditSongs.Clear();
-            if (!(redditThread.ThreadState == ThreadState.Running))
-            {
-                redditThread = new Thread(() => refreshReddit(curGenre));
-                redditThread.Start();
-            }
+            Invalidate();
         }
 
         private void nextGenreClicked(object sender, MouseEventArgs e)
         {
             if (++curGenre >= genres.Length) curGenre = 0;
-            redditSongs.Clear();
-            if (!(redditThread.ThreadState == ThreadState.Running))
-            {
-                redditThread = new Thread(() => refreshReddit(curGenre));
-                redditThread.Start();
-            }
+            Invalidate();
         }
 
         private void minimizeClicked(object sender, MouseEventArgs e)
@@ -561,8 +568,9 @@ namespace BlottoBeats.Client
         private void exitClicked(object sender, MouseEventArgs e)
         {
             stopSong();
-            redditThread.Abort();
-            if(songPos >= 0) sendScore(score, backlog[songPos], currentUser);
+            for (int i = 0; i < redditThreads.Length;i++ )
+                redditThreads[i].Abort();
+            if(songPos >= 0) sendScore(score, backlog[songPos], currentUser, curGenre);
             this.Close();
         }
 
@@ -629,7 +637,7 @@ namespace BlottoBeats.Client
                         nextGenreButton.onClicked(e);
                     else
                     {
-                        for (int i = 0; i < redditSongs.Count; i++)
+                        for (int i = 0; i < redditSongs[curGenre].Count; i++)
                             if (e.Location.X >= 3 * size / 4 && e.Location.X < 3 * size / 4 + 3 * size && e.Location.Y >= 15 * size / 16 + (i + 1) * smallFont.Size * 2 && e.Location.Y < 15 * size / 16 + (i + 2) * smallFont.Size * 2)
                             {
                                 bool[] checks = new bool[settings.Count];
@@ -639,9 +647,9 @@ namespace BlottoBeats.Client
                                     settings[j].setChecked(false);
                                 }
 
-                                genre.setValue(redditSongs[i].genre);
-                                tempo.setValue(redditSongs[i].tempo + "");
-                                seed.setValue(redditSongs[i].seed + "");
+                                genre.setValue(redditSongs[curGenre][i].genre);
+                                tempo.setValue(redditSongs[curGenre][i].tempo + "");
+                                seed.setValue(redditSongs[curGenre][i].seed + "");
 
                                 loadSong(true);
 
@@ -754,7 +762,7 @@ namespace BlottoBeats.Client
                 g.FillRectangle(medColor, 3 * size / 4, 7 * size / 8, 3 * size + 2, 2 * size);
                 g.DrawRectangle(lightInline, 3 * size / 4, 7 * size / 8, 3 * size + 2, 2 * size);
 
-                if (redditSongs.Count > 0)
+                if (redditSongs[curGenre].Count > 0)
                 {
                     StringFormat center = new StringFormat();
                     center.Alignment = StringAlignment.Center;
@@ -763,11 +771,11 @@ namespace BlottoBeats.Client
                     else
                         g.DrawString("Top: " + genres[curGenre], smallFont, textColor, 37 * size / 16, 15 * size / 16, center);
 
-                    for (int i = 0; i < redditSongs.Count; i++)
+                    for (int i = 0; i < redditSongs[curGenre].Count; i++)
                     {
                         String preString = "";
-                        if (redditSongs[i].score >= 0) preString = "+";
-                        String wholeString = preString + redditSongs[i].score + " | Genre: " + redditSongs[i].genre + " | Tempo: " + redditSongs[i].tempo + " | Seed: " + redditSongs[i].seed;
+                        if (redditSongs[curGenre][i].score >= 0) preString = "+";
+                        String wholeString = preString + redditSongs[curGenre][i].score + " | Genre: " + redditSongs[curGenre][i].genre + " | Tempo: " + redditSongs[curGenre][i].tempo + " | Seed: " + redditSongs[curGenre][i].seed;
                         if (wholeString.Length > 50)
                             wholeString = wholeString.Substring(0, 50) + "...";
                         g.DrawString(wholeString, smallFont, textColor, 13 * size / 16, 15 * size / 16 + (i + 1) * smallFont.Size * 2);
@@ -778,7 +786,7 @@ namespace BlottoBeats.Client
                     g.FillPolygon(nextGenreButton.inside, nextGenreButton.ClickLocation);
                     g.DrawString(">", smallFont, textColor, 57 * size / 16, 15 * size / 16);
                 }
-                else if (redditSongs.Count <= 0 && redditThread.ThreadState == ThreadState.Running)
+                else if (redditSongs[curGenre].Count <= 0 && redditThreads[curGenre].ThreadState == ThreadState.Running)
                     g.DrawString("Song list loading", font, textColor, 13 * size / 16, 15 * size / 16);
                 else
                     g.DrawString("Could not connect to server.", font, textColor, 13 * size / 16, 15 * size / 16);
