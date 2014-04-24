@@ -171,6 +171,7 @@ namespace BlottoBeats.Client
                         Properties.Settings.Default.Save();
                     }
 
+                    MessageBox.Show("Account successfully created!");
                     this.Close();
                 }
             }
@@ -189,8 +190,9 @@ namespace BlottoBeats.Client
             Properties.Settings.Default.token = "null";
             Properties.Settings.Default.Save();
             this.user.Clear();
-            this.Close();
-            
+            this.remember.Checked = false;
+            this.pass.Clear();
+            MessageBox.Show("Successfully logged out");
         }
 
         private void minimizeClicked(object sender, MouseEventArgs e)

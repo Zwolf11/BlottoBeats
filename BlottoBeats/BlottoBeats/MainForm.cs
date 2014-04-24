@@ -386,7 +386,7 @@ namespace BlottoBeats.Client
 
             player.Open("");
             songLen = generator.generate(backlog[songPos]);
-            player.Open(@"C:\BlottoBeats\temp.mid");
+            player.Open("temp.mid");
             playSong();
         }
 
@@ -527,8 +527,8 @@ namespace BlottoBeats.Client
             save.Filter = "MIDI Files | *.mid";
             save.DefaultExt = "mid";
 
-            if(save.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                File.Copy("C:/BlottoBeats/temp.mid", save.FileName);
+            if(save.ShowDialog() == System.Windows.Forms.DialogResult.OK && File.Exists("temp.mid"))
+                File.Copy("temp.mid", save.FileName);
         }
 
         private void prevGenreClicked(object sender, MouseEventArgs e)

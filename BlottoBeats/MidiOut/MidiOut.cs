@@ -185,18 +185,18 @@ namespace BlottoBeats.MidiOut
                 }
             }//endfor
             //Submits file to the C:\BlottoBeats Folder where it is stored until another song is generated
-            if (!Directory.Exists(@"C:\BlottoBeats"))
+            /*if (!Directory.Exists(@"C:\BlottoBeats"))
             {
                 Directory.CreateDirectory(@"C:\BlottoBeats");
 
-            }
-            if (File.Exists(@"C:\BlottoBeats\temp.mid"))
+            }*/
+            if (File.Exists("temp.mid"))
             {
-                File.Delete(@"C:\BlottoBeats\temp.mid");
+                File.Delete("temp.mid");
 
             }
 
-            sequence.Save(@"C:\BlottoBeats\temp.mid");
+            sequence.Save("temp.mid");
 
             return ((double)pos) / (PpqnClock.PpqnMinValue / 4) / 4 / output.Tempo * 60;
 
