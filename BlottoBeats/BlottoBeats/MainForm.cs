@@ -569,9 +569,9 @@ namespace BlottoBeats.Client
         private void exitClicked(object sender, MouseEventArgs e)
         {
             stopSong();
+            if (songPos >= 0) sendScore(score, backlog[songPos], currentUser, curGenre);
             for (int i = 0; i < redditThreads.Length; i++)
                 redditThreads[i].Abort();
-            if(songPos >= 0) sendScore(score, backlog[songPos], currentUser, curGenre);
             this.Close();
         }
 
