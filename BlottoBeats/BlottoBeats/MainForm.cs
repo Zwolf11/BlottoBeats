@@ -97,7 +97,7 @@ namespace BlottoBeats.Client
             songLen = 0;
             songPos = -1;
             backlog = new List<SongParameters>();
-            genres = new String[] { null, "Generic", "Classical", "Twelve-tone", "Jazz", "4-Chord Pop/Rock" };
+            genres = new String[] { null, "Generic", "Classical", "Twelve-tone", "Jazz", "4-Chord Pop/Rock", null };
             redditSongs = new List<SongParameters>[genres.Length];
             redditThreads = new Thread[genres.Length];
             for (int i = 0; i < redditSongs.Length; i++)
