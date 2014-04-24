@@ -55,7 +55,7 @@ namespace BlottoBeats.Client
             remember = new CheckBox();
             remember.BackColor = Color.Transparent;
             remember.Location = new Point(15 * size / 4 + 3, 69 * size / 32 - 3);
-            remember.Checked = Properties.Settings.Default.username != null;
+            remember.Checked = Properties.Settings.Default.username != "null";
             this.Controls.Add(remember);
 
             font = new Font("Arial", 16, FontStyle.Bold);
@@ -131,6 +131,7 @@ namespace BlottoBeats.Client
                     }
 
                     this.Close();
+                    form.createRedditThreads();
                 }
             }
             else
@@ -173,6 +174,7 @@ namespace BlottoBeats.Client
 
                     MessageBox.Show("Account successfully created!");
                     this.Close();
+                    form.createRedditThreads();
                 }
             }
             else
