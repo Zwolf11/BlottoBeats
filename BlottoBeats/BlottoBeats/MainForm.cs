@@ -430,7 +430,7 @@ namespace BlottoBeats.Client
 
         private void refreshReddit(int tempGenre)
         {
-            if (!this.IsDisposed) this.Invoke((MethodInvoker)delegate { this.Invalidate(); });
+            if (!this.IsDisposed) this.Invoke((MethodInvoker) delegate { this.Invalidate(); });
 
             if (server.Test())
             {
@@ -766,8 +766,10 @@ namespace BlottoBeats.Client
                 {
                     StringFormat center = new StringFormat();
                     center.Alignment = StringAlignment.Center;
-                    if(genres[curGenre] == null)
+                    if(curGenre == 0)
                         g.DrawString("Top: All", smallFont, textColor, 37 * size / 16, 15 * size / 16, center);
+                    else if(curGenre == genres.Length - 1)
+                        g.DrawString("Top: My Songs", smallFont, textColor, 37 * size / 16, 15 * size / 16, center);
                     else
                         g.DrawString("Top: " + genres[curGenre], smallFont, textColor, 37 * size / 16, 15 * size / 16, center);
 
