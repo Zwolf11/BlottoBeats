@@ -112,7 +112,7 @@ namespace BlottoBeats.Server {
 		/// <returns>A SongParamteres object that represents the song</returns>
 		internal SongParameters GetSong(int id) {
 			if (SongExists(id)) {
-				object score = returnItem(id, "voteScore", "uploadedsongs");
+				/*object score = returnItem(id, "voteScore", "uploadedsongs");
 				if (score == null || !(score is int))
 					throw new DatabaseException("DATABASE ERROR: Invalid data type for score returned.  Expected 'int' but got '" + score.GetType() + "'");
 
@@ -133,6 +133,46 @@ namespace BlottoBeats.Server {
 					throw new DatabaseException("DATABASE ERROR: Invalid data type for user ID returned.  Expected 'int' but got '" + userID.GetType() + "'");
 
 				return new SongParameters((int)id, (int)score, (int)seed, (int)tempo, (string)genre, (int)userID);
+                 * */
+                
+                int score = 0;
+                int seed = 0;
+                int tempo = 0;
+                string genre = "";
+                int userID = 0;
+                MySqlConnection conn = new MySqlConnection(connString);
+                MySqlCommand command = conn.CreateCommand();
+
+                command.CommandText = "Select genre,songseed,tempo,voteScore,idusers from uploadedsongs where iduploadedsongs like '%" + id + "%'";
+                try
+                {
+                    conn.Open();
+                    MySqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        
+                        genre = (string)reader["genre"];
+                        //Console.WriteLine(genre);
+                        seed = (int)reader["songseed"];
+                        tempo = (int)reader["tempo"];
+                        score = (int)reader["voteScore"];
+                        userID = (int)reader["idusers"];
+                        
+                        
+
+                    }
+                }
+                catch (MySqlException ex)
+                {
+                    throw new DatabaseException("SQL Exception: " + ex.Message, ex);	// Propagate the exception upwards after handling the finally block
+                }
+                finally
+                {
+                    conn.Close();
+                }
+
+                return new SongParameters((int)id, (int)score, (int)seed, (int)tempo, (string)genre, (int)userID);
+
 			} else {
 				return null;
 			}
@@ -181,10 +221,10 @@ namespace BlottoBeats.Server {
             MySqlCommand command = conn.CreateCommand();
             int totalSongs = GetNextAvailableID("uploadedsongs");
             
-            command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + totalSongs;
+            command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + genre + "%' order by voteScore desc limit " + numSongs;
             int score = 0;
-            int count = 0;
-            int[] idArray = new int[totalSongs];
+            //int count = 0;
+            int[] idArray = new int[numSongs];
             int i = -1;
 			try {
 				conn.Open();
@@ -193,6 +233,7 @@ namespace BlottoBeats.Server {
 					i++;
 					score = (int)reader["iduploadedsongs"];
 					idArray[i] = score;
+                    Console.WriteLine(idArray[i]);
                     
 				}
 			} catch (MySqlException ex) {
@@ -203,7 +244,7 @@ namespace BlottoBeats.Server {
 
             List<SongParameters> list = new List<SongParameters>();
             
-            for (int j = 0; j<totalSongs; j++) {
+            for (int j = 0; j<numSongs; j++) {
                 
                 int tempId = idArray[j];
                 if (tempId == 0)
@@ -212,24 +253,25 @@ namespace BlottoBeats.Server {
                 }
 				
 				SongParameters song = GetSong(tempId);
+                Console.WriteLine(song.genre);
 
 				// Filter parameters
 				//if (seed.HasValue && song.seed != seed.Value)
 					//continue;
 				//if (tempo.HasValue && song.tempo != tempo.Value)
 					//continue;
-				if (genre != null && genre.CompareTo(song.genre) != 0)
-					continue;
+				//if (genre != null && genre.CompareTo(song.genre) != 0)
+					//continue;
 				//if (userID.HasValue && song.userID != userID.Value)
 					//continue;
 
                 list.Add(song);
-                count += 1;
+                //count += 1;
 
-                if (count == numSongs)
-                {
-                    break;
-                } 
+                //if (count == numSongs)
+                //{
+                 //   break;
+               // } 
                 
                 
             }
