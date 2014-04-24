@@ -196,7 +196,7 @@ namespace BlottoBeats.Server {
 		internal List<SongParameters> GetSongList(int numSongs, int? seed, int? tempo, string genre, int? userID) {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            int totalSongs = GetNextAvailableID("uploadedsongs");
+            Console.WriteLine("Grabbing IDs");
 
             if (genre == null)
             {
@@ -212,7 +212,7 @@ namespace BlottoBeats.Server {
            
             int[] idArray = new int[numSongs];
             int i = -1;
-            Console.WriteLine("Grabbing IDs");
+            
 			try {
 				conn.Open();
 				MySqlDataReader reader = command.ExecuteReader();
