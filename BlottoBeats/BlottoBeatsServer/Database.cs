@@ -112,29 +112,7 @@ namespace BlottoBeats.Server {
 		/// <returns>A SongParamteres object that represents the song</returns>
 		internal SongParameters GetSong(int id) {
 			if (SongExists(id)) {
-				/*object score = returnItem(id, "voteScore", "uploadedsongs");
-				if (score == null || !(score is int))
-					throw new DatabaseException("DATABASE ERROR: Invalid data type for score returned.  Expected 'int' but got '" + score.GetType() + "'");
-
-				object seed = returnItem(id, "songseed", "uploadedsongs");
-				if (seed == null || !(seed is int))
-					throw new DatabaseException("DATABASE ERROR: Invalid data type for seed returned.  Expected 'int' but got '" + seed.GetType() + "'");
-
-				object tempo = returnItem(id, "tempo", "uploadedsongs");
-				if (tempo == null || !(tempo is int))
-					throw new DatabaseException("DATABASE ERROR: Invalid data type for tempo returned.  Expected 'int' but got '" + tempo.GetType() + "'");
-
-				object genre = returnItem(id, "genre", "uploadedsongs");
-				if (genre == null || !(genre is string))
-					throw new DatabaseException("DATABASE ERROR: Invalid data type for genre returned.  Expected 'string' but got '" + genre.GetType() + "'");
-
-				object userID = returnItem(id, "idusers", "uploadedsongs");
-				if (userID == null || !(userID is int))
-					throw new DatabaseException("DATABASE ERROR: Invalid data type for user ID returned.  Expected 'int' but got '" + userID.GetType() + "'");
-
-				return new SongParameters((int)id, (int)score, (int)seed, (int)tempo, (string)genre, (int)userID);
-                 * */
-                
+				
                 int score = 0;
                 int seed = 0;
                 int tempo = 0;
@@ -231,9 +209,10 @@ namespace BlottoBeats.Server {
             
             
             int score = 0;
-            //int count = 0;
+           
             int[] idArray = new int[numSongs];
             int i = -1;
+            Console.WriteLine("Grabbing IDs");
 			try {
 				conn.Open();
 				MySqlDataReader reader = command.ExecuteReader();
@@ -264,23 +243,9 @@ namespace BlottoBeats.Server {
                 Console.WriteLine(tempId);
                 
 
-				// Filter parameters
-				//if (seed.HasValue && song.seed != seed.Value)
-					//continue;
-				//if (tempo.HasValue && song.tempo != tempo.Value)
-					//continue;
-				//if (genre != null && genre.CompareTo(song.genre) != 0)
-					//continue;
-				//if (userID.HasValue && song.userID != userID.Value)
-					//continue;
 
                 list.Add(song);
-                //count += 1;
-
-                //if (count == numSongs)
-                //{
-                 //   break;
-               // } 
+                
                 
                 
             }
