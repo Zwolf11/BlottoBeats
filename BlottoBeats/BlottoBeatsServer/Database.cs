@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
+
 namespace BlottoBeats.Server {
 	/// <summary>
 	/// Handles all communication with the MySQL database
@@ -436,6 +437,7 @@ namespace BlottoBeats.Server {
             else if ((currentVote == -1) && (vote == false))
             {
                 return 0;      //user already downvoted
+                
             }
             else if ((currentVote == -1) && (vote == true))     //user changes downvote to upvote, returns true to show that vote was changed
             {
