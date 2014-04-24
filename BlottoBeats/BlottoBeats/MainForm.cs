@@ -787,7 +787,7 @@ namespace BlottoBeats.Client
                     g.DrawString(">", smallFont, textColor, 57 * size / 16, 15 * size / 16);
                 }
                 else if (redditSongs[curGenre].Count <= 0 && redditThreads[curGenre].ThreadState == ThreadState.Running)
-                    g.DrawString("Song list loading", font, textColor, 13 * size / 16, 15 * size / 16);
+                    g.DrawString("Song lists loading...", font, textColor, 13 * size / 16, 15 * size / 16);
                 else
                     g.DrawString("Could not connect to server.", font, textColor, 13 * size / 16, 15 * size / 16);
             }
