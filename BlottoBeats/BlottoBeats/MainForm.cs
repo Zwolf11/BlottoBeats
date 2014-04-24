@@ -435,10 +435,10 @@ namespace BlottoBeats.Client
             if (server.Test())
             {
                 BBResponse response;
-                //if(tempGenre < genres.Length - 1)
-                    response = server.SendRequest(new BBRequest(10, null, null, genres[tempGenre], null));
-                //else
-                    //response = server.SendRequest(new BBRequest(10, null, null, null, currentUser.));
+                if(tempGenre < genres.Length - 1)
+                    response = server.SendRequest(new BBRequest(10, genres[tempGenre], null));
+                else
+                    response = server.SendRequest(new BBRequest(10, null, currentUser.username));
 
                 if (response.responseType is BBResponse.SongList)
                 {

@@ -128,15 +128,11 @@ namespace BlottoBeats.Server {
                     MySqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
-                        
                         genre = (string)reader["genre"];
                         seed = (int)reader["songseed"];
                         tempo = (int)reader["tempo"];
                         score = (int)reader["voteScore"];
                         userID = (int)reader["idusers"];
-                        
-                        
-
                     }
                 }
                 catch (MySqlException ex)
@@ -193,20 +189,17 @@ namespace BlottoBeats.Server {
 		/// <param name="genre">(optional) the genre to filter by</param>
 		/// <param name="userID">(optional) the user ID to filter by</param>
 		/// <returns></returns>
-		internal List<SongParameters> GetSongList(int numSongs, int? seed, int? tempo, string genre, int? userID) {
+		internal List<SongParameters> GetSongList(int numSongs, string genre, string username) {
             MySqlConnection conn = new MySqlConnection(connString);
             MySqlCommand command = conn.CreateCommand();
-            Console.WriteLine("Grabbing IDs");
 
-            if (genre == null)
-            {
-                command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + numSongs;
+			if (genre != null) {
+				command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + genre + "%' order by voteScore desc limit " + numSongs;
+            } else if (username != null) {
+				command.CommandText = "Select iduploadedsongs from uploadedsongs where idusers like '%" + GetID(username) + "%' order by voteScore desc limit " + numSongs;
+			} else {
+				command.CommandText = "Select iduploadedsongs from uploadedsongs order by voteScore desc limit " + numSongs;
             }
-            else
-            {
-                command.CommandText = "Select iduploadedsongs from uploadedsongs where genre like '%" + genre + "%' order by voteScore desc limit " + numSongs;
-            }
-            
             
             int score = 0;
            
@@ -220,8 +213,6 @@ namespace BlottoBeats.Server {
 					i++;
 					score = (int)reader["iduploadedsongs"];
 					idArray[i] = score;
-                    
-                    
 				}
 			} catch (MySqlException ex) {
 				throw new DatabaseException("SQL Exception: " + ex.Message, ex);	// Propagate the exception upwards after handling the finally block
@@ -240,13 +231,8 @@ namespace BlottoBeats.Server {
                 }
 				
 				SongParameters song = GetSong(tempId);
-                Console.WriteLine(tempId);
                 
-
-
                 list.Add(song);
-                
-                
                 
             }
 

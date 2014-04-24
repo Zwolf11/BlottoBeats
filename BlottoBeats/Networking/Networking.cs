@@ -188,9 +188,9 @@ namespace BlottoBeats.Library.Networking {
 			requestType = new RequestSongs(numberOfSongs);
 		}
 
-        public BBRequest(int numberOfSongs, int? seed, int? tempo, string genre, int? userID)
+        public BBRequest(int numberOfSongs, string genre, string username)
         {
-            requestType = new RequestSongs(numberOfSongs, seed, tempo, genre, userID);
+            requestType = new RequestSongs(numberOfSongs, genre, username);
         }
 
 		/// <summary>
@@ -237,25 +237,19 @@ namespace BlottoBeats.Library.Networking {
 		[SerializableAttribute]
 		public class RequestSongs : Request {
 			public int num { get; private set; }
-			public int? seed { get; private set; }
-			public int? tempo { get; private set; }
 			public string genre { get; private set; }
-			public int? userID { get; private set; }
+			public string username { get; private set; }
 
 			public RequestSongs(int num) : base(null) {
 				this.num = num;
-				this.seed = null;
-				this.tempo = null;
 				this.genre = null;
-				this.userID = null;
+				this.username = null;
 			}
 
-			public RequestSongs(int num, int? seed, int? tempo, string genre, int? userID) : base(null) {
+			public RequestSongs(int num, string genre, string username) : base(null) {
 				this.num = num;
-				this.seed = seed;
-				this.tempo = tempo;
 				this.genre = genre;
-				this.userID = userID;
+				this.username = username;
 			}
 		}
 	}
